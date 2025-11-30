@@ -63,6 +63,9 @@
         
         <!-- Notifications -->
         <notificationGroup id="OpenSCAD" displayType="BALLOON" isLogByDefault="true"/>
+        
+        <!-- Run Configuration -->
+        <configurationType implementation="org.openscad.run.OpenSCADConfigurationType"/>
     </extensions>
 
     <actions>
@@ -81,6 +84,30 @@
                 description="Show documentation for the OpenSCAD symbol at caret">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
+        </action>
+        
+        <!-- Export actions -->
+        <action id="OpenSCAD.ExportSTL"
+                class="org.openscad.actions.ExportSTLAction"
+                text="Export to STL..."
+                description="Export OpenSCAD file to STL format">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        
+        <action id="OpenSCAD.BatchExport"
+                class="org.openscad.actions.BatchExportAction"
+                text="Batch Export to STL..."
+                description="Export all OpenSCAD files in project to STL">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+        
+        <action id="OpenSCAD.ExportMultiFormat"
+                class="org.openscad.actions.ExportMultiFormatAction"
+                text="Export to Multiple Formats..."
+                description="Export to STL, PNG, and other formats">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>

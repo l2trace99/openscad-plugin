@@ -64,7 +64,7 @@ class OpenSCADParserImpl : PsiParser {
         }
     }
     
-    // <module_declaration> ::= "module" IDENT "(" [ <parameter_list> ] ")" <block>
+    // <module_declaration> ::= "module" IDENT "(" [ <parameter_list> ] ")" ( <block> | <statement> )
     private fun parseModuleDeclaration(b: PsiBuilder): Boolean {
         val mark = b.mark()
         b.advanceLexer() // 'module'
@@ -88,7 +88,14 @@ class OpenSCADParserImpl : PsiParser {
             return true
         }
         
-        parseBlock(b)
+        // Module body can be either a block or a single statement
+        if (b.tokenType == OpenSCADTypes.LBRACE) {
+            parseBlock(b)
+        } else {
+            // Single statement module body (e.g., module curve() polygon(...);)
+            parseStatement(b)
+        }
+        
         mark.done(OpenSCADTypes.MODULE_DECLARATION)
         return true
     }
