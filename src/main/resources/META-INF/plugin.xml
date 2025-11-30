@@ -6,15 +6,33 @@
 
     <description>
         <![CDATA[
-        <p>OpenSCAD language support for IntelliJ-based IDEs.</p>
-        <p>Features:</p>
+        <h1>OpenSCAD Language Support</h1>
+        <p>Full-featured IntelliJ IDEA plugin for OpenSCAD with syntax highlighting, code intelligence, and 3D preview.</p>
+        
+        <h2>Features</h2>
         <ul>
-            <li>Syntax highlighting</li>
-            <li>Code completion</li>
-            <li>Go to definition</li>
-            <li>Find usages</li>
-            <li>And more...</li>
+            <li><b>Syntax Highlighting</b> - Full OpenSCAD language support with color coding</li>
+            <li><b>Code Intelligence</b> - Autocomplete, go-to-definition, find usages</li>
+            <li><b>3D Preview</b> - Real-time STL preview with wireframe/solid rendering</li>
+            <li><b>Split Editor</b> - Code and preview side-by-side</li>
+            <li><b>Auto-render</b> - Automatic preview updates on save</li>
+            <li><b>Run Configurations</b> - Custom OpenSCAD CLI configurations</li>
+            <li><b>Animation Support</b> - Export animation frames using $t variable</li>
+            <li><b>Batch Export</b> - Export multiple files at once (STL, PNG, etc.)</li>
+            <li><b>Library Path Support</b> - Configure external library paths (OPENSCADPATH)</li>
+            <li><b>Error Reporting</b> - OpenSCAD errors shown in IDE notifications</li>
+            <li><b>File Templates</b> - Quick start with Empty, 3D Model, or 2D Shape templates</li>
         </ul>
+        
+        <h2>Requirements</h2>
+        <p>OpenSCAD must be installed on your system. Download from <a href="https://openscad.org/downloads.html">openscad.org</a></p>
+        
+        <h2>Getting Started</h2>
+        <ol>
+            <li>Configure OpenSCAD path in Settings → Tools → OpenSCAD</li>
+            <li>Create a new OpenSCAD file: File → New → OpenSCAD File</li>
+            <li>Start coding! The preview updates automatically on save</li>
+        </ol>
         ]]>
     </description>
 
