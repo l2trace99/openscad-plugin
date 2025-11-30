@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-11-30
+
+### Added
+- Comprehensive plugin description with requirements and settings guide
+- Buy Me a Coffee link in plugin description
+- Detailed usage instructions for all features
+- Troubleshooting section in documentation
+
+### Changed
+- Enhanced plugin.xml description with complete setup and configuration guide
+
+## [1.0.0] - 2025-11-30
+
 ### Added
 - GitHub CI/CD workflows for automated testing and releases
 - Automated publishing to JetBrains Marketplace on tagged releases
+- CHANGELOG.md for version tracking
 
 ## [0.1.0] - 2025-11-30
 

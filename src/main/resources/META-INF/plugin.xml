@@ -1,13 +1,15 @@
 <idea-plugin>
     <id>org.openscad.plugin</id>
     <name>OpenSCAD</name>
-    <version>0.1.0</version>
+    <version>1.0.1</version>
     <vendor email="support@openscad.org" url="https://openscad.org">OpenSCAD Community</vendor>
 
     <description>
         <![CDATA[
         <h1>OpenSCAD Language Support</h1>
         <p>Full-featured IntelliJ IDEA plugin for OpenSCAD with syntax highlighting, code intelligence, and real-time 3D preview.</p>
+        
+        <p><b>Support this project:</b> <a href="https://www.buymeacoffee.com/l2trace99">Buy Me a Coffee ☕</a></p>
         
         <h2>Features</h2>
         <ul>
