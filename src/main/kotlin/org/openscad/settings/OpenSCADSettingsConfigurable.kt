@@ -30,6 +30,11 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
     private val autoCenterCheckbox = JBCheckBox("Auto-center model")
     private val viewAllCheckbox = JBCheckBox("Auto-fit model to view")
     
+    // Grid settings
+    private val showGridCheckbox = JBCheckBox("Show grid in preview")
+    private val gridSizeField = JBTextField()
+    private val gridSpacingField = JBTextField()
+    
     // Library paths
     private val libraryPathsField = JBTextArea()
     private val libraryPathsScrollPane = JBScrollPane(libraryPathsField)
@@ -96,6 +101,14 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             .addComponent(viewAllCheckbox)
             .addTooltip("Automatically adjust camera to fit the entire model")
             .addSeparator()
+            .addLabeledComponent(JBLabel("Grid Settings:"), JPanel(), 1, false)
+            .addComponent(showGridCheckbox)
+            .addTooltip("Show a horizontal grid centered on the origin")
+            .addLabeledComponent(JBLabel("Grid size (mm):"), gridSizeField, 1, false)
+            .addTooltip("Total grid size in millimeters (e.g., 250 for 250mm x 250mm)")
+            .addLabeledComponent(JBLabel("Grid spacing (mm):"), gridSpacingField, 1, false)
+            .addTooltip("Distance between grid lines in millimeters")
+            .addSeparator()
             .addLabeledComponent(JBLabel("Library Paths (one per line):"), libraryPathsScrollPane, 1, true)
             .addTooltip("Additional directories to search for OpenSCAD libraries (added to OPENSCADPATH)")
             .addComponentFillVertically(JPanel(), 0)
@@ -116,6 +129,9 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
                 useFullRenderCheckbox.isSelected != settings.useFullRender ||
                 autoCenterCheckbox.isSelected != settings.autoCenter ||
                 viewAllCheckbox.isSelected != settings.viewAll ||
+                showGridCheckbox.isSelected != settings.showGrid ||
+                gridSizeField.text != settings.gridSize.toString() ||
+                gridSpacingField.text != settings.gridSpacing.toString() ||
                 currentLibPaths != settings.libraryPaths
     }
     
@@ -127,6 +143,9 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         settings.useFullRender = useFullRenderCheckbox.isSelected
         settings.autoCenter = autoCenterCheckbox.isSelected
         settings.viewAll = viewAllCheckbox.isSelected
+        settings.showGrid = showGridCheckbox.isSelected
+        settings.gridSize = gridSizeField.text.toFloatOrNull() ?: 250.0f
+        settings.gridSpacing = gridSpacingField.text.toFloatOrNull() ?: 10.0f
         settings.libraryPaths = libraryPathsField.text.lines()
             .filter { it.isNotBlank() }
             .map { it.trim() }
@@ -142,6 +161,9 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         useFullRenderCheckbox.isSelected = settings.useFullRender
         autoCenterCheckbox.isSelected = settings.autoCenter
         viewAllCheckbox.isSelected = settings.viewAll
+        showGridCheckbox.isSelected = settings.showGrid
+        gridSizeField.text = settings.gridSize.toString()
+        gridSpacingField.text = settings.gridSpacing.toString()
         libraryPathsField.text = settings.libraryPaths.joinToString("\n")
         modified = false
     }

@@ -46,7 +46,7 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
     init {
         // Try to initialize JOGL viewer, fallback to simple viewer
         val (panel, viewerInstance) = try {
-            val v = STLViewer3D()
+            val v = STLViewer3D(project)
             Pair(v as JComponent, v)
         } catch (e: Exception) {
             logger.warn("Failed to initialize JOGL viewer, falling back to simple viewer", e)

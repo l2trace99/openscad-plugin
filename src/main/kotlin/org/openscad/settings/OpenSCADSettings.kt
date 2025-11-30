@@ -23,6 +23,11 @@ class OpenSCADSettings : PersistentStateComponent<OpenSCADSettings> {
     var autoCenter: Boolean = true // Use --autocenter
     var viewAll: Boolean = true // Use --viewall
     
+    // Preview grid settings
+    var showGrid: Boolean = true // Show grid in 3D preview
+    var gridSize: Float = 250.0f // Grid size in mm (250mm x 250mm default)
+    var gridSpacing: Float = 10.0f // Grid line spacing in mm
+    
     // Library paths
     var libraryPaths: MutableList<String> = mutableListOf()
     

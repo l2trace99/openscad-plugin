@@ -1,8 +1,10 @@
 package org.openscad.preview
 
+import com.intellij.openapi.project.Project
 import com.jogamp.opengl.*
 import com.jogamp.opengl.awt.GLCanvas
 import com.jogamp.opengl.util.FPSAnimator
+import org.openscad.settings.OpenSCADSettings
 import java.awt.event.*
 import javax.swing.JPanel
 import java.awt.BorderLayout
@@ -13,7 +15,7 @@ import kotlin.math.sin
  * Advanced 3D STL viewer using JOGL (Java OpenGL)
  * Provides hardware-accelerated rendering with lighting and smooth shading
  */
-class STLViewer3D : JPanel(BorderLayout()), GLEventListener {
+class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEventListener {
     
     private var model: STLParser.STLModel? = null
     private val canvas: GLCanvas
@@ -129,8 +131,8 @@ class STLViewer3D : JPanel(BorderLayout()), GLEventListener {
         // Enable smooth shading
         gl.glShadeModel(GL2.GL_SMOOTH)
         
-        // Background color
-        gl.glClearColor(0.18f, 0.18f, 0.18f, 1.0f)
+        // Background color - OpenSCAD default (light gray)
+        gl.glClearColor(0.898f, 0.898f, 0.898f, 1.0f)
     }
     
     override fun display(drawable: GLAutoDrawable) {
@@ -143,6 +145,12 @@ class STLViewer3D : JPanel(BorderLayout()), GLEventListener {
         gl.glTranslatef(panX, panY, -5.0f * zoom)
         gl.glRotatef(rotationX, 1.0f, 0.0f, 0.0f)
         gl.glRotatef(rotationY, 0.0f, 1.0f, 0.0f)
+        
+        // Draw grid first (under the model)
+        val settings = OpenSCADSettings.getInstance(project)
+        if (settings.showGrid) {
+            drawGrid(gl, settings.gridSize, settings.gridSpacing)
+        }
         
         val currentModel = model
         if (currentModel != null) {
@@ -161,11 +169,11 @@ class STLViewer3D : JPanel(BorderLayout()), GLEventListener {
         gl.glScalef(scale, scale, scale)
         gl.glTranslatef(-center.x, -center.y, -center.z)
         
-        // Set material properties
-        val matAmbient = floatArrayOf(0.2f, 0.4f, 0.8f, 1.0f)
-        val matDiffuse = floatArrayOf(0.3f, 0.6f, 1.0f, 1.0f)
-        val matSpecular = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
-        val matShininess = floatArrayOf(50.0f)
+        // Set material properties - OpenSCAD default (coral/orange)
+        val matAmbient = floatArrayOf(0.95f, 0.55f, 0.35f, 1.0f)
+        val matDiffuse = floatArrayOf(0.95f, 0.55f, 0.35f, 1.0f)
+        val matSpecular = floatArrayOf(0.8f, 0.8f, 0.8f, 1.0f)
+        val matShininess = floatArrayOf(32.0f)
         
         gl.glMaterialfv(GL.GL_FRONT, GL2.GL_AMBIENT, matAmbient, 0)
         gl.glMaterialfv(GL.GL_FRONT, GL2.GL_DIFFUSE, matDiffuse, 0)
@@ -189,6 +197,49 @@ class STLViewer3D : JPanel(BorderLayout()), GLEventListener {
         
         // Draw axes
         drawAxes(gl)
+    }
+    
+    private fun drawGrid(gl: GL2, gridSize: Float, gridSpacing: Float) {
+        gl.glDisable(GL2.GL_LIGHTING)
+        gl.glDisable(GL.GL_DEPTH_TEST)
+        
+        val halfSize = gridSize / 2.0f
+        val numLines = (gridSize / gridSpacing).toInt()
+        
+        gl.glBegin(GL.GL_LINES)
+        
+        // Grid lines parallel to X axis
+        for (i in -numLines..numLines) {
+            val y = i * gridSpacing
+            if (i == 0) {
+                // Center line (darker)
+                gl.glColor3f(0.5f, 0.5f, 0.5f)
+            } else {
+                // Regular grid lines (lighter)
+                gl.glColor3f(0.7f, 0.7f, 0.7f)
+            }
+            gl.glVertex3f(-halfSize, y, 0.0f)
+            gl.glVertex3f(halfSize, y, 0.0f)
+        }
+        
+        // Grid lines parallel to Y axis
+        for (i in -numLines..numLines) {
+            val x = i * gridSpacing
+            if (i == 0) {
+                // Center line (darker)
+                gl.glColor3f(0.5f, 0.5f, 0.5f)
+            } else {
+                // Regular grid lines (lighter)
+                gl.glColor3f(0.7f, 0.7f, 0.7f)
+            }
+            gl.glVertex3f(x, -halfSize, 0.0f)
+            gl.glVertex3f(x, halfSize, 0.0f)
+        }
+        
+        gl.glEnd()
+        
+        gl.glEnable(GL.GL_DEPTH_TEST)
+        gl.glEnable(GL2.GL_LIGHTING)
     }
     
     private fun drawAxes(gl: GL2) {
