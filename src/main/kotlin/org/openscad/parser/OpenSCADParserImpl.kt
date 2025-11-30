@@ -45,18 +45,13 @@ class OpenSCADParserImpl : PsiParser {
             OpenSCADTypes.HASH, OpenSCADTypes.NOT, OpenSCADTypes.MOD, OpenSCADTypes.MUL -> 
                 parseModuleInstantiation(b)
             OpenSCADTypes.IDENT -> {
-                // Could be assignment, module instantiation, or expression statement
+                // Could be assignment or module instantiation
                 val mark = b.mark()
                 b.advanceLexer()
                 when (b.tokenType) {
                     OpenSCADTypes.EQ -> {
                         mark.rollbackTo()
                         parseAssignmentStatement(b)
-                    }
-                    OpenSCADTypes.SEMICOLON -> {
-                        // Expression statement: identifier followed by semicolon (e.g., "s;")
-                        mark.rollbackTo()
-                        parseExpressionStatement(b)
                     }
                     else -> {
                         mark.rollbackTo()
@@ -197,18 +192,6 @@ class OpenSCADParserImpl : PsiParser {
         expect(b, OpenSCADTypes.SEMICOLON, "Expected ';'")
         
         mark.done(OpenSCADTypes.ASSIGNMENT_STATEMENT)
-        return true
-    }
-    
-    // <expression_statement> ::= <expression> ";"
-    // Used for standalone expressions like "s;" or "cube(10);" in module bodies
-    private fun parseExpressionStatement(b: PsiBuilder): Boolean {
-        val mark = b.mark()
-        
-        parseExpression(b)
-        expect(b, OpenSCADTypes.SEMICOLON, "Expected ';'")
-        
-        mark.done(OpenSCADTypes.MODULE_INSTANTIATION)
         return true
     }
     
