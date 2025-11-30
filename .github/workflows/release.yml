@@ -23,14 +23,21 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       
-    - name: Build plugin
-      run: ./gradlew buildPlugin -x test -x buildSearchableOptions
-      
     - name: Get version from tag
       id: get_version
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       
-    - name: Create Release
+    - name: Update version in plugin.xml
+      run: |
+        sed -i "s/<version>.*<\/version>/<version>${{ steps.get_version.outputs.VERSION }}<\/version>/" src/main/resources/META-INF/plugin.xml
+        
+    - name: Build plugin
+      run: ./gradlew buildPlugin -x test -x buildSearchableOptions
+      
+    - name: Verify plugin
+      run: ./gradlew verifyPlugin
+      
+    - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
         files: build/distributions/*.zip
@@ -39,3 +46,9 @@ jobs:
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Publish to JetBrains Marketplace
+      if: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN != '' }}
+      env:
+        PUBLISH_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
+      run: ./gradlew publishPlugin
