@@ -1,6 +1,7 @@
-// ${NAME}
+// OpenSCAD file
 // Created: ${DATE}
 
-$fn = 50; // Circle resolution
+\$fn = 50; // Circle resolution
 
-// Your OpenSCAD code here
+// Example: Simple 3D model
+cube([10, 10, 10]);

@@ -24,9 +24,7 @@ class NewOpenSCADFileAction : CreateFileFromTemplateAction(
         val icon = OpenSCADFileType.INSTANCE.icon
         builder
             .setTitle("New OpenSCAD File")
-            .addKind("Empty file", icon, "OpenSCAD File")
-            .addKind("3D Model", icon, "OpenSCAD 3D Model")
-            .addKind("2D Shape", icon, "OpenSCAD 2D Shape")
+            .addKind("OpenSCAD File", icon, "OpenSCAD File")
     }
     
     override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String {
