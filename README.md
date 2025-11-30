@@ -1,4 +1,97 @@
-You are building jetbrains plugin for OpenSCAD that provides full-featured IDE / language server for the OpenSCAD language
+# OpenSCAD IntelliJ Plugin
+
+[![CI](https://github.com/l2trace99/openscad-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/l2trace99/openscad-plugin/actions/workflows/ci.yml)
+[![Code Quality](https://github.com/l2trace99/openscad-plugin/actions/workflows/code-quality.yml/badge.svg)](https://github.com/l2trace99/openscad-plugin/actions/workflows/code-quality.yml)
+[![Release](https://github.com/l2trace99/openscad-plugin/actions/workflows/release.yml/badge.svg)](https://github.com/l2trace99/openscad-plugin/actions/workflows/release.yml)
+
+A full-featured IntelliJ IDEA plugin for OpenSCAD with syntax highlighting, code intelligence, 3D preview, and more.
+
+## Features
+
+- ✅ **Syntax Highlighting** - Full OpenSCAD language support
+- ✅ **Code Intelligence** - Autocomplete, go-to-definition, find usages
+- ✅ **3D Preview** - Real-time STL preview with wireframe/solid rendering
+- ✅ **Split Editor** - Code and preview side-by-side
+- ✅ **Auto-render** - Automatic preview updates on save
+- ✅ **Run Configurations** - Custom OpenSCAD CLI configurations
+- ✅ **Animation Support** - Export animation frames using `$t`
+- ✅ **Batch Export** - Export multiple files at once
+- ✅ **Library Path Support** - Configure external library paths
+- ✅ **Error Reporting** - OpenSCAD errors shown in IDE notifications
+
+## Installation
+
+1. Download the latest release from [Releases](https://github.com/l2trace99/openscad-plugin/releases)
+2. In IntelliJ IDEA: **Settings** → **Plugins** → **⚙️** → **Install Plugin from Disk**
+3. Select the downloaded `.zip` file
+4. Restart IDE
+
+## Usage
+
+### Configure OpenSCAD Path
+
+**Settings** → **Tools** → **OpenSCAD**
+- Set custom OpenSCAD executable path
+- Configure library paths (one per line)
+- Enable auto-render on save
+- Set rendering options
+
+### Create New File
+
+**File** → **New** → **OpenSCAD File**
+- Choose from templates: Empty, 3D Model, 2D Shape
+
+### Preview
+
+Open any `.scad` file to see the split editor with live 3D preview.
+
+**Preview Controls:**
+- **Render** - Generate STL preview
+- **Reset View** - Reset camera
+- **Wireframe** - Toggle wireframe/solid view
+- **Auto-render** - Enable automatic rendering on save
+
+### Export
+
+**Right-click on `.scad` file:**
+- **Export to STL...** - Single file export
+- **Export to Multiple Formats...** - Export to STL + PNG
+
+**Tools Menu:**
+- **Batch Export to STL...** - Export all project files
+
+### Run Configuration
+
+**Run** → **Edit Configurations** → **+** → **OpenSCAD**
+
+Configure:
+- Input/output files
+- Rendering options
+- Animation frames
+- Camera settings
+- Custom parameters
+
+## Development
+
+### Build
+
+```bash
+./gradlew build
+```
+
+### Run in Test IDE
+
+```bash
+./gradlew runIde
+```
+
+### Run Tests
+
+```bash
+./gradlew test
+```
+
+## Grammar Reference
 
 Your tasks:
 - Implement a parser, syntax highlighter, and code intelligence features for OpenSCAD.
