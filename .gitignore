@@ -9,7 +9,7 @@ out/
 .gradle/
 build/
 gradle-app.setting
-!gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
 
 # IntelliJ Plugin Development
 build/idea-sandbox/
