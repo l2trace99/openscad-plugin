@@ -18,7 +18,8 @@ repositories {
 
 dependencies {
     // JOGL for 3D rendering (Java OpenGL bindings)
-    val joglVersion = "2.3.2"
+    // Using 2.4.0 with universal natives for Apple Silicon support
+    val joglVersion = "2.4.0"
     implementation("org.jogamp.gluegen:gluegen-rt:$joglVersion")
     implementation("org.jogamp.jogl:jogl-all:$joglVersion")
     
@@ -26,10 +27,11 @@ dependencies {
     val os = org.gradle.internal.os.OperatingSystem.current()
     val arch = System.getProperty("os.arch")
     val classifier = when {
-        os.isMacOsX && arch == "aarch64" -> "natives-macosx-universal"
+        // macOS uses universal binaries that support both x86_64 and ARM64
         os.isMacOsX -> "natives-macosx-universal"
         os.isWindows && arch.contains("64") -> "natives-windows-amd64"
         os.isWindows -> "natives-windows-i586"
+        os.isLinux && arch.contains("aarch64") -> "natives-linux-aarch64"
         os.isLinux && arch.contains("64") -> "natives-linux-amd64"
         os.isLinux -> "natives-linux-i586"
         else -> "natives-linux-amd64"
@@ -82,7 +84,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("232")
-        untilBuild.set("241.*")
+        untilBuild.set("253.*")
     }
 
     signPlugin {
