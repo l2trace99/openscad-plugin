@@ -7,7 +7,7 @@
     <description>
         <![CDATA[
         <h1>OpenSCAD Language Support</h1>
-        <p>Full-featured IntelliJ IDEA plugin for OpenSCAD with syntax highlighting, code intelligence, and 3D preview.</p>
+        <p>Full-featured IntelliJ IDEA plugin for OpenSCAD with syntax highlighting, code intelligence, and real-time 3D preview.</p>
         
         <h2>Features</h2>
         <ul>
@@ -16,23 +16,151 @@
             <li><b>3D Preview</b> - Real-time STL preview with wireframe/solid rendering</li>
             <li><b>Split Editor</b> - Code and preview side-by-side</li>
             <li><b>Auto-render</b> - Automatic preview updates on save</li>
-            <li><b>Run Configurations</b> - Custom OpenSCAD CLI configurations</li>
-            <li><b>Animation Support</b> - Export animation frames using $t variable</li>
-            <li><b>Batch Export</b> - Export multiple files at once (STL, PNG, etc.)</li>
+            <li><b>Run Configurations</b> - Custom OpenSCAD CLI configurations with animation support</li>
+            <li><b>Batch Export</b> - Export multiple files at once (STL, PNG, 3MF, AMF, etc.)</li>
             <li><b>Library Path Support</b> - Configure external library paths (OPENSCADPATH)</li>
             <li><b>Error Reporting</b> - OpenSCAD errors shown in IDE notifications</li>
             <li><b>File Templates</b> - Quick start with Empty, 3D Model, or 2D Shape templates</li>
         </ul>
         
-        <h2>Requirements</h2>
-        <p>OpenSCAD must be installed on your system. Download from <a href="https://openscad.org/downloads.html">openscad.org</a></p>
+        <h2>System Requirements</h2>
+        <ul>
+            <li><b>OpenSCAD</b> - Version 2021.01 or later must be installed on your system</li>
+            <li><b>Download</b>: <a href="https://openscad.org/downloads.html">openscad.org/downloads</a></li>
+            <li><b>Supported Platforms</b>: Windows, macOS (Intel & Apple Silicon), Linux</li>
+            <li><b>IntelliJ Platform</b>: 2023.2 or later (IntelliJ IDEA, PyCharm, WebStorm, etc.)</li>
+            <li><b>Java</b>: JDK 17 or later (bundled with IDE)</li>
+        </ul>
         
-        <h2>Getting Started</h2>
+        <h2>Installation & Setup</h2>
         <ol>
-            <li>Configure OpenSCAD path in Settings → Tools → OpenSCAD</li>
-            <li>Create a new OpenSCAD file: File → New → OpenSCAD File</li>
-            <li>Start coding! The preview updates automatically on save</li>
+            <li><b>Install OpenSCAD</b> from <a href="https://openscad.org/downloads.html">openscad.org</a></li>
+            <li><b>Install Plugin</b> from JetBrains Marketplace or manually from ZIP</li>
+            <li><b>Configure Settings</b> (see below)</li>
         </ol>
+        
+        <h2>Settings Configuration</h2>
+        <p>Go to <b>Settings → Tools → OpenSCAD</b> to configure:</p>
+        
+        <h3>OpenSCAD Executable Path</h3>
+        <ul>
+            <li><b>Auto-detection</b>: Plugin automatically detects OpenSCAD in standard locations</li>
+            <li><b>Custom path</b>: Specify if installed in non-standard location</li>
+            <li><b>macOS</b>: <code>/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD</code></li>
+            <li><b>Windows</b>: <code>C:\Program Files\OpenSCAD\openscad.exe</code></li>
+            <li><b>Linux</b>: <code>/usr/bin/openscad</code></li>
+        </ul>
+        
+        <h3>Library Paths (OPENSCADPATH)</h3>
+        <ul>
+            <li><b>Purpose</b>: Resolve external libraries used in <code>include</code> and <code>use</code> statements</li>
+            <li><b>Format</b>: One path per line</li>
+            <li><b>Example</b>:
+                <pre>/Users/username/OpenSCAD/libraries
+/usr/local/share/openscad/libraries</pre>
+            </li>
+            <li><b>Common libraries</b>: MCAD, BOSL2, NopSCADlib, etc.</li>
+        </ul>
+        
+        <h3>Rendering Options</h3>
+        <ul>
+            <li><b>Use Full Render</b>: Enable for high-quality preview (slower, uses <code>--render</code> flag)</li>
+            <li><b>Auto Center</b>: Automatically center model in viewport (<code>--autocenter</code>)</li>
+            <li><b>View All</b>: Fit entire model in view (<code>--viewall</code>)</li>
+            <li><b>Auto-render on Save</b>: Automatically update preview when file is saved</li>
+        </ul>
+        
+        <h2>Usage Guide</h2>
+        
+        <h3>Creating New Files</h3>
+        <ol>
+            <li>Go to <b>File → New → OpenSCAD File</b></li>
+            <li>Choose template:
+                <ul>
+                    <li><b>Empty</b>: Blank file with basic setup</li>
+                    <li><b>3D Model</b>: Template with cube and cylinder example</li>
+                    <li><b>2D Shape</b>: Template with 2D shapes and extrusion example</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <h3>3D Preview</h3>
+        <ul>
+            <li><b>Open</b>: Any <code>.scad</code> file automatically shows split editor with preview</li>
+            <li><b>Render</b>: Click "Render" button or save file (if auto-render enabled)</li>
+            <li><b>Reset View</b>: Reset camera to default position</li>
+            <li><b>Wireframe/Solid</b>: Toggle between wireframe and solid rendering modes</li>
+            <li><b>Mouse Controls</b>:
+                <ul>
+                    <li>Left drag: Rotate model</li>
+                    <li>Right drag: Pan view</li>
+                    <li>Scroll: Zoom in/out</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <h3>Export Options</h3>
+        <ul>
+            <li><b>Single File Export</b>: Right-click <code>.scad</code> file → <b>Export to STL</b></li>
+            <li><b>Multi-Format Export</b>: Right-click → <b>Export to Multiple Formats</b> (STL + PNG)</li>
+            <li><b>Batch Export</b>: <b>Tools → Batch Export to STL</b> (exports all project files)</li>
+        </ul>
+        
+        <h3>Run Configurations</h3>
+        <ol>
+            <li>Go to <b>Run → Edit Configurations</b></li>
+            <li>Click <b>+</b> → <b>OpenSCAD</b></li>
+            <li>Configure:
+                <ul>
+                    <li><b>Script Path</b>: Input <code>.scad</code> file</li>
+                    <li><b>Output Path</b>: Where to save rendered file</li>
+                    <li><b>Rendering Options</b>: Full render, auto-center, view all</li>
+                    <li><b>Animation</b>: Enable and set number of frames (uses <code>$t</code> variable)</li>
+                    <li><b>Camera Settings</b>: Custom camera position and rotation</li>
+                    <li><b>Image Size</b>: Output resolution (e.g., <code>1920,1080</code>)</li>
+                    <li><b>Custom Parameters</b>: Additional OpenSCAD CLI flags</li>
+                </ul>
+            </li>
+            <li>Click <b>Run</b> to execute</li>
+        </ol>
+        
+        <h3>Animation Export</h3>
+        <ul>
+            <li>Use <code>$t</code> variable in your OpenSCAD code (ranges from 0 to 1)</li>
+            <li>Example: <code>rotate([0, 0, $t * 360]) cube(10);</code></li>
+            <li>In Run Configuration, enable animation and set frame count</li>
+            <li>Generates multiple files: <code>output_0001.png</code>, <code>output_0002.png</code>, etc.</li>
+        </ul>
+        
+        <h2>Troubleshooting</h2>
+        
+        <h3>Preview Not Working</h3>
+        <ul>
+            <li>Check OpenSCAD is installed: Run <code>openscad --version</code> in terminal</li>
+            <li>Verify executable path in Settings → Tools → OpenSCAD</li>
+            <li>Check IDE notifications for error messages</li>
+        </ul>
+        
+        <h3>"Can't open library" Warnings</h3>
+        <ul>
+            <li>Add library paths in Settings → Tools → OpenSCAD → Library Paths</li>
+            <li>Ensure paths point to directories containing <code>.scad</code> library files</li>
+        </ul>
+        
+        <h3>Rendering Errors</h3>
+        <ul>
+            <li>Check OpenSCAD syntax - errors shown in IDE notifications</li>
+            <li>Try rendering in OpenSCAD application directly to verify code</li>
+            <li>Enable full render in settings for better error reporting</li>
+        </ul>
+        
+        <h2>Support & Resources</h2>
+        <ul>
+            <li><b>GitHub</b>: <a href="https://github.com/l2trace99/openscad-plugin">github.com/l2trace99/openscad-plugin</a></li>
+            <li><b>Issues</b>: Report bugs and request features on GitHub</li>
+            <li><b>OpenSCAD Docs</b>: <a href="https://openscad.org/documentation.html">openscad.org/documentation</a></li>
+            <li><b>OpenSCAD Cheatsheet</b>: <a href="https://openscad.org/cheatsheet/">openscad.org/cheatsheet</a></li>
+        </ul>
         ]]>
     </description>
 
