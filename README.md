@@ -107,6 +107,8 @@ Reference URLs used to derive this spec (for you to cross-check or refine, NOT t
 - SCADFormat (OpenSCAD.g4 grammar – GPL, do NOT copy verbatim): https://github.com/hugheaves/scadformat/blob/main/OpenSCAD.g4
 - tree-sitter-openscad grammar (MIT, for cross-checking): https://github.com/openscad/tree-sitter-openscad
 
+
+```
 ======================================================================
 LEXICAL CONVENTIONS (informal)
 ======================================================================
@@ -495,9 +497,4 @@ NOTES FOR IMPLEMENTATION
     * let(...) which appears both as a statement-like construct and as an expression.
     * Optional block vs. single-statement forms after if/for/intersection_for/let.
     * Prefix object modifiers (#, !, %, *) which may apply to single objects or whole blocks.
-
-Using this grammar, implement:
-- A parser with robust error reporting / recovery.
-- Syntax highlighting driven by the parse tree.
-- Structural navigation (outline of modules, functions).
-- Basic semantic features: detect undefined identifiers, suggest built-in modules/functions, etc.
+```
