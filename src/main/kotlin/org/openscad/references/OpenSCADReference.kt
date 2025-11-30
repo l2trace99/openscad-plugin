@@ -22,17 +22,25 @@ class OpenSCADReference(element: PsiElement, textRange: TextRange) :
         val file = element.containingFile
         val results = mutableListOf<ResolveResult>()
         
-        // Find module declarations
+        // Find module declarations in current file
         PsiTreeUtil.findChildrenOfType(file, OpenSCADModuleDeclaration::class.java).forEach { module ->
             if (module.name == referenceName) {
                 results.add(PsiElementResolveResult(module))
             }
         }
         
-        // Find function declarations
+        // Find function declarations in current file
         PsiTreeUtil.findChildrenOfType(file, OpenSCADFunctionDeclaration::class.java).forEach { function ->
             if (function.name == referenceName) {
                 results.add(PsiElementResolveResult(function))
+            }
+        }
+        
+        // Find imported symbols from use/include statements
+        val importedSymbols = OpenSCADImportResolver.getImportedSymbols(file)
+        importedSymbols.forEach { symbol ->
+            if (symbol.name == referenceName) {
+                results.add(PsiElementResolveResult(symbol.declaration))
             }
         }
         

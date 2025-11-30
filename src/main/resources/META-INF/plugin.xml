@@ -46,9 +46,34 @@
         <!-- Editor features -->
         <lang.braceMatcher language="OpenSCAD" implementationClass="org.openscad.editor.OpenSCADBraceMatcher"/>
         <lang.foldingBuilder language="OpenSCAD" implementationClass="org.openscad.editor.OpenSCADFoldingBuilder"/>
+        <fileEditorProvider implementation="org.openscad.editor.OpenSCADSplitEditorProvider"/>
+        
+        <!-- Preview tool window -->
+        <toolWindow id="OpenSCAD Preview" 
+                    anchor="right" 
+                    icon="/icons/openscad.svg"
+                    factoryClass="org.openscad.preview.OpenSCADPreviewToolWindowFactory"/>
+        
+        <!-- Settings -->
+        <projectConfigurable parentId="tools" 
+                           instance="org.openscad.settings.OpenSCADSettingsConfigurable"
+                           id="org.openscad.settings.OpenSCADSettingsConfigurable"
+                           displayName="OpenSCAD"/>
+        <projectService serviceImplementation="org.openscad.settings.OpenSCADSettings"/>
+        
+        <!-- Notifications -->
+        <notificationGroup id="OpenSCAD" displayType="BALLOON" isLogByDefault="true"/>
     </extensions>
 
     <actions>
+        <!-- New file action -->
+        <action id="OpenSCAD.NewFile"
+                class="org.openscad.actions.NewOpenSCADFileAction"
+                text="OpenSCAD File"
+                description="Create new OpenSCAD file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+        
         <!-- Context menu action for showing documentation -->
         <action id="OpenSCAD.ShowDocumentation" 
                 class="org.openscad.actions.ShowDocumentationAction" 

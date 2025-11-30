@@ -285,29 +285,88 @@ class OpenSCADParserImpl : PsiParser {
         mark.done(OpenSCADTypes.ARGUMENT)
     }
     
-    // <include_statement> ::= "include" "<" STRING ">" ";"
+    // <include_statement> ::= "include" "<" path ">" ";"
+    // Path can be: identifier, identifier/identifier, identifier-identifier, etc.
     private fun parseIncludeStatement(b: PsiBuilder): Boolean {
         val mark = b.mark()
         b.advanceLexer() // 'include'
         
-        expect(b, OpenSCADTypes.LT, "Expected '<'")
-        expect(b, OpenSCADTypes.STRING, "Expected path")
-        expect(b, OpenSCADTypes.GT, "Expected '>'")
-        expect(b, OpenSCADTypes.SEMICOLON, "Expected ';'")
+        if (!expect(b, OpenSCADTypes.LT, "Expected '<'")) {
+            mark.done(OpenSCADTypes.INCLUDE_STATEMENT)
+            return true
+        }
+        
+        // Parse path - consume all tokens until we hit '>'
+        // Path can contain: identifiers, slashes, dashes, dots, etc.
+        // These get tokenized as IDENT, DIV, MINUS, etc.
+        val pathMark = b.mark()
+        var hasPath = false
+        while (b.tokenType != null && b.tokenType != OpenSCADTypes.GT) {
+            b.advanceLexer()
+            hasPath = true
+        }
+        
+        if (hasPath) {
+            pathMark.done(OpenSCADTypes.STRING) // Mark as STRING for compatibility
+        } else {
+            pathMark.drop() // No path found
+        }
+        
+        // Now we should be at '>'
+        if (b.tokenType == OpenSCADTypes.GT) {
+            b.advanceLexer() // consume '>'
+        } else {
+            b.error("Expected '>'")
+        }
+        
+        // Semicolon is optional for include statements
+        if (b.tokenType == OpenSCADTypes.SEMICOLON) {
+            b.advanceLexer() // consume ';' if present
+        }
         
         mark.done(OpenSCADTypes.INCLUDE_STATEMENT)
         return true
     }
     
-    // <use_statement> ::= "use" "<" STRING ">" ";"
+    // <use_statement> ::= "use" "<" path ">"
+    // Path can be: identifier, identifier/identifier, identifier-identifier, etc.
+    // Semicolon is optional
     private fun parseUseStatement(b: PsiBuilder): Boolean {
         val mark = b.mark()
         b.advanceLexer() // 'use'
         
-        expect(b, OpenSCADTypes.LT, "Expected '<'")
-        expect(b, OpenSCADTypes.STRING, "Expected path")
-        expect(b, OpenSCADTypes.GT, "Expected '>'")
-        expect(b, OpenSCADTypes.SEMICOLON, "Expected ';'")
+        if (!expect(b, OpenSCADTypes.LT, "Expected '<'")) {
+            mark.done(OpenSCADTypes.USE_STATEMENT)
+            return true
+        }
+        
+        // Parse path - consume all tokens until we hit '>'
+        // Path can contain: identifiers, slashes, dashes, dots, etc.
+        // These get tokenized as IDENT, DIV, MINUS, etc.
+        val pathMark = b.mark()
+        var hasPath = false
+        while (b.tokenType != null && b.tokenType != OpenSCADTypes.GT) {
+            b.advanceLexer()
+            hasPath = true
+        }
+        
+        if (hasPath) {
+            pathMark.done(OpenSCADTypes.STRING) // Mark as STRING for compatibility
+        } else {
+            pathMark.drop() // No path found
+        }
+        
+        // Now we should be at '>'
+        if (b.tokenType == OpenSCADTypes.GT) {
+            b.advanceLexer() // consume '>'
+        } else {
+            b.error("Expected '>'")
+        }
+        
+        // Semicolon is optional for use statements
+        if (b.tokenType == OpenSCADTypes.SEMICOLON) {
+            b.advanceLexer() // consume ';' if present
+        }
         
         mark.done(OpenSCADTypes.USE_STATEMENT)
         return true

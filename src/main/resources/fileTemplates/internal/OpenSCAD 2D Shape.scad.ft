@@ -1,0 +1,16 @@
+// ${NAME}
+// Created: ${DATE}
+
+$fn = 50; // Circle resolution
+
+// Example 2D shape
+difference() {
+    // Outer shape
+    circle(r = 20);
+    
+    // Inner cutout
+    circle(r = 10);
+}
+
+// Extrude to 3D if needed:
+// linear_extrude(height = 5) { ... }

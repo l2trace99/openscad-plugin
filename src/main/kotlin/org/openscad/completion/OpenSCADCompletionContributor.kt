@@ -6,6 +6,7 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
 import org.openscad.OpenSCADLanguage
 import org.openscad.psi.OpenSCADTypes
+import org.openscad.references.OpenSCADImportResolver
 
 class OpenSCADCompletionContributor : CompletionContributor() {
     init {
@@ -117,6 +118,36 @@ class OpenSCADCompletionProvider : CompletionProvider<CompletionParameters>() {
                     }
                     .withTypeText("function")
                     .withTailText("($params)")
+            )
+        }
+        
+        // Add imported symbols from use/include statements
+        val file = parameters.originalFile
+        val importedSymbols = OpenSCADImportResolver.getImportedSymbols(file)
+        
+        importedSymbols.forEach { symbol ->
+            val typeText = when (symbol.type) {
+                OpenSCADImportResolver.SymbolType.MODULE -> "imported module"
+                OpenSCADImportResolver.SymbolType.FUNCTION -> "imported function"
+                OpenSCADImportResolver.SymbolType.VARIABLE -> "imported variable"
+            }
+            
+            val sourceFile = symbol.declaration.containingFile.name
+            
+            result.addElement(
+                LookupElementBuilder.create(symbol.name)
+                    .withTypeText(typeText)
+                    .withTailText(" from $sourceFile", true)
+                    .withInsertHandler { context, _ ->
+                        // For modules/functions, add parentheses
+                        if (symbol.type != OpenSCADImportResolver.SymbolType.VARIABLE) {
+                            val editor = context.editor
+                            val document = editor.document
+                            val offset = context.tailOffset
+                            document.insertString(offset, "()")
+                            editor.caretModel.moveToOffset(offset + 1)
+                        }
+                    }
             )
         }
     }

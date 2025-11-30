@@ -1,0 +1,6 @@
+// ${NAME}
+// Created: ${DATE}
+
+$fn = 50; // Circle resolution
+
+// Your OpenSCAD code here
