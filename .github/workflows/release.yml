@@ -48,7 +48,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Publish to JetBrains Marketplace
-      if: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN != '' }}
+      continue-on-error: true
       env:
         PUBLISH_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
-      run: ./gradlew publishPlugin
+      run: |
+        if [ -n "$PUBLISH_TOKEN" ]; then
+          ./gradlew publishPlugin
+        else
+          echo "JETBRAINS_MARKETPLACE_TOKEN not set - skipping marketplace publish"
+          echo "Add the token to GitHub Secrets to enable automatic publishing"
+        fi
