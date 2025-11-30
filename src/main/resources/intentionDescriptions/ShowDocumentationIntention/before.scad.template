@@ -1,0 +1,2 @@
+// Place cursor on a function name and press Alt+Enter
+<spot>cube</spot>(10);

@@ -1,0 +1,61 @@
+<idea-plugin>
+    <id>org.openscad.plugin</id>
+    <name>OpenSCAD</name>
+    <version>0.1.0</version>
+    <vendor email="support@openscad.org" url="https://openscad.org">OpenSCAD Community</vendor>
+
+    <description>
+        <![CDATA[
+        <p>OpenSCAD language support for IntelliJ-based IDEs.</p>
+        <p>Features:</p>
+        <ul>
+            <li>Syntax highlighting</li>
+            <li>Code completion</li>
+            <li>Go to definition</li>
+            <li>Find usages</li>
+            <li>And more...</li>
+        </ul>
+        ]]>
+    </description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- File type -->
+        <fileType name="OpenSCAD" 
+                  implementationClass="org.openscad.file.OpenSCADFileType" 
+                  fieldName="INSTANCE" 
+                  language="OpenSCAD" 
+                  extensions="scad"/>
+        
+        <!-- Language support -->
+        <lang.parserDefinition language="OpenSCAD" implementationClass="org.openscad.parser.OpenSCADParserDefinition"/>
+        <!-- Syntax highlighting -->
+        <lang.syntaxHighlighterFactory language="OpenSCAD" implementationClass="org.openscad.highlighting.OpenSCADSyntaxHighlighterFactory"/>
+        <annotator language="OpenSCAD" implementationClass="org.openscad.highlighting.OpenSCADAnnotator"/>
+        <colorSettingsPage implementation="org.openscad.highlighting.OpenSCADColorSettingsPage"/>
+        <lang.commenter language="OpenSCAD" implementationClass="org.openscad.commenter.OpenSCADCommenter"/>
+        
+        <!-- Code intelligence -->
+        <completion.contributor language="OpenSCAD" implementationClass="org.openscad.completion.OpenSCADCompletionContributor"/>
+        <lang.psiStructureViewFactory language="OpenSCAD" implementationClass="org.openscad.structure.OpenSCADStructureViewFactory"/>
+        <psi.referenceContributor language="OpenSCAD" implementation="org.openscad.references.OpenSCADReferenceContributor"/>
+        <lang.findUsagesProvider language="OpenSCAD" implementationClass="org.openscad.findusages.OpenSCADFindUsagesProvider"/>
+        <lang.documentationProvider language="OpenSCAD" implementationClass="org.openscad.documentation.OpenSCADDocumentationProvider"/>
+        
+        <!-- Editor features -->
+        <lang.braceMatcher language="OpenSCAD" implementationClass="org.openscad.editor.OpenSCADBraceMatcher"/>
+        <lang.foldingBuilder language="OpenSCAD" implementationClass="org.openscad.editor.OpenSCADFoldingBuilder"/>
+    </extensions>
+
+    <actions>
+        <!-- Context menu action for showing documentation -->
+        <action id="OpenSCAD.ShowDocumentation" 
+                class="org.openscad.actions.ShowDocumentationAction" 
+                text="Show OpenSCAD Documentation" 
+                description="Show documentation for the OpenSCAD symbol at caret">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
+        </action>
+    </actions>
+</idea-plugin>

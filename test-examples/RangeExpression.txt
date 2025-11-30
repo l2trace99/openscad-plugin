@@ -1,0 +1,46 @@
+OpenSCAD File
+  OpenSCADPsiElement(OpenSCAD:ASSIGNMENT_STATEMENT)
+    PsiElement(IDENT)('range')
+    PsiWhiteSpace(' ')
+    PsiElement(EQ)('=')
+    PsiWhiteSpace(' ')
+    OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+      PsiElement(LBRACKET)('[')
+      OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+        PsiElement(NUMBER)('0')
+      PsiErrorElement:Expected ']'
+        <empty list>
+  PsiElement(COLON)(':')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(NUMBER)('10')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiElement(SEMICOLON)(';')
+  PsiWhiteSpace('\n')
+  OpenSCADPsiElement(OpenSCAD:ASSIGNMENT_STATEMENT)
+    PsiElement(IDENT)('range_step')
+    PsiWhiteSpace(' ')
+    PsiElement(EQ)('=')
+    PsiWhiteSpace(' ')
+    OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+      PsiElement(LBRACKET)('[')
+      OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+        PsiElement(NUMBER)('0')
+      PsiErrorElement:Expected ']'
+        <empty list>
+  PsiElement(COLON)(':')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(NUMBER)('2')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(COLON)(':')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(NUMBER)('10')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiElement(SEMICOLON)(';')

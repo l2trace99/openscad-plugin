@@ -1,0 +1,79 @@
+OpenSCAD File
+  OpenSCADPsiElement(OpenSCAD:ASSIGNMENT_STATEMENT)
+    PsiElement(IDENT)('grid')
+    PsiWhiteSpace(' ')
+    PsiElement(EQ)('=')
+    PsiWhiteSpace(' ')
+    OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+      PsiElement(LBRACKET)('[')
+      PsiElement(FOR)('for')
+      PsiWhiteSpace(' ')
+      PsiElement(LPAREN)('(')
+      PsiElement(IDENT)('x')
+      PsiWhiteSpace(' ')
+      PsiElement(EQ)('=')
+      PsiWhiteSpace(' ')
+      OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+        PsiElement(LBRACKET)('[')
+        OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+          PsiElement(NUMBER)('0')
+        PsiErrorElement:Expected ']'
+          <empty list>
+  PsiElement(COLON)(':')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(NUMBER)('5')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RPAREN)(')')
+  PsiWhiteSpace(' ')
+  OpenSCADPsiElement(OpenSCAD:FOR_STATEMENT)
+    PsiElement(FOR)('for')
+    PsiWhiteSpace(' ')
+    PsiElement(LPAREN)('(')
+    OpenSCADPsiElement(OpenSCAD:FOR_BINDING_LIST)
+      OpenSCADPsiElement(OpenSCAD:FOR_BINDING)
+        PsiElement(IDENT)('y')
+        PsiWhiteSpace(' ')
+        PsiElement(EQ)('=')
+        PsiWhiteSpace(' ')
+        OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+          PsiElement(LBRACKET)('[')
+          OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+            PsiElement(NUMBER)('0')
+          PsiErrorElement:Expected ']'
+            <empty list>
+  PsiElement(COLON)(':')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(NUMBER)('5')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RPAREN)(')')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiWhiteSpace(' ')
+  PsiElement(LBRACKET)('[')
+  OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+    OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+      PsiElement(IDENT)('x')
+      PsiErrorElement:Expected '('
+        <empty list>
+  PsiElement(COMMA)(',')
+  PsiWhiteSpace(' ')
+  OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+    OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+      PsiElement(IDENT)('y')
+      PsiErrorElement:Expected '('
+        <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiElement(SEMICOLON)(';')

@@ -1,0 +1,71 @@
+OpenSCAD File
+  OpenSCADPsiElement(OpenSCAD:ASSIGNMENT_STATEMENT)
+    PsiElement(IDENT)('points')
+    PsiWhiteSpace(' ')
+    PsiElement(EQ)('=')
+    PsiWhiteSpace(' ')
+    OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+      PsiElement(LBRACKET)('[')
+      PsiElement(FOR)('for')
+      PsiWhiteSpace(' ')
+      PsiElement(LPAREN)('(')
+      PsiElement(IDENT)('i')
+      PsiWhiteSpace(' ')
+      PsiElement(EQ)('=')
+      PsiWhiteSpace(' ')
+      OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+        PsiElement(LBRACKET)('[')
+        OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+          PsiElement(NUMBER)('0')
+        PsiErrorElement:Expected ']'
+          <empty list>
+  PsiElement(COLON)(':')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(NUMBER)('10')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RPAREN)(')')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiWhiteSpace(' ')
+  PsiElement(LBRACKET)('[')
+  OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+    OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+      PsiElement(IDENT)('i')
+      PsiErrorElement:Expected '('
+        <empty list>
+    PsiElement(MUL)('*')
+    PsiErrorElement:Expected module call or block
+      <empty list>
+  PsiElement(NUMBER)('2')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(COMMA)(',')
+  PsiWhiteSpace(' ')
+  OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+    OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+      PsiElement(IDENT)('i')
+      PsiErrorElement:Expected '('
+        <empty list>
+    OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+      PsiElement(MUL)('*')
+      OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+        PsiElement(IDENT)('i')
+        PsiErrorElement:Expected '('
+          <empty list>
+  PsiElement(COMMA)(',')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiWhiteSpace(' ')
+  PsiElement(NUMBER)('0')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiElement(SEMICOLON)(';')

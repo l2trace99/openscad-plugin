@@ -1,0 +1,16 @@
+<application>
+  <component name="ActionsLocalSummary">
+    <e n="$SelectAll">
+      <i c="1" l="1764466186743" />
+    </e>
+    <e n="EditorCopy">
+      <i c="1" l="1764466187384" />
+    </e>
+    <e n="WelcomeScreen.OpenProject">
+      <i c="1" l="1764465384507" />
+    </e>
+    <e n="com.intellij.notification.NotificationAction$Simple">
+      <i c="1" l="1764466173975" />
+    </e>
+  </component>
+</application>

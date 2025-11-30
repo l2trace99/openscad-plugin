@@ -1,0 +1,59 @@
+OpenSCAD File
+  OpenSCADPsiElement(OpenSCAD:ASSIGNMENT_STATEMENT)
+    PsiElement(IDENT)('evens')
+    PsiWhiteSpace(' ')
+    PsiElement(EQ)('=')
+    PsiWhiteSpace(' ')
+    OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+      PsiElement(LBRACKET)('[')
+      PsiElement(FOR)('for')
+      PsiWhiteSpace(' ')
+      PsiElement(LPAREN)('(')
+      PsiElement(IDENT)('i')
+      PsiWhiteSpace(' ')
+      PsiElement(EQ)('=')
+      PsiWhiteSpace(' ')
+      OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+        PsiElement(LBRACKET)('[')
+        OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+          PsiElement(NUMBER)('0')
+        PsiErrorElement:Expected ']'
+          <empty list>
+  PsiElement(COLON)(':')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(NUMBER)('20')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiErrorElement:Expected statement
+    <empty list>
+  PsiElement(RPAREN)(')')
+  PsiWhiteSpace(' ')
+  OpenSCADPsiElement(OpenSCAD:IF_STATEMENT)
+    PsiElement(IF)('if')
+    PsiWhiteSpace(' ')
+    PsiElement(LPAREN)('(')
+    OpenSCADPsiElement(OpenSCAD:EQUALITY_EXPRESSION)
+      OpenSCADPsiElement(OpenSCAD:MULTIPLICATIVE_EXPRESSION)
+        OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+          PsiElement(IDENT)('i')
+        PsiWhiteSpace(' ')
+        PsiElement(MOD)('%')
+        PsiWhiteSpace(' ')
+        OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+          PsiElement(NUMBER)('2')
+      PsiWhiteSpace(' ')
+      PsiElement(EQ_EQ)('==')
+      PsiWhiteSpace(' ')
+      OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+        PsiElement(NUMBER)('0')
+    PsiElement(RPAREN)(')')
+    PsiWhiteSpace(' ')
+    OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+      OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+        PsiElement(IDENT)('i')
+        PsiErrorElement:Expected '('
+          <empty list>
+  PsiElement(RBRACKET)(']')
+  PsiElement(SEMICOLON)(';')

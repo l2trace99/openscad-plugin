@@ -1,0 +1,38 @@
+OpenSCAD File
+  OpenSCADPsiElement(OpenSCAD:INCLUDE_STATEMENT)
+    PsiElement(INCLUDE)('include')
+    PsiWhiteSpace(' ')
+    PsiElement(LT)('<')
+    PsiErrorElement:Expected path
+      <empty list>
+  OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+    OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+      PsiElement(IDENT)('file')
+      PsiErrorElement:Expected '('
+        <empty list>
+  PsiElement(BAD_CHARACTER)('.')
+  OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+    OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+      PsiElement(IDENT)('scad')
+      PsiErrorElement:Expected '('
+        <empty list>
+  PsiElement(GT)('>')
+  PsiWhiteSpace('\n')
+  OpenSCADPsiElement(OpenSCAD:USE_STATEMENT)
+    PsiElement(USE)('use')
+    PsiWhiteSpace(' ')
+    PsiElement(LT)('<')
+    PsiErrorElement:Expected path
+      <empty list>
+  OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+    OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+      PsiElement(IDENT)('library')
+      PsiErrorElement:Expected '('
+        <empty list>
+  PsiElement(BAD_CHARACTER)('.')
+  OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+    OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+      PsiElement(IDENT)('scad')
+      PsiErrorElement:Expected '('
+        <empty list>
+  PsiElement(GT)('>')

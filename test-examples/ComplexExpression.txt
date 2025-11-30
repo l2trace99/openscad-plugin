@@ -1,0 +1,131 @@
+OpenSCAD File
+  PsiWhiteSpace('    ')
+  OpenSCADModuleDeclaration(OpenSCAD:MODULE_DECLARATION)
+    PsiElement(MODULE)('module')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENT)('comprehension_example')
+    PsiElement(LPAREN)('(')
+    PsiElement(RPAREN)(')')
+    PsiWhiteSpace(' ')
+    OpenSCADPsiElement(OpenSCAD:BLOCK)
+      PsiElement(LBRACE)('{')
+      PsiWhiteSpace('\n')
+      PsiWhiteSpace('    ')
+      OpenSCADPsiElement(OpenSCAD:ASSIGNMENT_STATEMENT)
+        PsiElement(IDENT)('points')
+        PsiWhiteSpace(' ')
+        PsiElement(EQ)('=')
+        PsiWhiteSpace(' ')
+        OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+          PsiElement(LBRACKET)('[')
+          PsiElement(FOR)('for')
+          PsiWhiteSpace(' ')
+          PsiElement(LPAREN)('(')
+          PsiElement(IDENT)('i')
+          PsiWhiteSpace(' ')
+          PsiElement(EQ)('=')
+          PsiWhiteSpace(' ')
+          OpenSCADPsiElement(OpenSCAD:VECTOR_LITERAL)
+            PsiElement(LBRACKET)('[')
+            OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+              PsiElement(NUMBER)('0')
+            PsiErrorElement:Expected ']'
+              <empty list>
+      PsiElement(COLON)(':')
+      PsiErrorElement:Unexpected token
+        <empty list>
+      PsiElement(NUMBER)('10')
+      PsiErrorElement:Unexpected token
+        <empty list>
+      PsiElement(RBRACKET)(']')
+      PsiErrorElement:Unexpected token
+        <empty list>
+      PsiElement(RPAREN)(')')
+      PsiErrorElement:Unexpected token
+        <empty list>
+      PsiWhiteSpace(' ')
+      PsiElement(LBRACKET)('[')
+      OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+        OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+          PsiElement(IDENT)('i')
+          PsiErrorElement:Expected '('
+            <empty list>
+        PsiElement(MUL)('*')
+        PsiErrorElement:Expected module call or block
+          <empty list>
+      PsiElement(NUMBER)('2')
+      PsiErrorElement:Unexpected token
+        <empty list>
+      PsiElement(COMMA)(',')
+      PsiWhiteSpace(' ')
+      OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+        OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+          PsiElement(IDENT)('i')
+          PsiErrorElement:Expected '('
+            <empty list>
+        OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+          PsiElement(MUL)('*')
+          OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+            PsiElement(IDENT)('i')
+            PsiErrorElement:Expected '('
+              <empty list>
+      PsiElement(COMMA)(',')
+      PsiErrorElement:Unexpected token
+        <empty list>
+      PsiWhiteSpace(' ')
+      PsiElement(NUMBER)('0')
+      PsiErrorElement:Unexpected token
+        <empty list>
+      PsiElement(RBRACKET)(']')
+      PsiErrorElement:Unexpected token
+        <empty list>
+      PsiElement(RBRACKET)(']')
+      PsiElement(SEMICOLON)(';')
+      PsiWhiteSpace('\n\n')
+      PsiWhiteSpace('    ')
+      OpenSCADPsiElement(OpenSCAD:FOR_STATEMENT)
+        PsiElement(FOR)('for')
+        PsiWhiteSpace(' ')
+        PsiElement(LPAREN)('(')
+        OpenSCADPsiElement(OpenSCAD:FOR_BINDING_LIST)
+          OpenSCADPsiElement(OpenSCAD:FOR_BINDING)
+            PsiElement(IDENT)('p')
+            PsiWhiteSpace(' ')
+            PsiElement(EQ)('=')
+            PsiWhiteSpace(' ')
+            OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+              PsiElement(IDENT)('points')
+        PsiElement(RPAREN)(')')
+        PsiWhiteSpace(' ')
+        OpenSCADPsiElement(OpenSCAD:BLOCK)
+          PsiElement(LBRACE)('{')
+          PsiWhiteSpace('\n')
+          PsiWhiteSpace('        ')
+          OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+            OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+              PsiElement(IDENT)('translate')
+              PsiElement(LPAREN)('(')
+              OpenSCADPsiElement(OpenSCAD:ARGUMENT_LIST)
+                OpenSCADPsiElement(OpenSCAD:ARGUMENT)
+                  OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+                    PsiElement(IDENT)('p')
+              PsiElement(RPAREN)(')')
+            PsiWhiteSpace('\n')
+            PsiWhiteSpace('            ')
+            OpenSCADPsiElement(OpenSCAD:MODULE_INSTANTIATION)
+              OpenSCADPsiElement(OpenSCAD:MODULE_CALL)
+                PsiElement(IDENT)('sphere')
+                PsiElement(LPAREN)('(')
+                OpenSCADPsiElement(OpenSCAD:ARGUMENT_LIST)
+                  OpenSCADPsiElement(OpenSCAD:ARGUMENT)
+                    PsiElement(IDENT)('r')
+                    PsiElement(EQ)('=')
+                    OpenSCADPsiElement(OpenSCAD:PRIMARY_EXPRESSION)
+                      PsiElement(NUMBER)('1')
+                PsiElement(RPAREN)(')')
+              PsiElement(SEMICOLON)(';')
+          PsiWhiteSpace('\n')
+          PsiWhiteSpace('    ')
+          PsiElement(RBRACE)('}')
+      PsiWhiteSpace('\n')
+      PsiElement(RBRACE)('}')
