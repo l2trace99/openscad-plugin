@@ -1,21 +1,27 @@
 package org.openscad.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
-import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
 import com.intellij.codeInsight.intention.preview.IntentionPreviewInfo
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.lang.documentation.DocumentationProvider
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.ui.components.JBScrollPane
+import org.openscad.documentation.OpenSCADDocumentationProvider
 import org.openscad.psi.OpenSCADFunctionDeclaration
 import org.openscad.psi.OpenSCADModuleDeclaration
 import org.openscad.psi.OpenSCADTypes
+import java.awt.Dimension
+import javax.swing.JEditorPane
+import javax.swing.text.html.HTMLEditorKit
 
 /**
  * Intention action to show documentation for OpenSCAD functions and modules
  */
-class ShowDocumentationIntention : PsiElementBaseIntentionAction(), IntentionAction {
+class ShowDocumentationIntention : IntentionAction {
     
     override fun getText(): String {
         // Make the text dynamic based on the element
@@ -24,7 +30,13 @@ class ShowDocumentationIntention : PsiElementBaseIntentionAction(), IntentionAct
     
     override fun getFamilyName(): String = "OpenSCAD"
     
-    override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean {
+    override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
+        if (editor == null || file == null) return false
+        
+        // Get element at caret
+        val offset = editor.caretModel.offset
+        val element = file.findElementAt(offset) ?: return false
+        
         // Available if cursor is on an identifier that could be a function/module call
         if (element.node?.elementType != OpenSCADTypes.IDENT) {
             return false
@@ -35,34 +47,57 @@ class ShowDocumentationIntention : PsiElementBaseIntentionAction(), IntentionAct
         return isBuiltInSymbol(text) || findDeclaration(element) != null
     }
     
-    override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
-        if (editor == null) return
+    override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
+        if (editor == null || file == null) return
         
-        // Trigger quick documentation for the element at cursor position
-        ApplicationManager.getApplication().invokeLater {
-            val action = com.intellij.codeInsight.documentation.actions.ShowQuickDocInfoAction()
-            val dataContext = com.intellij.openapi.actionSystem.DataContext { dataId ->
-                when (dataId) {
-                    com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT.name -> project
-                    com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR.name -> editor
-                    com.intellij.openapi.actionSystem.CommonDataKeys.PSI_FILE.name -> element.containingFile
-                    com.intellij.openapi.actionSystem.CommonDataKeys.PSI_ELEMENT.name -> element
-                    else -> null
-                }
+        // Get element at caret
+        val offset = editor.caretModel.offset
+        val element = file.findElementAt(offset) ?: return
+        
+        // Get documentation using the documentation provider
+        val docProvider = OpenSCADDocumentationProvider()
+        val text = element.text
+        
+        // Get documentation for the element or its declaration
+        val documentation = when {
+            findDeclaration(element) != null -> {
+                val declaration = findDeclaration(element)
+                docProvider.generateDoc(declaration, element)
             }
-            val event = com.intellij.openapi.actionSystem.AnActionEvent.createFromDataContext(
-                "",
-                null,
-                dataContext
-            )
-            action.actionPerformed(event)
+            else -> {
+                docProvider.generateDoc(element, element)
+            }
+        } ?: return
+        
+        // Create HTML viewer
+        val editorPane = JEditorPane().apply {
+            editorKit = HTMLEditorKit()
+            setText(documentation)
+            isEditable = false
+            caretPosition = 0
         }
+        
+        val scrollPane = JBScrollPane(editorPane).apply {
+            preferredSize = Dimension(500, 400)
+        }
+        
+        // Show popup
+        JBPopupFactory.getInstance()
+            .createComponentPopupBuilder(scrollPane, editorPane)
+            .setTitle("OpenSCAD Documentation: $text")
+            .setResizable(true)
+            .setMovable(true)
+            .setRequestFocus(true)
+            .createPopup()
+            .showInBestPositionFor(editor)
     }
     
-    override fun generatePreview(project: Project, editor: Editor, file: com.intellij.psi.PsiFile): IntentionPreviewInfo {
+    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo {
         // Don't generate preview for this intention as it shows a popup
         return IntentionPreviewInfo.EMPTY
     }
+    
+    override fun startInWriteAction(): Boolean = false
     
     private fun findDeclaration(element: PsiElement): PsiElement? {
         val file = element.containingFile

@@ -18,7 +18,7 @@ import java.io.File
 /**
  * Action to batch export multiple OpenSCAD files
  */
-class BatchExportAction : AnAction("Batch Export to STL...", "Export multiple OpenSCAD files to STL", null) {
+class BatchExportAction : AnAction() {
     
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return

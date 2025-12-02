@@ -10,11 +10,7 @@ import org.openscad.file.OpenSCADFileType
 /**
  * Action to create a new OpenSCAD file from the File → New menu
  */
-class NewOpenSCADFileAction : CreateFileFromTemplateAction(
-    "OpenSCAD File",
-    "Create new OpenSCAD file",
-    OpenSCADFileType.INSTANCE.icon
-), DumbAware {
+class NewOpenSCADFileAction : CreateFileFromTemplateAction(), DumbAware {
     
     override fun buildDialog(
         project: Project,

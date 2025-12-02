@@ -17,7 +17,7 @@ import javax.swing.text.html.HTMLEditorKit
 /**
  * Action to show OpenSCAD documentation in a popup
  */
-class ShowDocumentationAction : AnAction("Show OpenSCAD Documentation") {
+class ShowDocumentationAction : AnAction() {
     
     override fun actionPerformed(e: AnActionEvent) {
         val editor = e.getData(CommonDataKeys.EDITOR) ?: return

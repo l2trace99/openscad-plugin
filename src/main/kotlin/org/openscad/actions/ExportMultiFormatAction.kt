@@ -18,7 +18,7 @@ import java.io.File
 /**
  * Action to export to multiple formats at once
  */
-class ExportMultiFormatAction : AnAction("Export to Multiple Formats...", "Export to STL, PNG, and other formats", null) {
+class ExportMultiFormatAction : AnAction() {
     
     private val formats = listOf("stl", "png", "3mf", "amf", "off", "dxf", "svg")
     

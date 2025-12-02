@@ -17,7 +17,7 @@ import java.io.File
 /**
  * Action to export current OpenSCAD file to STL
  */
-class ExportSTLAction : AnAction("Export to STL...", "Export OpenSCAD file to STL format", null) {
+class ExportSTLAction : AnAction() {
     
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
