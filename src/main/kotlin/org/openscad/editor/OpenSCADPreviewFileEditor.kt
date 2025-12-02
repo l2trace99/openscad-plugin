@@ -10,6 +10,8 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.newvfs.BulkFileListener
+import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import org.openscad.preview.OpenSCADRenderer
 import org.openscad.preview.STLParser
 import org.openscad.preview.STLViewer3D
@@ -98,17 +100,16 @@ class OpenSCADPreviewFileEditor(
             }
         })
         
-        // Listen for document save events
-        val documentManager = com.intellij.openapi.fileEditor.FileDocumentManager.getInstance()
-        ApplicationManager.getApplication().messageBus.connect().subscribe(
-            com.intellij.AppTopics.FILE_DOCUMENT_SYNC,
-            object : com.intellij.openapi.fileEditor.FileDocumentManagerListener {
-                override fun beforeDocumentSaving(document: com.intellij.openapi.editor.Document) {
-                    val savedFile = documentManager.getFile(document)
-                    if (savedFile == file && autoRenderCheckbox.isSelected) {
-                        // Render after save completes
-                        ApplicationManager.getApplication().invokeLater {
-                            renderFile()
+        // Listen for file save events using bulk file listener
+        connection.subscribe(com.intellij.openapi.vfs.VirtualFileManager.VFS_CHANGES,
+            object : BulkFileListener {
+                override fun after(events: List<VFileEvent>) {
+                    events.forEach { event ->
+                        if (event.file == file && autoRenderCheckbox.isSelected) {
+                            // Render after save completes
+                            ApplicationManager.getApplication().invokeLater {
+                                renderFile()
+                            }
                         }
                     }
                 }

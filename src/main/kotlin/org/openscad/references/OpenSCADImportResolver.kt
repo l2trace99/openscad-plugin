@@ -53,8 +53,11 @@ object OpenSCADImportResolver {
         
         // If not found, try project-relative paths
         if (targetFile == null) {
-            val projectBase = project.baseDir
-            targetFile = projectBase?.findFileByRelativePath(pathText)
+            val contentRoots = com.intellij.openapi.roots.ProjectRootManager.getInstance(project).contentRoots
+            for (root in contentRoots) {
+                targetFile = root.findFileByRelativePath(pathText)
+                if (targetFile != null) break
+            }
         }
         
         // If still not found, try common library paths

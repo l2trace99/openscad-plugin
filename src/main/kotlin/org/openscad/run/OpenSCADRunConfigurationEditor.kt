@@ -1,5 +1,7 @@
 package org.openscad.run
 
+import com.intellij.openapi.fileChooser.FileChooser
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
@@ -28,26 +30,33 @@ class OpenSCADRunConfigurationEditor : SettingsEditor<OpenSCADRunConfiguration>(
     private val customParametersField = JBTextField()
     
     init {
-        scriptPathField.addBrowseFolderListener(
-            "Select OpenSCAD File",
-            null,
-            null,
-            FileChooserDescriptorFactory.createSingleFileDescriptor("scad")
-        )
+        val scadDescriptor = FileChooserDescriptor(true, false, false, false, false, false)
+            .withTitle("Select OpenSCAD File")
+            .withFileFilter { it.extension == "scad" }
+        scriptPathField.addActionListener {
+            val file = FileChooser.chooseFile(scadDescriptor, null, null)
+            if (file != null) {
+                scriptPathField.text = file.path
+            }
+        }
         
-        outputPathField.addBrowseFolderListener(
-            "Select Output File",
-            null,
-            null,
-            FileChooserDescriptorFactory.createSingleFileDescriptor()
-        )
+        val outputDescriptor = FileChooserDescriptor(true, false, false, false, false, false)
+            .withTitle("Select Output File")
+        outputPathField.addActionListener {
+            val file = FileChooser.chooseFile(outputDescriptor, null, null)
+            if (file != null) {
+                outputPathField.text = file.path
+            }
+        }
         
-        openscadPathField.addBrowseFolderListener(
-            "Select OpenSCAD Executable",
-            null,
-            null,
-            FileChooserDescriptorFactory.createSingleFileDescriptor()
-        )
+        val executableDescriptor = FileChooserDescriptor(true, false, false, false, false, false)
+            .withTitle("Select OpenSCAD Executable")
+        openscadPathField.addActionListener {
+            val file = FileChooser.chooseFile(executableDescriptor, null, null)
+            if (file != null) {
+                openscadPathField.text = file.path
+            }
+        }
         
         animationStepsField.text = "20"
     }

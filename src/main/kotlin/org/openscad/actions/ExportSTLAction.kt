@@ -24,9 +24,9 @@ class ExportSTLAction : AnAction() {
         val file = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
         
         // Show file chooser
-        val descriptor = FileSaverDescriptor("Export to STL", "Choose output STL file", "stl")
+        val descriptor = FileSaverDescriptor("Export to STL", "Choose output STL file")
         val saveDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project)
-        val fileWrapper = saveDialog.save(file.parent, file.nameWithoutExtension + ".stl") ?: return
+        val fileWrapper = saveDialog.save(file.nameWithoutExtension + ".stl") ?: return
         
         val outputFile = fileWrapper.file
         

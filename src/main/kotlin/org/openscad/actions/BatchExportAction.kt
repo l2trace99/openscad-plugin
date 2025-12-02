@@ -10,6 +10,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VirtualFile
 import org.openscad.file.OpenSCADFileType
 import org.openscad.preview.OpenSCADRenderer
@@ -30,7 +31,8 @@ class BatchExportAction : AnAction() {
         
         // Get all .scad files in project
         val scadFiles = mutableListOf<VirtualFile>()
-        project.baseDir?.let { collectScadFiles(it, scadFiles) }
+        val contentRoots = ProjectRootManager.getInstance(project).contentRoots
+        contentRoots.forEach { collectScadFiles(it, scadFiles) }
         
         if (scadFiles.isEmpty()) {
             NotificationGroupManager.getInstance()

@@ -1,5 +1,7 @@
 package org.openscad.settings
 
+import com.intellij.openapi.fileChooser.FileChooser
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
@@ -43,12 +45,15 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
     
     init {
         // Setup file chooser for OpenSCAD path
-        openscadPathField.addBrowseFolderListener(
-            "Select OpenSCAD Executable",
-            "Choose the OpenSCAD executable file",
-            project,
-            FileChooserDescriptorFactory.createSingleFileDescriptor()
-        )
+        val descriptor = FileChooserDescriptor(true, false, false, false, false, false)
+            .withTitle("Select OpenSCAD Executable")
+            .withDescription("Choose the OpenSCAD executable file")
+        openscadPathField.addActionListener {
+            val file = FileChooser.chooseFile(descriptor, project, null)
+            if (file != null) {
+                openscadPathField.text = file.path
+            }
+        }
         
         // Setup library paths text area
         libraryPathsField.rows = 5
