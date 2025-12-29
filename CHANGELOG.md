@@ -5,7 +5,25 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2025-12-29
+
+### Added
+- **Debug Preview** - PNG-based preview that shows OpenSCAD debug modifiers (`#`, `%`, `!`, `*`) with proper colors
+- **Orientation Cube** - Interactive 3D orientation cube in upper right corner for quick view switching (Front/Back/Left/Right/Top/Bottom)
+- **Export STL Button** - Direct export from preview pane toolbar with file save dialog
+- **Camera Orientation Sync** - Debug preview renders from the same camera angle as the 3D view
+- **OPENSCADPATH Support** - Run/debug configurations now properly set OPENSCADPATH from library path settings
+- **OS-specific Path Separator** - Library paths use correct separator (`:` on Unix, `;` on Windows)
+
+### Changed
+- **Improved 3D Rendering** - Backface culling for cleaner surface-only display
+- **Camera-relative Shading** - Faces pointing toward viewer are brighter
+- **Model Color** - Changed default color from yellow to light gray (`#c1c1c1`)
+- **Resizable Preview** - Preview pane can now be resized by dragging the splitter
+
+### Fixed
+- Kotlin stdlib conflict warning in Gradle configuration
+- Triangle edge visibility in solid render mode
 
 ## [1.0.1] - 2025-11-30
 

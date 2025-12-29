@@ -3,6 +3,8 @@ package org.openscad.preview
 import java.awt.*
 import java.awt.event.*
 import java.awt.image.BufferedImage
+import java.nio.file.Path
+import javax.imageio.ImageIO
 import javax.swing.JPanel
 import kotlin.math.cos
 import kotlin.math.sin
@@ -10,10 +12,13 @@ import kotlin.math.sin
 /**
  * Simple 3D wireframe viewer for STL models
  * Supports mouse rotation, zoom, and pan
+ * Also supports displaying PNG preview images (for debug modifier visualization)
  */
 class STLViewerPanel : JPanel() {
     
     private var model: STLParser.STLModel? = null
+    private var previewImage: BufferedImage? = null
+    private var showImagePreview = false // When true, shows PNG instead of 3D model
     private var rotationX = 0.3
     private var rotationY = 0.3
     private var rotationZ = 0.0
@@ -27,12 +32,22 @@ class STLViewerPanel : JPanel() {
     private var isDragging = false
     private var isPanning = false
     
+    // Orientation cube settings
+    private val cubeSize = 60
+    private val cubeMargin = 10
+    
     init {
-        background = Color(45, 45, 45)
-        preferredSize = Dimension(600, 600)
+        background = Color(37, 37, 37) // OpenSCAD default background
+        minimumSize = Dimension(200, 200)
+        preferredSize = Dimension(400, 400)
         
         addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
+                // Check if click is on orientation cube
+                if (e.button == MouseEvent.BUTTON1 && handleOrientationCubeClick(e.x, e.y)) {
+                    return
+                }
+                
                 lastMouseX = e.x
                 lastMouseY = e.y
                 isDragging = e.button == MouseEvent.BUTTON1
@@ -75,11 +90,75 @@ class STLViewerPanel : JPanel() {
         }
     }
     
-    fun setModel(model: STLParser.STLModel?) {
+    fun setModel(model: STLParser.STLModel?, preserveView: Boolean = true) {
+        val isFirstModel = this.model == null
         this.model = model
-        resetView()
+        showImagePreview = false // Switch back to 3D view
+        // Only reset view for first model load, preserve orientation for re-renders
+        if (!preserveView || isFirstModel) {
+            resetView()
+        }
         repaint()
     }
+    
+    /**
+     * Set a PNG preview image (for debug modifier visualization)
+     */
+    fun setPreviewImage(imagePath: Path?) {
+        if (imagePath != null) {
+            try {
+                previewImage = ImageIO.read(imagePath.toFile())
+                showImagePreview = true
+            } catch (e: Exception) {
+                previewImage = null
+                showImagePreview = false
+            }
+        } else {
+            previewImage = null
+            showImagePreview = false
+        }
+        repaint()
+    }
+    
+    /**
+     * Toggle between 3D model view and PNG preview image
+     */
+    fun toggleImagePreview(): Boolean {
+        if (previewImage != null) {
+            showImagePreview = !showImagePreview
+            repaint()
+        }
+        return showImagePreview
+    }
+    
+    /**
+     * Check if currently showing image preview
+     */
+    fun isShowingImagePreview(): Boolean = showImagePreview
+    
+    /**
+     * Get current view parameters for camera synchronization
+     * Returns rotation (x, y, z in degrees) and distance factor
+     */
+    fun getViewParameters(): ViewParameters {
+        return ViewParameters(
+            rotX = Math.toDegrees(rotationX),
+            rotY = Math.toDegrees(rotationY),
+            rotZ = Math.toDegrees(rotationZ),
+            distance = 500.0 / zoom, // Base distance adjusted by zoom
+            translateX = panX,
+            translateY = panY
+        )
+    }
+    
+    data class ViewParameters(
+        val rotX: Double,
+        val rotY: Double,
+        val rotZ: Double,
+        val distance: Double,
+        val translateX: Double,
+        val translateY: Double
+    )
     
     fun resetView() {
         rotationX = 0.3
@@ -89,6 +168,49 @@ class STLViewerPanel : JPanel() {
         panX = 0.0
         panY = 0.0
         repaint()
+    }
+    
+    // Preset view orientations
+    fun setViewFront() { rotationX = 0.0; rotationY = 0.0; rotationZ = 0.0; repaint() }
+    fun setViewBack() { rotationX = 0.0; rotationY = Math.PI; rotationZ = 0.0; repaint() }
+    fun setViewLeft() { rotationX = 0.0; rotationY = -Math.PI / 2; rotationZ = 0.0; repaint() }
+    fun setViewRight() { rotationX = 0.0; rotationY = Math.PI / 2; rotationZ = 0.0; repaint() }
+    fun setViewTop() { rotationX = -Math.PI / 2; rotationY = 0.0; rotationZ = 0.0; repaint() }
+    fun setViewBottom() { rotationX = Math.PI / 2; rotationY = 0.0; rotationZ = 0.0; repaint() }
+    
+    /**
+     * Handle click on orientation cube, returns true if click was on cube
+     */
+    private fun handleOrientationCubeClick(mouseX: Int, mouseY: Int): Boolean {
+        val cubeX = width - cubeSize - cubeMargin
+        val cubeY = cubeMargin
+        
+        // Check if click is within cube bounds
+        if (mouseX < cubeX || mouseX > cubeX + cubeSize || 
+            mouseY < cubeY || mouseY > cubeY + cubeSize) {
+            return false
+        }
+        
+        // Determine which face was clicked based on position within cube
+        val relX = mouseX - cubeX
+        val relY = mouseY - cubeY
+        val centerX = cubeSize / 2
+        val centerY = cubeSize / 2
+        
+        // Simple region detection - divide cube into regions
+        val dx = relX - centerX
+        val dy = relY - centerY
+        val threshold = cubeSize / 4
+        
+        when {
+            dy < -threshold -> setViewTop()      // Top region
+            dy > threshold -> setViewBottom()    // Bottom region
+            dx < -threshold -> setViewLeft()     // Left region
+            dx > threshold -> setViewRight()     // Right region
+            else -> setViewFront()               // Center = front
+        }
+        
+        return true
     }
     
     fun toggleWireframe() {
@@ -102,6 +224,12 @@ class STLViewerPanel : JPanel() {
         val g2d = g as Graphics2D
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         
+        // Show PNG preview if available and enabled
+        if (showImagePreview && previewImage != null) {
+            drawPreviewImage(g2d, previewImage!!)
+            return
+        }
+        
         val currentModel = model
         if (currentModel == null) {
             drawNoModelMessage(g2d)
@@ -109,6 +237,131 @@ class STLViewerPanel : JPanel() {
         }
         
         drawModel(g2d, currentModel)
+        
+        // Draw orientation cube overlay
+        drawOrientationCube(g2d)
+    }
+    
+    /**
+     * Draw orientation cube in upper right corner
+     */
+    private fun drawOrientationCube(g2d: Graphics2D) {
+        val cubeX = width - cubeSize - cubeMargin
+        val cubeY = cubeMargin
+        val centerX = cubeX + cubeSize / 2
+        val centerY = cubeY + cubeSize / 2
+        val halfSize = cubeSize / 2.5
+        
+        // Define cube vertices (centered at origin)
+        val vertices = arrayOf(
+            doubleArrayOf(-1.0, -1.0, -1.0), // 0: back-bottom-left
+            doubleArrayOf( 1.0, -1.0, -1.0), // 1: back-bottom-right
+            doubleArrayOf( 1.0,  1.0, -1.0), // 2: back-top-right
+            doubleArrayOf(-1.0,  1.0, -1.0), // 3: back-top-left
+            doubleArrayOf(-1.0, -1.0,  1.0), // 4: front-bottom-left
+            doubleArrayOf( 1.0, -1.0,  1.0), // 5: front-bottom-right
+            doubleArrayOf( 1.0,  1.0,  1.0), // 6: front-top-right
+            doubleArrayOf(-1.0,  1.0,  1.0)  // 7: front-top-left
+        )
+        
+        // Transform and project vertices
+        val projected = vertices.map { v ->
+            var x = v[0]
+            var y = v[1]
+            var z = v[2]
+            
+            // Rotate around X
+            val cosX = cos(rotationX)
+            val sinX = sin(rotationX)
+            val y1 = y * cosX - z * sinX
+            val z1 = y * sinX + z * cosX
+            y = y1; z = z1
+            
+            // Rotate around Y
+            val cosY = cos(rotationY)
+            val sinY = sin(rotationY)
+            val x1 = x * cosY + z * sinY
+            val z2 = -x * sinY + z * cosY
+            x = x1; z = z2
+            
+            Pair((centerX + x * halfSize).toInt(), (centerY - y * halfSize).toInt())
+        }
+        
+        // Define faces with vertices, color, and label
+        data class CubeFace(val v: IntArray, val color: Color, val label: String, val normalZ: Double)
+        
+        // Calculate face depths for sorting
+        val faces = listOf(
+            CubeFace(intArrayOf(4, 5, 6, 7), Color(100, 150, 200), "Front", cos(rotationX) * cos(rotationY)),
+            CubeFace(intArrayOf(0, 3, 2, 1), Color(100, 150, 200), "Back", -cos(rotationX) * cos(rotationY)),
+            CubeFace(intArrayOf(0, 4, 7, 3), Color(150, 100, 100), "Left", -cos(rotationX) * sin(rotationY)),
+            CubeFace(intArrayOf(1, 2, 6, 5), Color(150, 100, 100), "Right", cos(rotationX) * sin(rotationY)),
+            CubeFace(intArrayOf(3, 7, 6, 2), Color(100, 180, 100), "Top", sin(rotationX)),
+            CubeFace(intArrayOf(0, 1, 5, 4), Color(100, 180, 100), "Bottom", -sin(rotationX))
+        ).sortedBy { it.normalZ } // Draw back-to-front
+        
+        // Draw background
+        g2d.color = Color(60, 60, 60, 200)
+        g2d.fillRoundRect(cubeX - 5, cubeY - 5, cubeSize + 10, cubeSize + 10, 8, 8)
+        
+        // Draw faces
+        faces.forEach { face ->
+            val xPoints = face.v.map { projected[it].first }.toIntArray()
+            val yPoints = face.v.map { projected[it].second }.toIntArray()
+            
+            // Only draw if facing camera (normalZ > 0)
+            if (face.normalZ > -0.1) {
+                // Adjust brightness based on facing direction
+                val brightness = (0.5 + 0.5 * face.normalZ).coerceIn(0.3, 1.0)
+                g2d.color = Color(
+                    (face.color.red * brightness).toInt(),
+                    (face.color.green * brightness).toInt(),
+                    (face.color.blue * brightness).toInt()
+                )
+                g2d.fillPolygon(xPoints, yPoints, 4)
+                
+                // Draw label if face is mostly visible
+                if (face.normalZ > 0.3) {
+                    val labelX = xPoints.average().toInt()
+                    val labelY = yPoints.average().toInt()
+                    g2d.color = Color.WHITE
+                    g2d.font = Font("SansSerif", Font.BOLD, 9)
+                    val fm = g2d.fontMetrics
+                    val labelWidth = fm.stringWidth(face.label)
+                    g2d.drawString(face.label, labelX - labelWidth / 2, labelY + fm.ascent / 2 - 2)
+                }
+            }
+            
+            // Draw edges
+            g2d.color = Color(80, 80, 80)
+            g2d.drawPolygon(xPoints, yPoints, 4)
+        }
+    }
+    
+    private fun drawPreviewImage(g2d: Graphics2D, image: BufferedImage) {
+        // Scale image to fit panel while maintaining aspect ratio
+        val panelRatio = width.toDouble() / height.toDouble()
+        val imageRatio = image.width.toDouble() / image.height.toDouble()
+        
+        val (drawWidth, drawHeight) = if (imageRatio > panelRatio) {
+            // Image is wider - fit to width
+            Pair(width, (width / imageRatio).toInt())
+        } else {
+            // Image is taller - fit to height
+            Pair((height * imageRatio).toInt(), height)
+        }
+        
+        val x = (width - drawWidth) / 2
+        val y = (height - drawHeight) / 2
+        
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
+        g2d.drawImage(image, x, y, drawWidth, drawHeight, null)
+        
+        // Draw info overlay
+        g2d.color = Color.LIGHT_GRAY
+        g2d.font = Font("SansSerif", Font.PLAIN, 11)
+        g2d.drawString("Debug Preview (PNG) - Shows # % ! * modifiers", 10, 15)
+        g2d.drawString("Click '3D View' to return to interactive 3D model", 10, 30)
     }
     
     private fun drawNoModelMessage(g2d: Graphics2D) {
@@ -157,38 +410,61 @@ class STLViewerPanel : JPanel() {
             ProjectedTriangle(p1, p2, p3, depth, triangle.normal)
         }.sortedBy { it.depth } // Draw far to near
         
+        // Calculate view direction (camera looks down -Z axis after rotations)
+        // We need to transform the normal by the same rotation to get view-relative lighting
+        val cosX = cos(rotationX)
+        val sinX = sin(rotationX)
+        val cosY = cos(rotationY)
+        val sinY = sin(rotationY)
+        
         // Draw triangles
         projectedTriangles.forEach { tri ->
-            // Calculate lighting based on normal (simple directional light)
-            val lightDir = STLParser.Vector3(0.5f, 0.5f, 1.0f)
-            val lightDot = maxOf(0f, 
-                tri.normal.x * lightDir.x + 
-                tri.normal.y * lightDir.y + 
-                tri.normal.z * lightDir.z
-            )
+            // Transform normal by view rotation to get camera-relative orientation
+            var nx = tri.normal.x.toDouble()
+            var ny = tri.normal.y.toDouble()
+            var nz = tri.normal.z.toDouble()
             
-            // Base color with lighting
-            val brightness = (0.3f + 0.7f * lightDot).coerceIn(0f, 1f)
-            val r = (100 * brightness).toInt()
-            val g = (150 * brightness).toInt()
-            val b = (255 * brightness).toInt()
+            // Rotate normal around X axis
+            val ny1 = ny * cosX - nz * sinX
+            val nz1 = ny * sinX + nz * cosX
+            ny = ny1
+            nz = nz1
+            
+            // Rotate normal around Y axis
+            val nx1 = nx * cosY + nz * sinY
+            val nz2 = -nx * sinY + nz * cosY
+            nx = nx1
+            nz = nz2
+            
+            // nz now represents how much the face points toward the camera
+            // Positive nz = facing camera, negative = facing away
+            
+            // Backface culling - skip triangles facing away from camera
+            if (nz <= 0) {
+                return@forEach
+            }
+            
+            // Brightness based on how directly the face points at camera
+            val brightness = (0.6f + 0.4f * nz.toFloat()).coerceIn(0.6f, 1.0f)
+            
+            // Base color: #c1c1c1 (light gray)
+            val r = (193 * brightness).toInt()
+            val g = (193 * brightness).toInt()
+            val b = (193 * brightness).toInt()
+            val faceColor = Color(r, g, b)
             
             if (showWireframe) {
                 // Wireframe mode
-                g2d.color = Color(r, g, b)
+                g2d.color = faceColor
                 g2d.drawLine(tri.p1.first, tri.p1.second, tri.p2.first, tri.p2.second)
                 g2d.drawLine(tri.p2.first, tri.p2.second, tri.p3.first, tri.p3.second)
                 g2d.drawLine(tri.p3.first, tri.p3.second, tri.p1.first, tri.p1.second)
             } else {
-                // Solid mode with filled triangles
-                g2d.color = Color(r, g, b)
+                // Solid mode - only front-facing surfaces
+                g2d.color = faceColor
                 val xPoints = intArrayOf(tri.p1.first, tri.p2.first, tri.p3.first)
                 val yPoints = intArrayOf(tri.p1.second, tri.p2.second, tri.p3.second)
                 g2d.fillPolygon(xPoints, yPoints, 3)
-                
-                // Draw edges in darker color
-                g2d.color = Color(r / 2, g / 2, b / 2)
-                g2d.drawPolygon(xPoints, yPoints, 3)
             }
         }
         

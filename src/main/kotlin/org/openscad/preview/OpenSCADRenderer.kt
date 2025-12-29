@@ -243,9 +243,112 @@ class OpenSCADRenderer(private val project: Project) {
     }
     
     /**
+     * Renders an OpenSCAD file to PNG format (shows debug modifiers # % ! *)
+     * @param scadFile The OpenSCAD source file
+     * @param width Image width
+     * @param height Image height
+     * @param cameraParams Optional camera parameters (rotX, rotY, rotZ in degrees, distance)
+     * @return Path to the generated PNG file, or null if rendering failed
+     */
+    fun renderToPNG(
+        scadFile: VirtualFile, 
+        width: Int = 800, 
+        height: Int = 600,
+        cameraParams: CameraParameters? = null
+    ): Path? {
+        val openscadPath = findOpenSCADExecutable() ?: run {
+            logger.warn("OpenSCAD executable not found")
+            return null
+        }
+        
+        val tempDir = Files.createTempDirectory("openscad-preview")
+        val pngPath = tempDir.resolve("${scadFile.nameWithoutExtension}.png")
+        
+        try {
+            val settings = org.openscad.settings.OpenSCADSettings.getInstance(project)
+            
+            val params = mutableListOf<String>()
+            
+            // Use preview mode (not --render) to show debug modifiers
+            // Debug modifiers (#, %) are only visible in preview mode
+            
+            // View options
+            if (settings.autoCenter) {
+                params.add("--autocenter")
+            }
+            if (settings.viewAll) {
+                params.add("--viewall")
+            }
+            
+            // Image size
+            params.add("--imgsize")
+            params.add("$width,$height")
+            
+            // Use OpenSCAD's default colorscheme which shows debug colors
+            params.add("--colorscheme")
+            params.add("Cornfield")
+            
+            // Camera parameters for preserving orientation
+            if (cameraParams != null) {
+                // OpenSCAD camera format: --camera=translate_x,translate_y,translate_z,rot_x,rot_y,rot_z,distance
+                params.add("--camera")
+                params.add("0,0,0,${cameraParams.rotX},${cameraParams.rotY},${cameraParams.rotZ},${cameraParams.distance}")
+            }
+            
+            // Output file
+            params.add("-o")
+            params.add(pngPath.toString())
+            
+            // Use project root as working directory
+            val workDir = project.basePath ?: scadFile.parent.path
+            
+            // Input file
+            val inputPath = if (project.basePath != null && scadFile.path.startsWith(project.basePath!!)) {
+                File(project.basePath!!).toPath().relativize(File(scadFile.path).toPath()).toString()
+            } else {
+                scadFile.path
+            }
+            params.add(inputPath)
+            
+            val openscadPathEnv = buildOpenSCADPath(settings)
+            
+            val commandLine = GeneralCommandLine()
+                .withExePath(openscadPath)
+                .withParameters(params)
+                .withWorkDirectory(workDir)
+                .withEnvironment("OPENSCADPATH", openscadPathEnv)
+            
+            logger.info("Executing PNG render: ${commandLine.commandLineString}")
+            
+            val output: ProcessOutput = ExecUtil.execAndGetOutput(commandLine, 30000)
+            
+            if (output.exitCode == 0 && pngPath.exists()) {
+                logger.info("Successfully rendered ${scadFile.name} to PNG")
+                return pngPath
+            } else {
+                logger.error("PNG rendering failed: ${output.stderr}")
+                return null
+            }
+        } catch (e: Exception) {
+            logger.error("Error rendering to PNG", e)
+            return null
+        }
+    }
+    
+    /**
      * Checks if OpenSCAD is available on the system
      */
     fun isOpenSCADAvailable(): Boolean {
         return findOpenSCADExecutable() != null
     }
+    
+    /**
+     * Camera parameters for PNG rendering
+     */
+    data class CameraParameters(
+        val rotX: Double,
+        val rotY: Double,
+        val rotZ: Double,
+        val distance: Double
+    )
 }
