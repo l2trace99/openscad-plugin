@@ -10,6 +10,10 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
+import com.intellij.openapi.fileChooser.FileChooserFactory
+import com.intellij.openapi.fileChooser.FileSaverDescriptor
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.*
@@ -39,6 +43,8 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
     private val statusLabel = JLabel("Ready")
     private val renderButton = JButton("Render")
     private val resetViewButton = JButton("Reset View")
+    private val debugPreviewButton = JButton("Debug Preview")
+    private val exportSTLButton = JButton("Export STL")
     
     private var currentFile: VirtualFile? = null
     private var isRendering = false
@@ -66,6 +72,8 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         val toolbar = JPanel(FlowLayout(FlowLayout.LEFT))
         toolbar.add(renderButton)
         toolbar.add(resetViewButton)
+        toolbar.add(debugPreviewButton)
+        toolbar.add(exportSTLButton)
         toolbar.add(Box.createHorizontalStrut(20))
         toolbar.add(statusLabel)
         
@@ -82,6 +90,14 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
                 is STLViewer3D -> viewer.resetView()
                 is STLViewerPanel -> viewer.resetView()
             }
+        }
+        
+        exportSTLButton.addActionListener {
+            currentFile?.let { exportSTL(it) }
+        }
+        
+        debugPreviewButton.addActionListener {
+            currentFile?.let { renderDebugPreview(it) }
         }
     }
     
@@ -167,6 +183,107 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         SwingUtilities.invokeLater {
             statusLabel.text = message
             logger.info(message)
+        }
+    }
+    
+    private fun renderDebugPreview(file: VirtualFile) {
+        if (isRendering) {
+            updateStatus("Already rendering...")
+            return
+        }
+        
+        // Check if already showing debug preview, toggle back to 3D view
+        val viewerPanel = viewer as? STLViewerPanel
+        if (viewerPanel?.isShowingImagePreview() == true) {
+            viewerPanel.toggleImagePreview()
+            debugPreviewButton.text = "Debug Preview"
+            updateStatus("✓ Switched to 3D view")
+            return
+        }
+        
+        isRendering = true
+        debugPreviewButton.isEnabled = false
+        updateStatus("Rendering debug preview...")
+        
+        ApplicationManager.getApplication().executeOnPooledThread {
+            try {
+                // Get current view parameters for camera synchronization
+                val cameraParams = (viewer as? STLViewerPanel)?.getViewParameters()?.let { vp ->
+                    OpenSCADRenderer.CameraParameters(
+                        rotX = vp.rotX,
+                        rotY = vp.rotY,
+                        rotZ = vp.rotZ,
+                        distance = vp.distance
+                    )
+                }
+                val pngPath = renderer.renderToPNG(file, 1024, 768, cameraParams)
+                
+                SwingUtilities.invokeLater {
+                    if (pngPath != null) {
+                        (viewer as? STLViewerPanel)?.setPreviewImage(pngPath)
+                        debugPreviewButton.text = "3D View"
+                        updateStatus("✓ Debug preview (shows # % ! * modifiers)")
+                    } else {
+                        updateStatus("✗ Debug preview failed")
+                    }
+                }
+            } catch (e: Exception) {
+                logger.error("Error rendering debug preview", e)
+                SwingUtilities.invokeLater {
+                    updateStatus("✗ Error: ${e.message}")
+                }
+            } finally {
+                SwingUtilities.invokeLater {
+                    isRendering = false
+                    debugPreviewButton.isEnabled = true
+                }
+            }
+        }
+    }
+    
+    private fun exportSTL(file: VirtualFile) {
+        // Show file save dialog
+        val descriptor = FileSaverDescriptor("Export to STL", "Choose output STL file", "stl")
+        val saveDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project)
+        val fileWrapper = saveDialog.save(file.parent, file.nameWithoutExtension + ".stl") ?: return
+        
+        val outputFile = fileWrapper.file
+        
+        updateStatus("Exporting to ${outputFile.name}...")
+        
+        ApplicationManager.getApplication().executeOnPooledThread {
+            try {
+                val stlPath = renderer.renderToSTL(file, outputFile.toPath())
+                
+                SwingUtilities.invokeLater {
+                    if (stlPath != null) {
+                        updateStatus("✓ Exported to ${outputFile.name}")
+                        NotificationGroupManager.getInstance()
+                            .getNotificationGroup("OpenSCAD")
+                            .createNotification(
+                                "Export Successful",
+                                "Exported to ${outputFile.absolutePath}",
+                                NotificationType.INFORMATION
+                            )
+                            .notify(project)
+                    } else {
+                        updateStatus("✗ Export failed")
+                        NotificationGroupManager.getInstance()
+                            .getNotificationGroup("OpenSCAD")
+                            .createNotification(
+                                "Export Failed",
+                                "Failed to export STL file",
+                                NotificationType.ERROR
+                            )
+                            .notify(project)
+                    }
+                }
+            } catch (e: Exception) {
+                logger.error("Error exporting STL", e)
+                SwingUtilities.invokeLater {
+                    updateStatus("✗ Export error: ${e.message}")
+                }
+            }
         }
     }
 }

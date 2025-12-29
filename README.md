@@ -54,7 +54,34 @@ Open any `.scad` file to see the split editor with live 3D preview.
 - **Render** - Generate STL preview
 - **Reset View** - Reset camera
 - **Wireframe** - Toggle wireframe/solid view
+- **Debug Preview** - Show OpenSCAD debug modifiers (see below)
+- **Export STL** - Export directly to STL file
 - **Auto-render** - Enable automatic rendering on save
+
+**3D Navigation:**
+- **Left-click + drag** - Rotate model
+- **Right-click + drag** - Pan view
+- **Mouse wheel** - Zoom in/out
+- **Orientation Cube** - Click faces (Front/Back/Left/Right/Top/Bottom) to snap to that view
+
+### Debug Preview
+
+The **Debug Preview** feature renders your model as OpenSCAD sees it, showing debug modifiers with their proper colors:
+
+| Modifier | Name | Effect in Debug Preview |
+|----------|------|------------------------|
+| `#` | Debug | Highlighted in transparent red/pink |
+| `%` | Background | Shown in transparent gray |
+| `!` | Root | Only this object is rendered |
+| `*` | Disable | Object is hidden |
+
+**Usage:**
+1. Add debug modifiers to your code (e.g., `#cube(10);`)
+2. Click **Debug Preview** button in the toolbar
+3. The preview shows a PNG rendered by OpenSCAD with debug colors
+4. Click **3D View** to return to the interactive 3D model
+
+**Note:** Debug preview preserves your current camera orientation, so you can rotate the 3D view first, then click Debug Preview to see the same angle with debug colors
 
 ### Export
 

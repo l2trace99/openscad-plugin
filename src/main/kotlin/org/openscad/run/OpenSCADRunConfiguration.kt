@@ -11,6 +11,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import org.jdom.Element
 import org.openscad.file.OpenSCADFileType
+import org.openscad.settings.OpenSCADSettings
+import java.io.File
 import javax.swing.*
 
 /**
@@ -43,6 +45,12 @@ class OpenSCADRunConfiguration(
                 val commandLine = GeneralCommandLine()
                     .withExePath(options.openscadPath.ifEmpty { "openscad" })
                     .withWorkDirectory(project.basePath)
+                
+                // Set OPENSCADPATH environment variable from library path settings
+                val openscadPath = buildOpenSCADPath()
+                if (openscadPath.isNotEmpty()) {
+                    commandLine.withEnvironment("OPENSCADPATH", openscadPath)
+                }
                 
                 // Add parameters based on configuration
                 if (options.outputPath.isNotEmpty()) {
@@ -94,6 +102,38 @@ class OpenSCADRunConfiguration(
                     .createColoredProcessHandler(commandLine)
                 ProcessTerminatedListener.attach(processHandler)
                 return processHandler
+            }
+            
+            /**
+             * Build OPENSCADPATH environment variable from configured library paths
+             */
+            private fun buildOpenSCADPath(): String {
+                val settings = OpenSCADSettings.getInstance(project)
+                val paths = mutableListOf<String>()
+                
+                // Add configured library paths
+                paths.addAll(settings.libraryPaths.filter { File(it).exists() })
+                
+                // Add project-relative lib directory if it exists
+                project.basePath?.let { basePath ->
+                    val projectLibDir = File(basePath, "lib")
+                    if (projectLibDir.exists() && projectLibDir.isDirectory) {
+                        paths.add(projectLibDir.absolutePath)
+                    }
+                }
+                
+                // Add common OpenSCAD library locations
+                val commonPaths = listOf(
+                    "/usr/share/openscad/libraries",
+                    "/usr/local/share/openscad/libraries",
+                    System.getProperty("user.home") + "/.local/share/OpenSCAD/libraries",
+                    System.getProperty("user.home") + "/Documents/OpenSCAD/libraries"
+                )
+                
+                paths.addAll(commonPaths.filter { File(it).exists() })
+                
+                // Join with platform-specific path separator (: on Unix, ; on Windows)
+                return paths.joinToString(File.pathSeparator)
             }
         }
     }

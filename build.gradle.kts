@@ -8,6 +8,13 @@ plugins {
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
 }
 
+// Kotlin stdlib is provided by IntelliJ Platform (configured in gradle.properties)
+kotlin {
+    compilerOptions {
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8)
+    }
+}
+
 group = "org.openscad"
 version = "0.1.0"
 
