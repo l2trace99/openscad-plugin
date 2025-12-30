@@ -208,6 +208,16 @@
                            id="org.openscad.settings.OpenSCADSettingsConfigurable"
                            displayName="OpenSCAD"/>
         <projectService serviceImplementation="org.openscad.settings.OpenSCADSettings"/>
+        <projectService serviceImplementation="org.openscad.references.OpenSCADLibraryIndexer"/>
+        
+        <!-- Library roots provider for PSI parsing of library files -->
+        <additionalLibraryRootsProvider implementation="org.openscad.references.OpenSCADLibraryRootsProvider"/>
+        
+        <!-- Startup activity for library indexing -->
+        <postStartupActivity implementation="org.openscad.references.OpenSCADLibraryIndexerStartup"/>
+        
+        <!-- File save listener for re-indexing -->
+        <fileDocumentManagerListener implementation="org.openscad.references.OpenSCADFileSaveListener"/>
         
         <!-- Notifications -->
         <notificationGroup id="OpenSCAD" displayType="BALLOON" isLogByDefault="true"/>
