@@ -5,6 +5,23 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-12-29
+
+### Added
+- **Library Autocomplete** - Autocomplete suggestions for modules and functions from configured library paths
+- **Auto-insert Use Statement** - Automatically adds `use <library>` when selecting a library symbol from autocomplete
+- **Proactive Library Indexing** - Libraries are indexed on project startup with progress indicator
+- **Re-index on Save** - Library index updates automatically when `.scad` files are saved
+- **Project Directory Indexing** - Project files are included in autocomplete suggestions
+- **Library Path in Autocomplete** - Shows the library file path instead of generic "library function/module"
+
+### Changed
+- Re-indexing triggered when library paths are changed in settings
+
+### Fixed
+- `ProcessCanceledException` handling during library indexing
+- Autocomplete pattern matching for OpenSCAD files
+
 ## [1.1.0] - 2025-12-29
 
 ### Added
