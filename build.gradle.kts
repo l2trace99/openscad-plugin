@@ -65,6 +65,26 @@ sourceSets {
     }
 }
 
+// Integration test source set
+val integrationTest by sourceSets.creating {
+    compileClasspath += sourceSets.main.get().output
+    runtimeClasspath += sourceSets.main.get().output
+}
+
+val integrationTestImplementation by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+
+val integrationTestRuntimeOnly by configurations.getting {
+    extendsFrom(configurations.testRuntimeOnly.get())
+}
+
+// Integration test dependencies
+dependencies {
+    "integrationTestImplementation"("org.junit.jupiter:junit-jupiter:5.10.0")
+    "integrationTestRuntimeOnly"("org.junit.platform:junit-platform-launcher:1.10.0")
+}
+
 // Configure Grammar-Kit for lexer generation
 tasks.register<GenerateLexerTask>("generateOpenSCADLexer") {
     sourceFile.set(file("src/main/grammars/OpenSCADLexer.flex"))
@@ -105,5 +125,26 @@ tasks {
 
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
+    }
+}
+
+// Integration test task
+tasks.register<Test>("integrationTest") {
+    description = "Runs integration tests"
+    group = "verification"
+    
+    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+    classpath = sourceSets["integrationTest"].runtimeClasspath
+    
+    dependsOn(tasks.prepareSandbox)
+    dependsOn(tasks.buildPlugin)
+    
+    systemProperty("path.to.build.plugin", tasks.buildPlugin.get().archiveFile.get().asFile.absolutePath)
+    
+    useJUnitPlatform()
+    
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
     }
 }
