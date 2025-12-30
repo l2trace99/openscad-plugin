@@ -1,11 +1,13 @@
 package org.openscad.references
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiTreeUtil
 import org.openscad.psi.OpenSCADFunctionDeclaration
 import org.openscad.psi.OpenSCADModuleDeclaration
+import org.openscad.settings.OpenSCADSettings
 
 /**
  * Resolves imported symbols from use/include statements
@@ -90,19 +92,29 @@ object OpenSCADImportResolver {
     }
     
     /**
-     * Find file in common OpenSCAD library paths
+     * Find file in configured and common OpenSCAD library paths
      */
     private fun findInLibraryPaths(path: String, project: Project): VirtualFile? {
-        // Common library locations (can be extended)
-        val libraryPaths = listOf(
+        val allPaths = mutableListOf<String>()
+        
+        // First, add user-configured library paths from settings
+        try {
+            val settings = OpenSCADSettings.getInstance(project)
+            allPaths.addAll(settings.libraryPaths)
+        } catch (e: Exception) {
+            // Settings not available, continue with common paths
+        }
+        
+        // Then add common library locations
+        allPaths.addAll(listOf(
             "/usr/share/openscad/libraries",
             "/usr/local/share/openscad/libraries",
             System.getProperty("user.home") + "/.local/share/OpenSCAD/libraries",
             System.getProperty("user.home") + "/Documents/OpenSCAD/libraries"
-        )
+        ))
         
-        for (libPath in libraryPaths) {
-            val libDir = com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByPath(libPath)
+        for (libPath in allPaths) {
+            val libDir = LocalFileSystem.getInstance().findFileByPath(libPath)
             val file = libDir?.findFileByRelativePath(path)
             if (file != null) {
                 return file
