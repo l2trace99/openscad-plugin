@@ -5,6 +5,17 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-12-29
+
+### Added
+- **Go to Definition** - Cmd/Ctrl+Click on module or function names to jump to their declaration
+- **GotoDeclarationHandler** - Direct navigation support for symbols in current file, imported files, and library files
+- **Integration Tests** - Unit tests for completion data, identifier patterns, path calculations, and Go to Definition logic
+
+### Fixed
+- Import resolver now uses configured library paths from settings (fixes library symbol resolution)
+- Reference provider improved to better detect identifier tokens
+
 ## [1.1.1] - 2025-12-29
 
 ### Added

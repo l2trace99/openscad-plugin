@@ -195,6 +195,7 @@
         <completion.contributor language="OpenSCAD" implementationClass="org.openscad.completion.OpenSCADCompletionContributor"/>
         <lang.psiStructureViewFactory language="OpenSCAD" implementationClass="org.openscad.structure.OpenSCADStructureViewFactory"/>
         <psi.referenceContributor language="OpenSCAD" implementation="org.openscad.references.OpenSCADReferenceContributor"/>
+        <gotoDeclarationHandler implementation="org.openscad.references.OpenSCADGotoDeclarationHandler"/>
         <lang.findUsagesProvider language="OpenSCAD" implementationClass="org.openscad.findusages.OpenSCADFindUsagesProvider"/>
         <lang.documentationProvider language="OpenSCAD" implementationClass="org.openscad.documentation.OpenSCADDocumentationProvider"/>
         

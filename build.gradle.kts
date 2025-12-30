@@ -136,15 +136,23 @@ tasks.register<Test>("integrationTest") {
     testClassesDirs = sourceSets["integrationTest"].output.classesDirs
     classpath = sourceSets["integrationTest"].runtimeClasspath
     
+    dependsOn(tasks.named("compileIntegrationTestKotlin"))
     dependsOn(tasks.prepareSandbox)
     dependsOn(tasks.buildPlugin)
     
     systemProperty("path.to.build.plugin", tasks.buildPlugin.get().archiveFile.get().asFile.absolutePath)
     
-    useJUnitPlatform()
+    // Use JUnit 4 for BasePlatformTestCase compatibility
+    useJUnit()
     
     testLogging {
         events("passed", "skipped", "failed")
         showStandardStreams = true
     }
+}
+
+// Ensure classpathIndexCleanup runs after integration test tasks
+tasks.matching { it.name == "classpathIndexCleanup" }.configureEach {
+    mustRunAfter(tasks.named("compileIntegrationTestKotlin"))
+    mustRunAfter(tasks.named("processIntegrationTestResources"))
 }
