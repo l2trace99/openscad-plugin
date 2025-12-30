@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>org.openscad.plugin</id>
     <name>OpenSCAD</name>
-    <version>1.0.1</version>
+    <version>1.1.1</version>
     <vendor email="support@openscad.org" url="https://openscad.org">OpenSCAD Community</vendor>
 
     <description>
@@ -15,7 +15,11 @@
         <ul>
             <li><b>Syntax Highlighting</b> - Full OpenSCAD language support with color coding</li>
             <li><b>Code Intelligence</b> - Autocomplete, go-to-definition, find usages</li>
+            <li><b>Library Autocomplete</b> - Autocomplete for external library modules/functions with auto-insert of <code>use</code> statements</li>
             <li><b>3D Preview</b> - Real-time STL preview with wireframe/solid rendering</li>
+            <li><b>Debug Preview</b> - PNG preview showing debug modifiers (<code>#</code>, <code>%</code>, <code>!</code>, <code>*</code>) with proper colors</li>
+            <li><b>Orientation Cube</b> - Interactive 3D cube for quick view switching (Front/Back/Left/Right/Top/Bottom)</li>
+            <li><b>Export STL</b> - Direct export from preview pane toolbar</li>
             <li><b>Split Editor</b> - Code and preview side-by-side</li>
             <li><b>Auto-render</b> - Automatic preview updates on save</li>
             <li><b>Run Configurations</b> - Custom OpenSCAD CLI configurations with animation support</li>
@@ -55,13 +59,16 @@
         
         <h3>Library Paths (OPENSCADPATH)</h3>
         <ul>
-            <li><b>Purpose</b>: Resolve external libraries used in <code>include</code> and <code>use</code> statements</li>
+            <li><b>Purpose</b>: Resolve external libraries and enable library autocomplete</li>
+            <li><b>Autocomplete</b>: Modules and functions from configured libraries appear in autocomplete suggestions</li>
+            <li><b>Auto-insert</b>: Selecting a library symbol automatically adds the required <code>use &lt;library&gt;</code> statement</li>
             <li><b>Format</b>: One path per line</li>
             <li><b>Example</b>:
                 <pre>/Users/username/OpenSCAD/libraries
 /usr/local/share/openscad/libraries</pre>
             </li>
             <li><b>Common libraries</b>: MCAD, BOSL2, NopSCADlib, etc.</li>
+            <li><b>Indexing</b>: Libraries are indexed on project startup and re-indexed on file save</li>
         </ul>
         
         <h3>Rendering Options</h3>
@@ -115,7 +122,7 @@
             <li>Configure:
                 <ul>
                     <li><b>Script Path</b>: Input <code>.scad</code> file</li>
-                    <li><b>Output Path</b>: Where to save rendered file</li>
+                    <li><b>Output Path</b>: Where to save rendered files</li>
                     <li><b>Rendering Options</b>: Full render, auto-center, view all</li>
                     <li><b>Animation</b>: Enable and set number of frames (uses <code>$t</code> variable)</li>
                     <li><b>Camera Settings</b>: Custom camera position and rotation</li>
@@ -152,7 +159,7 @@
         <h3>Rendering Errors</h3>
         <ul>
             <li>Check OpenSCAD syntax - errors shown in IDE notifications</li>
-            <li>Try rendering in OpenSCAD application directly to verify code</li>
+            <li>Try rendering in the OpenSCAD application directly to verify code</li>
             <li>Enable full render in settings for better error reporting</li>
         </ul>
         
