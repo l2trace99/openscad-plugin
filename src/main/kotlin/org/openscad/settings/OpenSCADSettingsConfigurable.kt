@@ -13,6 +13,7 @@ import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import org.openscad.preview.OpenSCADRenderer
+import org.openscad.references.OpenSCADLibraryIndexer
 import java.awt.BorderLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -142,6 +143,8 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
     
     override fun apply() {
         val settings = OpenSCADSettings.getInstance(project)
+        val oldLibraryPaths = settings.libraryPaths.toList()
+        
         settings.openscadPath = openscadPathField.text
         settings.autoRenderOnSave = autoRenderCheckbox.isSelected
         settings.renderTimeout = timeoutField.text.toIntOrNull() ?: 30
@@ -155,6 +158,12 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             .filter { it.isNotBlank() }
             .map { it.trim() }
             .toMutableList()
+        
+        // Re-index libraries if paths changed
+        if (oldLibraryPaths != settings.libraryPaths) {
+            OpenSCADLibraryIndexer.getInstance(project).reindex()
+        }
+        
         modified = false
     }
     

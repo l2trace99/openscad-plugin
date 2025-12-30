@@ -22,6 +22,7 @@ Support this project by buying me a coffee!
 - ✅ **Animation Support** - Export animation frames using `$t`
 - ✅ **Batch Export** - Export multiple files at once
 - ✅ **Library Path Support** - Configure external library paths
+- ✅ **Library Indexing** - Autocomplete symbols from library files
 - ✅ **Error Reporting** - OpenSCAD errors shown in IDE notifications
 
 ## Installation
@@ -82,6 +83,31 @@ The **Debug Preview** feature renders your model as OpenSCAD sees it, showing de
 4. Click **3D View** to return to the interactive 3D model
 
 **Note:** Debug preview preserves your current camera orientation, so you can rotate the 3D view first, then click Debug Preview to see the same angle with debug colors
+
+### Library Indexing
+
+The plugin automatically indexes all `.scad` files in your configured library paths, making library modules and functions available in autocomplete.
+
+**How it works:**
+1. Configure library paths in **Settings** → **Tools** → **OpenSCAD**
+2. The plugin scans all `.scad` files in those directories
+3. Modules and functions appear in autocomplete with "library module" or "library function" labels
+4. Selecting a library symbol automatically adds the required `use <...>` statement to your file
+
+**Indexed locations:**
+- Paths configured in settings
+- Project `lib/` directory (if it exists)
+- Standard OpenSCAD library locations:
+  - `/usr/share/openscad/libraries`
+  - `/usr/local/share/openscad/libraries`
+  - `~/.local/share/OpenSCAD/libraries`
+  - `~/Documents/OpenSCAD/libraries`
+
+**Autocomplete features:**
+- Shows parameter hints for modules/functions
+- Displays icon indicating module vs function
+- Shows source file path
+- Private symbols (starting with `_`) are excluded
 
 ### Export
 

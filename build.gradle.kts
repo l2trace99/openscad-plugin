@@ -30,6 +30,9 @@ dependencies {
     implementation("org.jogamp.gluegen:gluegen-rt:$joglVersion")
     implementation("org.jogamp.jogl:jogl-all:$joglVersion")
     
+    // Test dependencies
+    testImplementation("junit:junit:4.13.2")
+    
     // Platform-specific natives for JOGL
     val os = org.gradle.internal.os.OperatingSystem.current()
     val arch = System.getProperty("os.arch")

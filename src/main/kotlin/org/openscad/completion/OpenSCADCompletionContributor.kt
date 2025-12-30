@@ -2,17 +2,29 @@ package org.openscad.completion
 
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.icons.AllIcons
+import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
 import org.openscad.OpenSCADLanguage
+import org.openscad.file.OpenSCADFileType
 import org.openscad.psi.OpenSCADTypes
 import org.openscad.references.OpenSCADImportResolver
+import org.openscad.references.OpenSCADLibraryIndexer
 
 class OpenSCADCompletionContributor : CompletionContributor() {
     init {
+        // Register for OpenSCAD language
         extend(
             CompletionType.BASIC,
             PlatformPatterns.psiElement().withLanguage(OpenSCADLanguage.INSTANCE),
+            OpenSCADCompletionProvider()
+        )
+        
+        // Also register for OpenSCAD file type as fallback
+        extend(
+            CompletionType.BASIC,
+            PlatformPatterns.psiElement().inFile(PlatformPatterns.psiFile().withFileType(PlatformPatterns.instanceOf(OpenSCADFileType::class.java))),
             OpenSCADCompletionProvider()
         )
     }
@@ -124,6 +136,7 @@ class OpenSCADCompletionProvider : CompletionProvider<CompletionParameters>() {
         // Add imported symbols from use/include statements
         val file = parameters.originalFile
         val importedSymbols = OpenSCADImportResolver.getImportedSymbols(file)
+        val importedNames = importedSymbols.map { it.name }.toSet()
         
         importedSymbols.forEach { symbol ->
             val typeText = when (symbol.type) {
@@ -150,6 +163,87 @@ class OpenSCADCompletionProvider : CompletionProvider<CompletionParameters>() {
                     }
             )
         }
+        
+        // Add library symbols (from indexed library paths)
+        try {
+            val project = parameters.originalFile.project
+            val libraryIndexer = OpenSCADLibraryIndexer.getInstance(project)
+            val librarySymbols = libraryIndexer.getLibrarySymbols()
+            
+            librarySymbols.forEach { symbol ->
+            // Skip if already imported
+            if (importedNames.contains(symbol.name)) return@forEach
+            
+            val typeText = symbol.relativePath
+            
+            val icon = when (symbol.type) {
+                OpenSCADLibraryIndexer.SymbolType.MODULE -> AllIcons.Nodes.Module
+                OpenSCADLibraryIndexer.SymbolType.FUNCTION -> AllIcons.Nodes.Function
+            }
+            
+            val symbolRelativePath = symbol.relativePath
+            result.addElement(
+                LookupElementBuilder.create(symbol.name)
+                    .withIcon(icon)
+                    .withTypeText(typeText)
+                    .withTailText(if (symbol.parameters.isNotEmpty()) "(${symbol.parameters})" else "()", true)
+                    .withInsertHandler { insertContext, _ ->
+                        val editor = insertContext.editor
+                        val document = editor.document
+                        val offset = insertContext.tailOffset
+                        
+                        // Check if use statement needs to be added BEFORE modifying document
+                        val fileText = document.text
+                        val useStatement = "use <$symbolRelativePath>"
+                        val needsUseStatement = !fileText.contains(useStatement) && 
+                                               !fileText.contains("include <$symbolRelativePath>")
+                        
+                        // Add use statement first (at top of file)
+                        if (needsUseStatement) {
+                            val insertPos = findUseInsertPosition(fileText)
+                            document.insertString(insertPos, "$useStatement\n")
+                        }
+                        
+                        // Add parentheses - adjust offset if we inserted use statement
+                        val adjustedOffset = if (needsUseStatement) {
+                            offset + useStatement.length + 1 // +1 for newline
+                        } else {
+                            offset
+                        }
+                        document.insertString(adjustedOffset, "()")
+                        editor.caretModel.moveToOffset(adjustedOffset + 1)
+                    }
+            )
+        }
+        } catch (e: ProcessCanceledException) {
+            // Rethrow ProcessCanceledException - it's a control-flow exception
+            throw e
+        } catch (e: Exception) {
+            // Silently ignore other indexer errors to not break autocomplete
+        }
+    }
+    
+    /**
+     * Find the best position to insert a use statement
+     */
+    private fun findUseInsertPosition(fileText: String): Int {
+        // Find the last use/include statement and insert after it
+        val lines = fileText.lines()
+        var lastImportEnd = 0
+        var currentPos = 0
+        
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("use ") || trimmed.startsWith("include ")) {
+                lastImportEnd = currentPos + line.length + 1 // +1 for newline
+            } else if (trimmed.isNotEmpty() && !trimmed.startsWith("//") && !trimmed.startsWith("/*")) {
+                // Found first non-import, non-comment line
+                break
+            }
+            currentPos += line.length + 1 // +1 for newline
+        }
+        
+        return lastImportEnd
     }
     
     companion object {
