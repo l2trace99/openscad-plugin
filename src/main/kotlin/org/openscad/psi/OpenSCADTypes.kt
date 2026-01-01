@@ -18,6 +18,9 @@ object OpenSCADTypes {
     @JvmField val FOR_KW = OpenSCADTokenType("FOR")
     @JvmField val INTERSECTION_FOR_KW = OpenSCADTokenType("INTERSECTION_FOR")
     @JvmField val LET_KW = OpenSCADTokenType("LET")
+    @JvmField val EACH_KW = OpenSCADTokenType("EACH")
+    @JvmField val ASSERT_KW = OpenSCADTokenType("ASSERT")
+    @JvmField val ECHO_KW = OpenSCADTokenType("ECHO")
     
     // Literals
     @JvmField val NUMBER = OpenSCADTokenType("NUMBER")
@@ -37,8 +40,14 @@ object OpenSCADTypes {
     @JvmField val AND_AND = OpenSCADTokenType("AND_AND")    // &&
     @JvmField val OR_OR = OpenSCADTokenType("OR_OR")        // ||
     @JvmField val NOT = OpenSCADTokenType("NOT")            // !
+    @JvmField val BITNOT = OpenSCADTokenType("BITNOT")      // ~
+    @JvmField val BITOR = OpenSCADTokenType("BITOR")        // |
+    @JvmField val BITAND = OpenSCADTokenType("BITAND")      // &
+    @JvmField val LSH = OpenSCADTokenType("LSH")            // <<
+    @JvmField val RSH = OpenSCADTokenType("RSH")            // >>
     @JvmField val QUESTION = OpenSCADTokenType("QUESTION")  // ?
     @JvmField val COLON = OpenSCADTokenType("COLON")        // :
+    @JvmField val DOT = OpenSCADTokenType("DOT")            // .
     @JvmField val DOT_DOT = OpenSCADTokenType("DOT_DOT")    // ..
     @JvmField val PLUS = OpenSCADTokenType("PLUS")          // +
     @JvmField val MINUS = OpenSCADTokenType("MINUS")        // -
@@ -85,6 +94,8 @@ object OpenSCADTypes {
     val FOR_STATEMENT = OpenSCADElementType("FOR_STATEMENT")
     val INTERSECTION_FOR_STATEMENT = OpenSCADElementType("INTERSECTION_FOR_STATEMENT")
     val LET_STATEMENT = OpenSCADElementType("LET_STATEMENT")
+    val ASSERT_STATEMENT = OpenSCADElementType("ASSERT_STATEMENT")
+    val EACH_EXPRESSION = OpenSCADElementType("EACH_EXPRESSION")
     val INCLUDE_STATEMENT = OpenSCADElementType("INCLUDE_STATEMENT")
     val USE_STATEMENT = OpenSCADElementType("USE_STATEMENT")
     val CONDITIONAL_EXPRESSION = OpenSCADElementType("CONDITIONAL_EXPRESSION")
@@ -92,6 +103,9 @@ object OpenSCADTypes {
     val LOGICAL_AND_EXPRESSION = OpenSCADElementType("LOGICAL_AND_EXPRESSION")
     val EQUALITY_EXPRESSION = OpenSCADElementType("EQUALITY_EXPRESSION")
     val RELATIONAL_EXPRESSION = OpenSCADElementType("RELATIONAL_EXPRESSION")
+    val BINARY_OR_EXPRESSION = OpenSCADElementType("BINARY_OR_EXPRESSION")
+    val BINARY_AND_EXPRESSION = OpenSCADElementType("BINARY_AND_EXPRESSION")
+    val SHIFT_EXPRESSION = OpenSCADElementType("SHIFT_EXPRESSION")
     val ADDITIVE_EXPRESSION = OpenSCADElementType("ADDITIVE_EXPRESSION")
     val MULTIPLICATIVE_EXPRESSION = OpenSCADElementType("MULTIPLICATIVE_EXPRESSION")
     val UNARY_EXPRESSION = OpenSCADElementType("UNARY_EXPRESSION")
@@ -108,6 +122,7 @@ object OpenSCADTypes {
     val FUNCTION_CALL = OpenSCADElementType("FUNCTION_CALL")
     val INDEX_EXPRESSION = OpenSCADElementType("INDEX_EXPRESSION")
     val SLICE_EXPRESSION = OpenSCADElementType("SLICE_EXPRESSION")
+    val MEMBER_ACCESS = OpenSCADElementType("MEMBER_ACCESS")
     
     object Factory {
         fun createElement(node: ASTNode?): PsiElement {

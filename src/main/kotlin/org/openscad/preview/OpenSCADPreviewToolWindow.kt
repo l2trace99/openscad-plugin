@@ -157,17 +157,20 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
                             }
                             updateStatus("✓ Rendered successfully (${model.triangles.size} triangles)")
                         } else {
+                            clearModel()
                             updateStatus("✗ Failed to parse STL file")
                         }
                     }
                 } else {
                     SwingUtilities.invokeLater {
+                        clearModel()
                         updateStatus("✗ Rendering failed")
                     }
                 }
             } catch (e: Exception) {
                 logger.error("Error rendering file", e)
                 SwingUtilities.invokeLater {
+                    clearModel()
                     updateStatus("✗ Error: ${e.message}")
                 }
             } finally {
@@ -183,6 +186,13 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         SwingUtilities.invokeLater {
             statusLabel.text = message
             logger.info(message)
+        }
+    }
+    
+    private fun clearModel() {
+        when (viewer) {
+            is STLViewer3D -> viewer.setModel(null)
+            is STLViewerPanel -> viewer.setModel(null)
         }
     }
     
