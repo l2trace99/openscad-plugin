@@ -188,6 +188,8 @@
         <!-- Syntax highlighting -->
         <lang.syntaxHighlighterFactory language="OpenSCAD" implementationClass="org.openscad.highlighting.OpenSCADSyntaxHighlighterFactory"/>
         <annotator language="OpenSCAD" implementationClass="org.openscad.highlighting.OpenSCADAnnotator"/>
+        <annotator language="OpenSCAD" implementationClass="org.openscad.highlighting.OpenSCADDeprecatedAnnotator"/>
+        <annotator language="OpenSCAD" implementationClass="org.openscad.highlighting.OpenSCADWarningAnnotator"/>
         <colorSettingsPage implementation="org.openscad.highlighting.OpenSCADColorSettingsPage"/>
         <lang.commenter language="OpenSCAD" implementationClass="org.openscad.commenter.OpenSCADCommenter"/>
         
