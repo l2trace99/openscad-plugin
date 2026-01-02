@@ -15,20 +15,25 @@ import com.intellij.psi.TokenType;
 %eof{  return;
 %eof}
 
+%state STRING_STATE
+
 %{
   public OpenSCADLexerImpl() {
     this((java.io.Reader)null);
   }
+  
+  private int stringStart;
 %}
 
 EOL=\n|\r|\r\n
 WHITE_SPACE=[ \t\f]
 
 DIGIT=[0-9]
+HEX_DIGIT=[0-9a-fA-F]
 LETTER=[a-zA-Z_]
 IDENT=(\$)?{LETTER}({LETTER}|{DIGIT})*
 NUMBER=({DIGIT}+(\.{DIGIT}*)?|{DIGIT}*\.{DIGIT}+)([eE][-+]?{DIGIT}+)?
-STRING=\"([^\"\\\r\n]|\\.)*\"
+HEX_NUMBER=0[xX]{HEX_DIGIT}+
 LINE_COMMENT_TEXT="//"[^\r\n]*
 BLOCK_COMMENT_TEXT="/*"([^*]|\*+[^*/])*\*+"/"
 
@@ -37,6 +42,9 @@ BLOCK_COMMENT_TEXT="/*"([^*]|\*+[^*/])*\*+"/"
 <YYINITIAL> {
   {WHITE_SPACE}+ { return TokenType.WHITE_SPACE; }
   {EOL}+ { return TokenType.WHITE_SPACE; }
+  
+  // String start - enter STRING_STATE
+  \" { stringStart = zzStartRead; yybegin(STRING_STATE); }
   
   // Comments (must come before operators)
   {LINE_COMMENT_TEXT} { return OpenSCADTypes.LINE_COMMENT; }
@@ -52,6 +60,9 @@ BLOCK_COMMENT_TEXT="/*"([^*]|\*+[^*/])*\*+"/"
   "for" { return OpenSCADTypes.FOR_KW; }
   "intersection_for" { return OpenSCADTypes.INTERSECTION_FOR_KW; }
   "let" { return OpenSCADTypes.LET_KW; }
+  "each" { return OpenSCADTypes.EACH_KW; }
+  "assert" { return OpenSCADTypes.ASSERT_KW; }
+  "echo" { return OpenSCADTypes.ECHO_KW; }
   "true" { return OpenSCADTypes.BOOL_LITERAL; }
   "false" { return OpenSCADTypes.BOOL_LITERAL; }
   "undef" { return OpenSCADTypes.UNDEF_LITERAL; }
@@ -63,13 +74,19 @@ BLOCK_COMMENT_TEXT="/*"([^*]|\*+[^*/])*\*+"/"
   ">=" { return OpenSCADTypes.GE; }
   "&&" { return OpenSCADTypes.AND_AND; }
   "||" { return OpenSCADTypes.OR_OR; }
+  "<<" { return OpenSCADTypes.LSH; }
+  ">>" { return OpenSCADTypes.RSH; }
   ".." { return OpenSCADTypes.DOT_DOT; }
+  "." { return OpenSCADTypes.DOT; }
   
   // Single-character operators and punctuation
   "=" { return OpenSCADTypes.EQ; }
   "<" { return OpenSCADTypes.LT; }
   ">" { return OpenSCADTypes.GT; }
   "!" { return OpenSCADTypes.NOT; }
+  "~" { return OpenSCADTypes.BITNOT; }
+  "|" { return OpenSCADTypes.BITOR; }
+  "&" { return OpenSCADTypes.BITAND; }
   "?" { return OpenSCADTypes.QUESTION; }
   ":" { return OpenSCADTypes.COLON; }
   "+" { return OpenSCADTypes.PLUS; }
@@ -89,10 +106,24 @@ BLOCK_COMMENT_TEXT="/*"([^*]|\*+[^*/])*\*+"/"
   "#" { return OpenSCADTypes.HASH; }
   
   // Literals (must come after keywords)
+  {HEX_NUMBER} { return OpenSCADTypes.NUMBER; }
   {NUMBER} { return OpenSCADTypes.NUMBER; }
-  {STRING} { return OpenSCADTypes.STRING; }
   {IDENT} { return OpenSCADTypes.IDENT; }
   
   // Error fallback
   . { return TokenType.BAD_CHARACTER; }
+}
+
+<STRING_STATE> {
+  // Closing quote - return the complete string
+  \" { yybegin(YYINITIAL); return OpenSCADTypes.STRING; }
+  
+  // Escape sequences (backslash followed by any character)
+  \\[^] { }
+  
+  // Any other character (including newlines and Unicode)
+  [^\\\"]+ { }
+  
+  // Unterminated string at EOF
+  <<EOF>> { yybegin(YYINITIAL); return TokenType.BAD_CHARACTER; }
 }

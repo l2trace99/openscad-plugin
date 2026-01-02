@@ -5,6 +5,40 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-01-01
+
+### Added
+- **Deprecation Warnings** - Highlights deprecated OpenSCAD syntax with warning underlines:
+  - `filename=` parameter (use `file=` instead)
+  - `layername=` parameter (use `layer=` instead)
+  - `triangles=` parameter in polyhedron (use `faces=` instead)
+  - `.amf` file imports (use 3MF instead)
+  - Identifier names starting with digits (e.g., `2D`, `3d_shape`) - deprecated in future OpenSCAD releases
+- **Variable Reassignment Warnings** - Detects when global variables are assigned multiple times, showing original and overwrite locations
+- **`each` Keyword Support** - Full parser support for `each` in list comprehensions
+- **`assert` Statement Support** - Parse and highlight `assert()` statements
+- **`echo` Statement Support** - Parse and highlight `echo()` statements  
+- **Bitwise Operators** - Support for `&`, `|`, `~`, `<<`, `>>` operators
+- **Hex Number Literals** - Support for `0xFF` style hexadecimal numbers
+- **Member Access Operator** - Support for `.` operator (e.g., `vector.x`)
+- **Comprehensive Test Suite** - 37 new unit tests including:
+  - Deprecation and warning detection tests
+  - Lexer tests for new token types
+  - Parser regression tests with real-world OpenSCAD files
+  - Lightweight parser validation
+
+### Fixed
+- **Preview Error Handling** - Preview now clears model on render failure instead of showing stale data
+- **String Lexing** - Improved string literal handling with proper state machine
+- **Scientific Notation** - Numbers like `1e-9` no longer incorrectly flagged as deprecated identifiers
+
+### Technical
+- Scope-aware analysis properly tracks module/function scopes to avoid false positives
+- Comment-aware detection ignores patterns inside `//` and `/* */` comments
+- String-aware detection ignores patterns inside string literals
+- Deduplication logic shows one warning per identifier per line
+- Static caching in annotators for reliable single-pass processing
+
 ## [1.1.2] - 2025-12-29
 
 ### Added

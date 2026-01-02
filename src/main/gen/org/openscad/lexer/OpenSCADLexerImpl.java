@@ -19,6 +19,7 @@ class OpenSCADLexerImpl implements FlexLexer {
 
   /** lexical states */
   public static final int YYINITIAL = 0;
+  public static final int STRING_STATE = 2;
 
   /**
    * ZZ_LEXSTATE[l] is the state in the DFA for the lexical state l
@@ -27,7 +28,7 @@ class OpenSCADLexerImpl implements FlexLexer {
    * l is of the form l = 2*k, k a non negative integer
    */
   private static final int ZZ_LEXSTATE[] = {
-     0, 0
+     0,  0,  1, 1
   };
 
   /**
@@ -64,14 +65,15 @@ class OpenSCADLexerImpl implements FlexLexer {
   private static final int [] ZZ_CMAP_BLOCKS = zzUnpackcmap_blocks();
 
   private static final String ZZ_CMAP_BLOCKS_PACKED_0 =
-    "\11\0\1\1\1\2\1\3\1\4\1\2\22\0\1\1"+
-    "\1\5\1\6\1\7\1\10\1\11\1\12\1\0\1\13"+
-    "\1\14\1\15\1\16\1\17\1\20\1\21\1\22\12\23"+
-    "\1\24\1\25\1\26\1\27\1\30\1\31\1\0\4\32"+
-    "\1\33\25\32\1\34\1\35\1\36\1\37\1\40\1\0"+
-    "\1\41\1\32\1\42\1\43\1\44\1\45\2\32\1\46"+
-    "\2\32\1\47\1\50\1\51\1\52\2\32\1\53\1\54"+
-    "\1\55\1\56\5\32\1\57\1\60\1\61\7\0\1\3"+
+    "\11\0\1\1\1\2\1\3\1\1\1\2\22\0\1\1"+
+    "\1\4\1\5\1\6\1\7\1\10\1\11\1\0\1\12"+
+    "\1\13\1\14\1\15\1\16\1\17\1\20\1\21\1\22"+
+    "\11\23\1\24\1\25\1\26\1\27\1\30\1\31\1\0"+
+    "\4\32\1\33\1\32\21\34\1\35\2\34\1\36\1\37"+
+    "\1\40\1\41\1\42\1\0\1\43\1\32\1\44\1\45"+
+    "\1\46\1\47\1\34\1\50\1\51\2\34\1\52\1\53"+
+    "\1\54\1\55\2\34\1\56\1\57\1\60\1\61\2\34"+
+    "\1\35\2\34\1\62\1\63\1\64\1\65\6\0\1\3"+
     "\u01a2\0\2\3\326\0\u0100\3";
 
   private static int [] zzUnpackcmap_blocks() {
@@ -99,18 +101,19 @@ class OpenSCADLexerImpl implements FlexLexer {
   private static final int [] ZZ_ACTION = zzUnpackAction();
 
   private static final String ZZ_ACTION_PACKED_0 =
-    "\1\0\1\1\2\2\1\3\1\1\1\4\1\1\1\5"+
-    "\1\1\1\6\1\7\1\10\1\11\1\12\1\13\1\1"+
-    "\1\14\1\15\1\16\1\17\1\20\1\21\1\22\1\23"+
-    "\1\24\1\25\1\26\1\27\7\24\1\30\1\1\1\31"+
-    "\1\32\1\0\1\33\1\0\1\34\1\35\1\15\1\0"+
-    "\1\36\1\0\1\37\1\40\1\41\4\24\1\42\6\24"+
-    "\1\43\2\0\1\15\2\24\1\44\3\24\1\45\3\24"+
-    "\1\46\1\47\1\50\4\24\1\51\5\24\1\52\3\24"+
-    "\1\53\1\24\1\54\1\24\1\55\10\24\1\56";
+    "\2\0\1\1\2\2\1\3\1\4\1\5\1\1\1\6"+
+    "\1\7\1\10\1\11\1\12\1\13\1\14\1\15\1\16"+
+    "\1\17\2\20\1\21\1\22\1\23\1\24\1\25\1\26"+
+    "\1\27\1\30\1\31\1\32\10\27\1\33\1\34\1\35"+
+    "\1\36\1\37\1\40\1\0\1\41\1\42\1\43\1\20"+
+    "\1\0\1\44\2\0\1\45\1\46\1\47\1\50\1\51"+
+    "\7\27\1\52\6\27\1\53\1\37\2\0\2\20\5\27"+
+    "\1\54\3\27\1\55\3\27\1\56\1\57\1\27\1\60"+
+    "\1\61\1\62\4\27\1\63\6\27\1\64\1\65\3\27"+
+    "\1\66\1\27\1\67\1\27\1\70\10\27\1\71";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[108];
+    int [] result = new int[128];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -135,23 +138,25 @@ class OpenSCADLexerImpl implements FlexLexer {
   private static final int [] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
-    "\0\0\0\62\0\144\0\226\0\310\0\372\0\62\0\u012c"+
-    "\0\62\0\u015e\0\62\0\62\0\62\0\62\0\62\0\62"+
-    "\0\u0190\0\u01c2\0\u01f4\0\62\0\62\0\u0226\0\u0258\0\u028a"+
-    "\0\62\0\u02bc\0\62\0\62\0\62\0\u02ee\0\u0320\0\u0352"+
-    "\0\u0384\0\u03b6\0\u03e8\0\u041a\0\62\0\u044c\0\62\0\62"+
-    "\0\372\0\62\0\u047e\0\62\0\62\0\u04b0\0\u04e2\0\u0514"+
-    "\0\u0546\0\62\0\62\0\62\0\u0578\0\u05aa\0\u05dc\0\u060e"+
-    "\0\u02bc\0\u0640\0\u0672\0\u06a4\0\u06d6\0\u0708\0\u073a\0\62"+
-    "\0\u076c\0\u079e\0\u079e\0\u07d0\0\u0802\0\u02bc\0\u0834\0\u0866"+
-    "\0\u0898\0\u02bc\0\u08ca\0\u08fc\0\u092e\0\u02bc\0\62\0\u02bc"+
-    "\0\u0960\0\u0992\0\u09c4\0\u09f6\0\u02bc\0\u0a28\0\u0a5a\0\u0a8c"+
-    "\0\u0abe\0\u0af0\0\u02bc\0\u0b22\0\u0b54\0\u0b86\0\u02bc\0\u0bb8"+
-    "\0\u02bc\0\u0bea\0\u02bc\0\u0c1c\0\u0c4e\0\u0c80\0\u0cb2\0\u0ce4"+
-    "\0\u0d16\0\u0d48\0\u0d7a\0\u02bc";
+    "\0\0\0\66\0\154\0\242\0\330\0\u010e\0\154\0\154"+
+    "\0\u0144\0\154\0\u017a\0\154\0\154\0\154\0\154\0\154"+
+    "\0\154\0\u01b0\0\u01e6\0\u021c\0\u0252\0\154\0\154\0\u0288"+
+    "\0\u02be\0\u02f4\0\154\0\u032a\0\154\0\154\0\154\0\u0360"+
+    "\0\u0396\0\u03cc\0\u0402\0\u0438\0\u046e\0\u04a4\0\u04da\0\154"+
+    "\0\u0510\0\154\0\154\0\u0546\0\154\0\u057c\0\154\0\154"+
+    "\0\154\0\u05b2\0\u05e8\0\u061e\0\u0654\0\u068a\0\154\0\154"+
+    "\0\154\0\154\0\154\0\u06c0\0\u06f6\0\u072c\0\u0762\0\u0798"+
+    "\0\u07ce\0\u0804\0\u032a\0\u083a\0\u0870\0\u08a6\0\u08dc\0\u0912"+
+    "\0\u0948\0\154\0\154\0\u097e\0\u09b4\0\u09b4\0\u068a\0\u09ea"+
+    "\0\u0a20\0\u0a56\0\u0a8c\0\u0ac2\0\u032a\0\u0af8\0\u0b2e\0\u0b64"+
+    "\0\u032a\0\u0b9a\0\u0bd0\0\u0c06\0\u032a\0\154\0\u0c3c\0\u032a"+
+    "\0\u032a\0\u032a\0\u0c72\0\u0ca8\0\u0cde\0\u0d14\0\u032a\0\u0d4a"+
+    "\0\u0d80\0\u0db6\0\u0dec\0\u0e22\0\u0e58\0\u032a\0\u032a\0\u0e8e"+
+    "\0\u0ec4\0\u0efa\0\u032a\0\u0f30\0\u032a\0\u0f66\0\u032a\0\u0f9c"+
+    "\0\u0fd2\0\u1008\0\u103e\0\u1074\0\u10aa\0\u10e0\0\u1116\0\u032a";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[108];
+    int [] result = new int[128];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -174,73 +179,85 @@ class OpenSCADLexerImpl implements FlexLexer {
   private static final int [] ZZ_TRANS = zzUnpacktrans();
 
   private static final String ZZ_TRANS_PACKED_0 =
-    "\1\2\1\3\1\4\1\0\1\3\1\5\1\6\1\7"+
-    "\1\10\1\11\1\12\1\13\1\14\1\15\1\16\1\17"+
-    "\1\20\1\21\1\22\1\23\1\24\1\25\1\26\1\27"+
-    "\1\30\1\31\2\32\1\33\1\2\1\34\1\35\4\32"+
-    "\1\36\1\37\1\40\1\41\1\42\4\32\1\43\1\44"+
-    "\1\45\1\46\1\47\63\0\1\3\2\0\1\3\57\0"+
-    "\1\4\106\0\1\50\32\0\2\51\1\0\3\51\1\52"+
-    "\26\51\1\53\24\51\32\0\2\32\4\0\17\32\15\0"+
-    "\1\54\70\0\1\55\1\0\1\56\53\0\1\57\4\0"+
-    "\1\60\60\0\1\56\1\0\1\23\7\0\1\61\10\0"+
-    "\1\61\44\0\1\62\61\0\1\63\61\0\1\64\55\0"+
-    "\1\32\6\0\2\32\4\0\17\32\26\0\1\32\6\0"+
-    "\2\32\4\0\7\32\1\65\7\32\26\0\1\32\6\0"+
-    "\2\32\4\0\1\32\1\66\10\32\1\67\3\32\1\70"+
-    "\26\0\1\32\6\0\2\32\4\0\5\32\1\71\3\32"+
-    "\1\72\5\32\26\0\1\32\6\0\2\32\4\0\4\32"+
-    "\1\73\12\32\26\0\1\32\6\0\2\32\4\0\12\32"+
-    "\1\74\4\32\26\0\1\32\6\0\2\32\4\0\13\32"+
-    "\1\75\3\32\26\0\1\32\6\0\2\32\4\0\11\32"+
-    "\1\76\2\32\1\77\2\32\63\0\1\100\1\0\2\51"+
-    "\3\0\55\51\23\0\1\56\7\0\1\61\10\0\1\61"+
-    "\15\0\15\57\1\101\44\57\2\60\1\0\57\60\16\0"+
-    "\1\102\1\0\1\102\2\0\1\103\61\0\1\32\6\0"+
-    "\2\32\4\0\14\32\1\104\2\32\26\0\1\32\6\0"+
-    "\2\32\4\0\7\32\1\105\7\32\26\0\1\32\6\0"+
-    "\2\32\4\0\13\32\1\106\3\32\26\0\1\32\6\0"+
-    "\2\32\4\0\11\32\1\107\5\32\26\0\1\32\6\0"+
-    "\2\32\4\0\2\32\1\110\12\32\1\111\1\32\26\0"+
-    "\1\32\6\0\2\32\4\0\15\32\1\112\1\32\26\0"+
-    "\1\32\6\0\2\32\4\0\3\32\1\113\13\32\26\0"+
-    "\1\32\6\0\2\32\4\0\16\32\1\114\26\0\1\32"+
-    "\6\0\2\32\4\0\3\32\1\115\13\32\26\0\1\32"+
-    "\6\0\2\32\4\0\4\32\1\116\12\32\3\0\15\57"+
-    "\1\101\4\57\1\117\37\57\23\0\1\103\61\0\1\32"+
-    "\6\0\2\32\4\0\4\32\1\120\12\32\26\0\1\32"+
-    "\6\0\2\32\4\0\14\32\1\114\2\32\26\0\1\32"+
-    "\6\0\2\32\4\0\2\32\1\121\14\32\26\0\1\32"+
-    "\6\0\2\32\4\0\7\32\1\122\7\32\26\0\1\32"+
-    "\6\0\2\32\4\0\4\32\1\123\12\32\26\0\1\32"+
-    "\6\0\2\32\4\0\16\32\1\124\26\0\1\32\6\0"+
-    "\2\32\4\0\4\32\1\125\12\32\26\0\1\32\6\0"+
-    "\2\32\4\0\4\32\1\126\12\32\26\0\1\32\6\0"+
-    "\2\32\4\0\15\32\1\127\1\32\26\0\1\32\6\0"+
-    "\2\32\4\0\16\32\1\130\26\0\1\32\6\0\2\32"+
-    "\4\0\13\32\1\131\3\32\26\0\1\32\6\0\2\32"+
-    "\4\0\7\32\1\132\7\32\26\0\1\32\6\0\2\32"+
-    "\4\0\5\32\1\133\11\32\26\0\1\32\6\0\2\32"+
-    "\4\0\6\32\1\134\10\32\26\0\1\32\6\0\2\32"+
-    "\4\0\3\32\1\135\13\32\26\0\1\32\6\0\2\32"+
-    "\4\0\14\32\1\136\2\32\26\0\1\32\6\0\2\32"+
-    "\4\0\4\32\1\137\12\32\26\0\1\32\6\0\2\32"+
-    "\4\0\12\32\1\140\4\32\26\0\1\32\6\0\2\32"+
-    "\4\0\4\32\1\141\12\32\26\0\1\32\6\0\2\32"+
-    "\4\0\4\32\1\142\12\32\26\0\1\32\6\0\2\32"+
-    "\4\0\11\32\1\143\5\32\26\0\1\32\6\0\2\32"+
-    "\4\0\2\32\1\144\14\32\26\0\1\32\6\0\2\32"+
-    "\4\0\15\32\1\145\1\32\26\0\1\32\6\0\2\32"+
-    "\4\0\6\32\1\146\10\32\26\0\1\32\6\0\2\32"+
-    "\4\0\12\32\1\147\4\32\26\0\1\32\6\0\2\32"+
-    "\4\0\11\32\1\150\5\32\26\0\1\32\6\0\2\32"+
-    "\4\0\1\151\16\32\26\0\1\32\6\0\2\32\4\0"+
-    "\5\32\1\152\11\32\26\0\1\32\6\0\2\32\4\0"+
-    "\12\32\1\153\4\32\26\0\1\32\6\0\2\32\4\0"+
-    "\13\32\1\154\3\32\3\0";
+    "\1\3\1\4\1\5\1\0\1\6\1\7\1\10\1\11"+
+    "\1\12\1\13\1\14\1\15\1\16\1\17\1\20\1\21"+
+    "\1\22\1\23\1\24\1\25\1\26\1\27\1\30\1\31"+
+    "\1\32\1\33\4\34\1\35\1\3\1\36\1\37\1\34"+
+    "\1\40\2\34\1\41\1\42\1\34\1\43\1\44\1\45"+
+    "\4\34\1\46\1\47\1\50\1\51\1\52\1\53\5\54"+
+    "\1\55\31\54\1\56\26\54\67\0\1\4\66\0\1\5"+
+    "\112\0\1\57\70\0\4\34\4\0\20\34\15\0\1\60"+
+    "\74\0\1\61\1\0\2\62\56\0\1\63\4\0\1\64"+
+    "\64\0\1\62\1\0\2\25\7\0\1\65\1\0\1\66"+
+    "\10\0\1\65\37\0\1\62\1\0\2\25\7\0\1\65"+
+    "\12\0\1\65\45\0\1\67\1\70\65\0\1\71\65\0"+
+    "\1\72\1\73\57\0\2\34\6\0\4\34\4\0\20\34"+
+    "\26\0\2\34\6\0\4\34\4\0\15\34\1\74\2\34"+
+    "\26\0\2\34\6\0\4\34\4\0\1\34\1\75\1\76"+
+    "\5\34\1\77\7\34\26\0\2\34\6\0\4\34\4\0"+
+    "\1\34\1\100\11\34\1\101\3\34\1\102\26\0\2\34"+
+    "\6\0\4\34\4\0\5\34\1\103\4\34\1\104\5\34"+
+    "\26\0\2\34\6\0\4\34\4\0\4\34\1\105\13\34"+
+    "\26\0\2\34\6\0\4\34\4\0\13\34\1\106\4\34"+
+    "\26\0\2\34\6\0\4\34\4\0\14\34\1\107\3\34"+
+    "\26\0\2\34\6\0\4\34\4\0\12\34\1\110\2\34"+
+    "\1\111\2\34\67\0\1\112\2\0\5\54\1\0\31\54"+
+    "\1\0\26\54\66\113\22\0\2\62\7\0\1\65\12\0"+
+    "\1\65\17\0\14\63\1\114\51\63\2\64\1\0\63\64"+
+    "\15\0\1\115\1\0\1\115\2\0\2\116\64\0\2\117"+
+    "\6\0\2\117\7\0\5\117\40\0\2\34\6\0\4\34"+
+    "\4\0\15\34\1\120\2\34\26\0\2\34\6\0\4\34"+
+    "\4\0\2\34\1\121\15\34\26\0\2\34\6\0\4\34"+
+    "\4\0\6\34\1\122\11\34\26\0\2\34\6\0\4\34"+
+    "\4\0\15\34\1\123\2\34\26\0\2\34\6\0\4\34"+
+    "\4\0\10\34\1\124\7\34\26\0\2\34\6\0\4\34"+
+    "\4\0\14\34\1\125\3\34\26\0\2\34\6\0\4\34"+
+    "\4\0\12\34\1\126\5\34\26\0\2\34\6\0\4\34"+
+    "\4\0\2\34\1\127\13\34\1\130\1\34\26\0\2\34"+
+    "\6\0\4\34\4\0\16\34\1\131\1\34\26\0\2\34"+
+    "\6\0\4\34\4\0\3\34\1\132\14\34\26\0\2\34"+
+    "\6\0\4\34\4\0\17\34\1\133\26\0\2\34\6\0"+
+    "\4\34\4\0\3\34\1\134\14\34\26\0\2\34\6\0"+
+    "\4\34\4\0\4\34\1\135\13\34\4\0\14\63\1\114"+
+    "\4\63\1\136\44\63\22\0\2\116\64\0\2\34\6\0"+
+    "\4\34\4\0\4\34\1\137\13\34\26\0\2\34\6\0"+
+    "\4\34\4\0\6\34\1\140\11\34\26\0\2\34\6\0"+
+    "\4\34\4\0\13\34\1\141\4\34\26\0\2\34\6\0"+
+    "\4\34\4\0\4\34\1\142\13\34\26\0\2\34\6\0"+
+    "\4\34\4\0\15\34\1\133\2\34\26\0\2\34\6\0"+
+    "\4\34\4\0\2\34\1\143\15\34\26\0\2\34\6\0"+
+    "\4\34\4\0\10\34\1\144\7\34\26\0\2\34\6\0"+
+    "\4\34\4\0\4\34\1\145\13\34\26\0\2\34\6\0"+
+    "\4\34\4\0\17\34\1\146\26\0\2\34\6\0\4\34"+
+    "\4\0\4\34\1\147\13\34\26\0\2\34\6\0\4\34"+
+    "\4\0\4\34\1\150\13\34\26\0\2\34\6\0\4\34"+
+    "\4\0\14\34\1\151\3\34\26\0\2\34\6\0\4\34"+
+    "\4\0\16\34\1\152\1\34\26\0\2\34\6\0\4\34"+
+    "\4\0\17\34\1\153\26\0\2\34\6\0\4\34\4\0"+
+    "\14\34\1\154\3\34\26\0\2\34\6\0\4\34\4\0"+
+    "\10\34\1\155\7\34\26\0\2\34\6\0\4\34\4\0"+
+    "\5\34\1\156\12\34\26\0\2\34\6\0\4\34\4\0"+
+    "\16\34\1\157\1\34\26\0\2\34\6\0\4\34\4\0"+
+    "\7\34\1\160\10\34\26\0\2\34\6\0\4\34\4\0"+
+    "\3\34\1\161\14\34\26\0\2\34\6\0\4\34\4\0"+
+    "\15\34\1\162\2\34\26\0\2\34\6\0\4\34\4\0"+
+    "\4\34\1\163\13\34\26\0\2\34\6\0\4\34\4\0"+
+    "\13\34\1\164\4\34\26\0\2\34\6\0\4\34\4\0"+
+    "\4\34\1\165\13\34\26\0\2\34\6\0\4\34\4\0"+
+    "\4\34\1\166\13\34\26\0\2\34\6\0\4\34\4\0"+
+    "\12\34\1\167\5\34\26\0\2\34\6\0\4\34\4\0"+
+    "\2\34\1\170\15\34\26\0\2\34\6\0\4\34\4\0"+
+    "\16\34\1\171\1\34\26\0\2\34\6\0\4\34\4\0"+
+    "\7\34\1\172\10\34\26\0\2\34\6\0\4\34\4\0"+
+    "\13\34\1\173\4\34\26\0\2\34\6\0\4\34\4\0"+
+    "\12\34\1\174\5\34\26\0\2\34\6\0\4\34\4\0"+
+    "\1\175\17\34\26\0\2\34\6\0\4\34\4\0\5\34"+
+    "\1\176\12\34\26\0\2\34\6\0\4\34\4\0\13\34"+
+    "\1\177\4\34\26\0\2\34\6\0\4\34\4\0\14\34"+
+    "\1\200\3\34\4\0";
 
   private static int [] zzUnpacktrans() {
-    int [] result = new int[3500];
+    int [] result = new int[4428];
     int offset = 0;
     offset = zzUnpacktrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -278,14 +295,14 @@ class OpenSCADLexerImpl implements FlexLexer {
   private static final int [] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-    "\1\0\1\11\4\1\1\11\1\1\1\11\1\1\6\11"+
-    "\3\1\2\11\3\1\1\11\1\1\3\11\7\1\1\11"+
-    "\1\1\2\11\1\0\1\11\1\0\2\11\1\1\1\0"+
-    "\1\1\1\0\3\11\13\1\1\11\2\0\14\1\1\11"+
-    "\35\1";
+    "\2\0\1\11\3\1\2\11\1\1\1\11\1\1\6\11"+
+    "\4\1\2\11\3\1\1\11\1\1\3\11\10\1\1\11"+
+    "\1\1\2\11\1\1\1\11\1\0\3\11\1\1\1\0"+
+    "\1\1\2\0\5\11\16\1\2\11\2\0\20\1\1\11"+
+    "\42\1";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[108];
+    int [] result = new int[128];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -355,6 +372,8 @@ class OpenSCADLexerImpl implements FlexLexer {
   public OpenSCADLexerImpl() {
     this((java.io.Reader)null);
   }
+  
+  private int stringStart;
 
 
   /**
@@ -607,7 +626,14 @@ class OpenSCADLexerImpl implements FlexLexer {
       if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
         zzAtEOF = true;
             zzDoEOF();
+            switch (zzLexicalState) {
+            case STRING_STATE: {
+              yybegin(YYINITIAL); return TokenType.BAD_CHARACTER;
+            }  // fall though
+            case 129: break;
+            default:
         return null;
+        }
       }
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
@@ -615,232 +641,287 @@ class OpenSCADLexerImpl implements FlexLexer {
             { return TokenType.BAD_CHARACTER;
             }
           // fall through
-          case 47: break;
+          case 58: break;
           case 2:
             { return TokenType.WHITE_SPACE;
             }
           // fall through
-          case 48: break;
+          case 59: break;
           case 3:
             { return OpenSCADTypes.NOT;
             }
           // fall through
-          case 49: break;
-          case 4:
-            { return OpenSCADTypes.HASH;
-            }
-          // fall through
-          case 50: break;
-          case 5:
-            { return OpenSCADTypes.MOD;
-            }
-          // fall through
-          case 51: break;
-          case 6:
-            { return OpenSCADTypes.LPAREN;
-            }
-          // fall through
-          case 52: break;
-          case 7:
-            { return OpenSCADTypes.RPAREN;
-            }
-          // fall through
-          case 53: break;
-          case 8:
-            { return OpenSCADTypes.MUL;
-            }
-          // fall through
-          case 54: break;
-          case 9:
-            { return OpenSCADTypes.PLUS;
-            }
-          // fall through
-          case 55: break;
-          case 10:
-            { return OpenSCADTypes.COMMA;
-            }
-          // fall through
-          case 56: break;
-          case 11:
-            { return OpenSCADTypes.MINUS;
-            }
-          // fall through
-          case 57: break;
-          case 12:
-            { return OpenSCADTypes.DIV;
-            }
-          // fall through
-          case 58: break;
-          case 13:
-            { return OpenSCADTypes.NUMBER;
-            }
-          // fall through
-          case 59: break;
-          case 14:
-            { return OpenSCADTypes.COLON;
-            }
-          // fall through
           case 60: break;
-          case 15:
-            { return OpenSCADTypes.SEMICOLON;
+          case 4:
+            { stringStart = zzStartRead; yybegin(STRING_STATE);
             }
           // fall through
           case 61: break;
-          case 16:
-            { return OpenSCADTypes.LT;
+          case 5:
+            { return OpenSCADTypes.HASH;
             }
           // fall through
           case 62: break;
-          case 17:
-            { return OpenSCADTypes.EQ;
+          case 6:
+            { return OpenSCADTypes.MOD;
             }
           // fall through
           case 63: break;
-          case 18:
-            { return OpenSCADTypes.GT;
+          case 7:
+            { return OpenSCADTypes.BITAND;
             }
           // fall through
           case 64: break;
-          case 19:
-            { return OpenSCADTypes.QUESTION;
+          case 8:
+            { return OpenSCADTypes.LPAREN;
             }
           // fall through
           case 65: break;
-          case 20:
-            { return OpenSCADTypes.IDENT;
+          case 9:
+            { return OpenSCADTypes.RPAREN;
             }
           // fall through
           case 66: break;
-          case 21:
-            { return OpenSCADTypes.LBRACKET;
+          case 10:
+            { return OpenSCADTypes.MUL;
             }
           // fall through
           case 67: break;
-          case 22:
-            { return OpenSCADTypes.RBRACKET;
+          case 11:
+            { return OpenSCADTypes.PLUS;
             }
           // fall through
           case 68: break;
-          case 23:
-            { return OpenSCADTypes.POW;
+          case 12:
+            { return OpenSCADTypes.COMMA;
             }
           // fall through
           case 69: break;
-          case 24:
-            { return OpenSCADTypes.LBRACE;
+          case 13:
+            { return OpenSCADTypes.MINUS;
             }
           // fall through
           case 70: break;
-          case 25:
-            { return OpenSCADTypes.RBRACE;
+          case 14:
+            { return OpenSCADTypes.DOT;
             }
           // fall through
           case 71: break;
-          case 26:
-            { return OpenSCADTypes.NOT_EQ;
+          case 15:
+            { return OpenSCADTypes.DIV;
             }
           // fall through
           case 72: break;
-          case 27:
-            { return OpenSCADTypes.STRING;
+          case 16:
+            { return OpenSCADTypes.NUMBER;
             }
           // fall through
           case 73: break;
-          case 28:
-            { return OpenSCADTypes.AND_AND;
+          case 17:
+            { return OpenSCADTypes.COLON;
             }
           // fall through
           case 74: break;
-          case 29:
-            { return OpenSCADTypes.DOT_DOT;
+          case 18:
+            { return OpenSCADTypes.SEMICOLON;
             }
           // fall through
           case 75: break;
-          case 30:
-            { return OpenSCADTypes.LINE_COMMENT;
+          case 19:
+            { return OpenSCADTypes.LT;
             }
           // fall through
           case 76: break;
-          case 31:
-            { return OpenSCADTypes.LE;
+          case 20:
+            { return OpenSCADTypes.EQ;
             }
           // fall through
           case 77: break;
-          case 32:
-            { return OpenSCADTypes.EQ_EQ;
+          case 21:
+            { return OpenSCADTypes.GT;
             }
           // fall through
           case 78: break;
-          case 33:
-            { return OpenSCADTypes.GE;
+          case 22:
+            { return OpenSCADTypes.QUESTION;
             }
           // fall through
           case 79: break;
-          case 34:
-            { return OpenSCADTypes.IF_KW;
+          case 23:
+            { return OpenSCADTypes.IDENT;
             }
           // fall through
           case 80: break;
-          case 35:
-            { return OpenSCADTypes.OR_OR;
+          case 24:
+            { return OpenSCADTypes.LBRACKET;
             }
           // fall through
           case 81: break;
-          case 36:
-            { return OpenSCADTypes.FOR_KW;
+          case 25:
+            { return OpenSCADTypes.RBRACKET;
             }
           // fall through
           case 82: break;
-          case 37:
-            { return OpenSCADTypes.LET_KW;
+          case 26:
+            { return OpenSCADTypes.POW;
             }
           // fall through
           case 83: break;
-          case 38:
-            { return OpenSCADTypes.USE_KW;
+          case 27:
+            { return OpenSCADTypes.LBRACE;
             }
           // fall through
           case 84: break;
-          case 39:
-            { return OpenSCADTypes.BLOCK_COMMENT;
+          case 28:
+            { return OpenSCADTypes.BITOR;
             }
           // fall through
           case 85: break;
-          case 40:
-            { return OpenSCADTypes.ELSE_KW;
+          case 29:
+            { return OpenSCADTypes.RBRACE;
             }
           // fall through
           case 86: break;
-          case 41:
-            { return OpenSCADTypes.BOOL_LITERAL;
+          case 30:
+            { return OpenSCADTypes.BITNOT;
             }
           // fall through
           case 87: break;
-          case 42:
-            { return OpenSCADTypes.UNDEF_LITERAL;
+          case 31:
+            { 
             }
           // fall through
           case 88: break;
-          case 43:
-            { return OpenSCADTypes.MODULE_KW;
+          case 32:
+            { yybegin(YYINITIAL); return OpenSCADTypes.STRING;
             }
           // fall through
           case 89: break;
-          case 44:
-            { return OpenSCADTypes.INCLUDE_KW;
+          case 33:
+            { return OpenSCADTypes.NOT_EQ;
             }
           // fall through
           case 90: break;
-          case 45:
-            { return OpenSCADTypes.FUNCTION_KW;
+          case 34:
+            { return OpenSCADTypes.AND_AND;
             }
           // fall through
           case 91: break;
-          case 46:
-            { return OpenSCADTypes.INTERSECTION_FOR_KW;
+          case 35:
+            { return OpenSCADTypes.DOT_DOT;
             }
           // fall through
           case 92: break;
+          case 36:
+            { return OpenSCADTypes.LINE_COMMENT;
+            }
+          // fall through
+          case 93: break;
+          case 37:
+            { return OpenSCADTypes.LSH;
+            }
+          // fall through
+          case 94: break;
+          case 38:
+            { return OpenSCADTypes.LE;
+            }
+          // fall through
+          case 95: break;
+          case 39:
+            { return OpenSCADTypes.EQ_EQ;
+            }
+          // fall through
+          case 96: break;
+          case 40:
+            { return OpenSCADTypes.GE;
+            }
+          // fall through
+          case 97: break;
+          case 41:
+            { return OpenSCADTypes.RSH;
+            }
+          // fall through
+          case 98: break;
+          case 42:
+            { return OpenSCADTypes.IF_KW;
+            }
+          // fall through
+          case 99: break;
+          case 43:
+            { return OpenSCADTypes.OR_OR;
+            }
+          // fall through
+          case 100: break;
+          case 44:
+            { return OpenSCADTypes.FOR_KW;
+            }
+          // fall through
+          case 101: break;
+          case 45:
+            { return OpenSCADTypes.LET_KW;
+            }
+          // fall through
+          case 102: break;
+          case 46:
+            { return OpenSCADTypes.USE_KW;
+            }
+          // fall through
+          case 103: break;
+          case 47:
+            { return OpenSCADTypes.BLOCK_COMMENT;
+            }
+          // fall through
+          case 104: break;
+          case 48:
+            { return OpenSCADTypes.EACH_KW;
+            }
+          // fall through
+          case 105: break;
+          case 49:
+            { return OpenSCADTypes.ECHO_KW;
+            }
+          // fall through
+          case 106: break;
+          case 50:
+            { return OpenSCADTypes.ELSE_KW;
+            }
+          // fall through
+          case 107: break;
+          case 51:
+            { return OpenSCADTypes.BOOL_LITERAL;
+            }
+          // fall through
+          case 108: break;
+          case 52:
+            { return OpenSCADTypes.UNDEF_LITERAL;
+            }
+          // fall through
+          case 109: break;
+          case 53:
+            { return OpenSCADTypes.ASSERT_KW;
+            }
+          // fall through
+          case 110: break;
+          case 54:
+            { return OpenSCADTypes.MODULE_KW;
+            }
+          // fall through
+          case 111: break;
+          case 55:
+            { return OpenSCADTypes.INCLUDE_KW;
+            }
+          // fall through
+          case 112: break;
+          case 56:
+            { return OpenSCADTypes.FUNCTION_KW;
+            }
+          // fall through
+          case 113: break;
+          case 57:
+            { return OpenSCADTypes.INTERSECTION_FOR_KW;
+            }
+          // fall through
+          case 114: break;
           default:
             zzScanError(ZZ_NO_MATCH);
           }
