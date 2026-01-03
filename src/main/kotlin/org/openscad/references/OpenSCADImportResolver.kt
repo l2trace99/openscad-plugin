@@ -105,13 +105,8 @@ object OpenSCADImportResolver {
             // Settings not available, continue with common paths
         }
         
-        // Then add common library locations
-        allPaths.addAll(listOf(
-            "/usr/share/openscad/libraries",
-            "/usr/local/share/openscad/libraries",
-            System.getProperty("user.home") + "/.local/share/OpenSCAD/libraries",
-            System.getProperty("user.home") + "/Documents/OpenSCAD/libraries"
-        ))
+        // Then add common library locations based on OS
+        allPaths.addAll(org.openscad.util.OpenSCADPathUtils.getCommonLibraryPaths())
         
         for (libPath in allPaths) {
             val libDir = LocalFileSystem.getInstance().findFileByPath(libPath)

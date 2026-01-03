@@ -42,6 +42,9 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
     private val libraryPathsField = JBTextArea()
     private val libraryPathsScrollPane = JBScrollPane(libraryPathsField)
     
+    // Temp directory
+    private val tempDirectoryField = TextFieldWithBrowseButton()
+    
     private var modified = false
     
     init {
@@ -60,6 +63,17 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         libraryPathsField.rows = 5
         libraryPathsField.lineWrap = false
         libraryPathsScrollPane.preferredSize = java.awt.Dimension(400, 100)
+        
+        // Setup file chooser for temp directory
+        val tempDirDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor()
+            .withTitle("Select Temp Directory")
+            .withDescription("Choose a directory for temporary render files (leave empty for default)")
+        tempDirectoryField.addActionListener {
+            val file = FileChooser.chooseFile(tempDirDescriptor, project, null)
+            if (file != null) {
+                tempDirectoryField.text = file.path
+            }
+        }
         
         openscadPathField.textField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
             override fun insertUpdate(e: javax.swing.event.DocumentEvent?) { modified = true }
@@ -117,6 +131,9 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             .addSeparator()
             .addLabeledComponent(JBLabel("Library Paths (one per line):"), libraryPathsScrollPane, 1, true)
             .addTooltip("Additional directories to search for OpenSCAD libraries (added to OPENSCADPATH)")
+            .addSeparator()
+            .addLabeledComponent(JBLabel("Temp directory for renders:"), tempDirectoryField, 1, false)
+            .addTooltip("Custom directory for temporary render files. Leave empty to use system default (Linux uses ~/.cache for Flatpak compatibility)")
             .addComponentFillVertically(JPanel(), 0)
             .panel
         
@@ -138,7 +155,8 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
                 showGridCheckbox.isSelected != settings.showGrid ||
                 gridSizeField.text != settings.gridSize.toString() ||
                 gridSpacingField.text != settings.gridSpacing.toString() ||
-                currentLibPaths != settings.libraryPaths
+                currentLibPaths != settings.libraryPaths ||
+                tempDirectoryField.text != settings.customTempDirectory
     }
     
     override fun apply() {
@@ -158,6 +176,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             .filter { it.isNotBlank() }
             .map { it.trim() }
             .toMutableList()
+        settings.customTempDirectory = tempDirectoryField.text.trim()
         
         // Re-index libraries if paths changed
         if (oldLibraryPaths != settings.libraryPaths) {
@@ -179,6 +198,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         gridSizeField.text = settings.gridSize.toString()
         gridSpacingField.text = settings.gridSpacing.toString()
         libraryPathsField.text = settings.libraryPaths.joinToString("\n")
+        tempDirectoryField.text = settings.customTempDirectory
         modified = false
     }
 }

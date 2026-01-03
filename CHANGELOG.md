@@ -5,6 +5,25 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-01-02
+
+### Added
+- **Custom Temp Directory Setting** - Configure custom directory for render temp files in Settings → Tools → OpenSCAD
+- **Automatic Temp Cleanup** - Old preview temp directories are automatically deleted in background when creating new renders
+
+### Fixed
+- **Windows Compatibility** - OS-independent library paths now properly support Windows:
+  - `%USERPROFILE%\Documents\OpenSCAD\libraries`
+  - `%PROGRAMFILES%\OpenSCAD\libraries`
+  - `%PROGRAMFILES(X86)%\OpenSCAD\libraries`
+- **Windows OpenSCAD Detection** - Uses `where` command instead of `which` on Windows to find OpenSCAD in PATH
+- **Linux Flatpak Compatibility** - Temp directory uses `~/.cache/openscad-plugin/` on Linux instead of `/tmp/` to support sandboxed Flatpak OpenSCAD installations
+
+### Technical
+- Refactored OS-specific library paths into `OpenSCADPathUtils` utility class
+- Added `isWindows()` and `isLinux()` helper functions
+- Centralized temp directory creation with `createTempDirectory()` helper
+
 ## [1.2.0] - 2026-01-01
 
 ### Added

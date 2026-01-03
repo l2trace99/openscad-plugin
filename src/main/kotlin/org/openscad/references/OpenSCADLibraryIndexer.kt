@@ -135,15 +135,8 @@ class OpenSCADLibraryIndexer(private val project: Project) {
             }
         }
         
-        // Add common OpenSCAD library locations
-        val commonPaths = listOf(
-            "/usr/share/openscad/libraries",
-            "/usr/local/share/openscad/libraries",
-            System.getProperty("user.home") + "/.local/share/OpenSCAD/libraries",
-            System.getProperty("user.home") + "/Documents/OpenSCAD/libraries"
-        )
-        
-        paths.addAll(commonPaths.filter { File(it).exists() })
+        // Add common OpenSCAD library locations based on OS
+        paths.addAll(org.openscad.util.OpenSCADPathUtils.getExistingLibraryPaths())
         
         return paths.distinct()
     }

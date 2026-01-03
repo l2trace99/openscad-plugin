@@ -56,9 +56,9 @@ class OpenSCADRenderer(private val project: Project) {
             // Use project root as working directory so relative paths work
             val workDir = project.basePath ?: scadFile.parent.path
             
-            // Output file (absolute path)
+            // Output file (absolute path) - use toAbsolutePath to ensure OpenSCAD can resolve it
             params.add("-o")
-            params.add(stlPath.toString())
+            params.add(stlPath.toAbsolutePath().toString())
             
             // Input file - use relative path if in project, otherwise absolute
             val inputPath = if (project.basePath != null && scadFile.path.startsWith(project.basePath!!)) {
@@ -167,15 +167,8 @@ class OpenSCADRenderer(private val project: Project) {
             paths.add(projectLibDir.absolutePath)
         }
         
-        // Add common OpenSCAD library locations
-        val commonPaths = listOf(
-            "/usr/share/openscad/libraries",
-            "/usr/local/share/openscad/libraries",
-            System.getProperty("user.home") + "/.local/share/OpenSCAD/libraries",
-            System.getProperty("user.home") + "/Documents/OpenSCAD/libraries"
-        )
-        
-        paths.addAll(commonPaths.filter { File(it).exists() })
+        // Add common OpenSCAD library locations based on OS
+        paths.addAll(org.openscad.util.OpenSCADPathUtils.getExistingLibraryPaths())
         
         // Join with platform-specific path separator
         return paths.joinToString(File.pathSeparator)
@@ -221,11 +214,16 @@ class OpenSCADRenderer(private val project: Project) {
             }
         }
         
-        // Try PATH
+        // Try PATH using OS-appropriate command
         try {
-            val result = ExecUtil.execAndGetOutput(GeneralCommandLine("which", "openscad"), 5000)
+            val findCommand = if (org.openscad.util.OpenSCADPathUtils.isWindows()) {
+                GeneralCommandLine("where", "openscad")
+            } else {
+                GeneralCommandLine("which", "openscad")
+            }
+            val result = ExecUtil.execAndGetOutput(findCommand, 5000)
             if (result.exitCode == 0) {
-                return result.stdout.trim()
+                return result.stdout.trim().lines().firstOrNull()?.trim()
             }
         } catch (e: Exception) {
             // Ignore
@@ -238,7 +236,14 @@ class OpenSCADRenderer(private val project: Project) {
      * Creates a temporary path for the STL output
      */
     private fun createTempSTLPath(baseName: String): Path {
-        val tempDir = Files.createTempDirectory("openscad-preview")
+        val settings = org.openscad.settings.OpenSCADSettings.getInstance(project)
+        val tempDir = org.openscad.util.OpenSCADPathUtils.createTempDirectory("openscad-preview", settings.customTempDirectory)
+        // Ensure the directory exists and is accessible
+        if (!Files.exists(tempDir) || !Files.isDirectory(tempDir)) {
+            logger.error("Failed to create temp directory: $tempDir")
+            throw IllegalStateException("Could not create temp directory for rendering")
+        }
+        logger.info("Created temp directory: $tempDir")
         return tempDir.resolve("$baseName.stl")
     }
     
@@ -261,11 +266,17 @@ class OpenSCADRenderer(private val project: Project) {
             return null
         }
         
-        val tempDir = Files.createTempDirectory("openscad-preview")
+        val settings = org.openscad.settings.OpenSCADSettings.getInstance(project)
+        val tempDir = org.openscad.util.OpenSCADPathUtils.createTempDirectory("openscad-preview", settings.customTempDirectory)
+        // Ensure the directory exists and is accessible
+        if (!Files.exists(tempDir) || !Files.isDirectory(tempDir)) {
+            logger.error("Failed to create temp directory: $tempDir")
+            return null
+        }
+        logger.info("Created temp directory for PNG: $tempDir")
         val pngPath = tempDir.resolve("${scadFile.nameWithoutExtension}.png")
         
         try {
-            val settings = org.openscad.settings.OpenSCADSettings.getInstance(project)
             
             val params = mutableListOf<String>()
             
@@ -295,9 +306,9 @@ class OpenSCADRenderer(private val project: Project) {
                 params.add("0,0,0,${cameraParams.rotX},${cameraParams.rotY},${cameraParams.rotZ},${cameraParams.distance}")
             }
             
-            // Output file
+            // Output file (absolute path)
             params.add("-o")
-            params.add(pngPath.toString())
+            params.add(pngPath.toAbsolutePath().toString())
             
             // Use project root as working directory
             val workDir = project.basePath ?: scadFile.parent.path
