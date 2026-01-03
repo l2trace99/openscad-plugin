@@ -13,8 +13,9 @@ Support this project by buying me a coffee!
 
 ## Features
 
-- ✅ **Syntax Highlighting** - Full OpenSCAD language support
+- ✅ **Syntax Highlighting** - Full OpenSCAD language support with trailing comma support
 - ✅ **Code Intelligence** - Autocomplete, go-to-definition, find usages
+- ✅ **Rename Refactoring** - Rename modules and functions with automatic reference updates (Shift+F6)
 - ✅ **3D Preview** - Real-time STL preview with wireframe/solid rendering
 - ✅ **Split Editor** - Code and preview side-by-side
 - ✅ **Auto-render** - Automatic preview updates on save
@@ -24,6 +25,7 @@ Support this project by buying me a coffee!
 - ✅ **Library Path Support** - Configure external library paths
 - ✅ **Library Indexing** - Autocomplete symbols from library files
 - ✅ **Error Reporting** - OpenSCAD errors shown in IDE notifications
+- ✅ **Cross-Platform** - Windows, macOS, and Linux support (including Flatpak)
 
 ## Installation
 
@@ -39,8 +41,37 @@ Support this project by buying me a coffee!
 **Settings** → **Tools** → **OpenSCAD**
 - Set custom OpenSCAD executable path
 - Configure library paths (one per line)
+- Configure custom temp directory (see below)
 - Enable auto-render on save
 - Set rendering options
+
+### Custom Temp Directory (Flatpak/Sandbox Support)
+
+If you're using OpenSCAD installed via Flatpak or another sandboxed environment, OpenSCAD may not have access to the system's default temp directory (`/tmp`). This causes preview rendering to fail.
+
+**To fix this:**
+1. Go to **Settings** → **Tools** → **OpenSCAD**
+2. Set **Custom Temp Directory** to a path that OpenSCAD can access, for example:
+   - `~/.cache/openscad-plugin/` (recommended for Linux)
+   - Any directory within your home folder
+
+The plugin will create this directory automatically if it doesn't exist.
+
+**Note:** On Linux, the plugin automatically uses `~/.cache/openscad-plugin/` as the default temp directory to support Flatpak installations.
+
+### Rename Refactoring
+
+Rename modules and functions with automatic reference updates:
+
+1. Place cursor on a module or function name
+2. Press **Shift+F6** (or right-click → **Refactor** → **Rename**)
+3. Enter the new name
+4. All usages are automatically updated
+
+**Name validation:**
+- Names must start with a letter or underscore
+- Names can only contain letters, digits, and underscores
+- OpenSCAD keywords (`module`, `function`, `if`, `for`, etc.) cannot be used as names
 
 ### Create New File
 

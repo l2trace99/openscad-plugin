@@ -13,8 +13,9 @@
         
         <h2>Features</h2>
         <ul>
-            <li><b>Syntax Highlighting</b> - Full OpenSCAD language support with color coding</li>
+            <li><b>Syntax Highlighting</b> - Full OpenSCAD language support with trailing comma support</li>
             <li><b>Code Intelligence</b> - Autocomplete, go-to-definition, find usages</li>
+            <li><b>Rename Refactoring</b> - Rename modules and functions with automatic reference updates (Shift+F6)</li>
             <li><b>Library Autocomplete</b> - Autocomplete for external library modules/functions with auto-insert of <code>use</code> statements</li>
             <li><b>3D Preview</b> - Real-time STL preview with wireframe/solid rendering</li>
             <li><b>Debug Preview</b> - PNG preview showing debug modifiers (<code>#</code>, <code>%</code>, <code>!</code>, <code>*</code>) with proper colors</li>
@@ -27,6 +28,7 @@
             <li><b>Library Path Support</b> - Configure external library paths (OPENSCADPATH)</li>
             <li><b>Error Reporting</b> - OpenSCAD errors shown in IDE notifications</li>
             <li><b>File Templates</b> - Quick start with Empty, 3D Model, or 2D Shape templates</li>
+            <li><b>Cross-Platform</b> - Windows, macOS, and Linux support (including Flatpak)</li>
         </ul>
         
         <h2>System Requirements</h2>
@@ -79,7 +81,22 @@
             <li><b>Auto-render on Save</b>: Automatically update preview when file is saved</li>
         </ul>
         
+        <h3>Custom Temp Directory (Flatpak/Sandbox Support)</h3>
+        <ul>
+            <li><b>Purpose</b>: Required for sandboxed OpenSCAD installations (Flatpak) that cannot access <code>/tmp</code></li>
+            <li><b>Recommended</b>: <code>~/.cache/openscad-plugin/</code> for Linux</li>
+            <li><b>Note</b>: On Linux, the plugin automatically uses <code>~/.cache/openscad-plugin/</code> as the default</li>
+        </ul>
+        
         <h2>Usage Guide</h2>
+        
+        <h3>Rename Refactoring</h3>
+        <ol>
+            <li>Place cursor on a module or function name</li>
+            <li>Press <b>Shift+F6</b> (or right-click → Refactor → Rename)</li>
+            <li>Enter the new name - all usages are automatically updated</li>
+        </ol>
+        <p><b>Name validation:</b> Names must start with a letter or underscore, contain only letters/digits/underscores, and cannot be OpenSCAD keywords.</p>
         
         <h3>Creating New Files</h3>
         <ol>
@@ -200,6 +217,11 @@
         <gotoDeclarationHandler implementation="org.openscad.references.OpenSCADGotoDeclarationHandler"/>
         <lang.findUsagesProvider language="OpenSCAD" implementationClass="org.openscad.findusages.OpenSCADFindUsagesProvider"/>
         <lang.documentationProvider language="OpenSCAD" implementationClass="org.openscad.documentation.OpenSCADDocumentationProvider"/>
+        
+        <!-- Rename refactoring support -->
+        <lang.namesValidator language="OpenSCAD" implementationClass="org.openscad.refactoring.OpenSCADNamesValidator"/>
+        <renameInputValidator implementation="org.openscad.refactoring.OpenSCADRenameInputValidator"/>
+        <referencesSearch implementation="org.openscad.references.OpenSCADReferencesSearcher"/>
         
         <!-- Editor features -->
         <lang.braceMatcher language="OpenSCAD" implementationClass="org.openscad.editor.OpenSCADBraceMatcher"/>

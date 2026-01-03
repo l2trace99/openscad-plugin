@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Custom Temp Directory Setting** - Configure custom directory for render temp files in Settings → Tools → OpenSCAD
 - **Automatic Temp Cleanup** - Old preview temp directories are automatically deleted in background when creating new renders
+- **Rename Refactoring** - Full support for Refactor → Rename (Shift+F6):
+  - Rename modules and functions with automatic reference updates
+  - Name validation prevents invalid identifiers (must start with letter/underscore)
+  - Rejects OpenSCAD keywords as names
+  - Custom error messages for invalid rename attempts
 
 ### Fixed
 - **Windows Compatibility** - OS-independent library paths now properly support Windows:

@@ -25,6 +25,63 @@ class OpenSCADReference(element: PsiElement, textRange: TextRange) :
         return if (results.size == 1) results[0].element else null
     }
     
+    override fun isReferenceTo(element: PsiElement): Boolean {
+        // Check if this reference refers to the given element
+        val resolved = resolve() ?: return false
+        
+        // Direct match
+        if (resolved == element) return true
+        
+        // Check by name and type for declarations
+        if (element is OpenSCADModuleDeclaration || element is OpenSCADFunctionDeclaration) {
+            val elementName = (element as? com.intellij.psi.PsiNamedElement)?.name
+            if (elementName == referenceName && resolved.isEquivalentTo(element)) {
+                return true
+            }
+        }
+        
+        // Check if resolved element is equivalent
+        return resolved.isEquivalentTo(element)
+    }
+    
+    override fun handleElementRename(newElementName: String): PsiElement {
+        // Create a new identifier element with the new name
+        val factory = PsiFileFactory.getInstance(element.project)
+        val dummyFile = factory.createFileFromText(
+            "dummy.scad",
+            OpenSCADLanguage.INSTANCE,
+            "module $newElementName() {}"
+        )
+        
+        // Find the identifier in the dummy file
+        val newIdent = findIdentifierInTree(dummyFile)
+        
+        return if (newIdent != null) {
+            element.replace(newIdent)
+        } else {
+            element
+        }
+    }
+    
+    private fun findIdentifierInTree(element: PsiElement): PsiElement? {
+        if (element.node?.elementType == OpenSCADTypes.IDENT) {
+            return element
+        }
+        for (child in element.children) {
+            val result = findIdentifierInTree(child)
+            if (result != null) return result
+        }
+        // Also check leaf elements
+        var leaf = element.firstChild
+        while (leaf != null) {
+            if (leaf.node?.elementType == OpenSCADTypes.IDENT) {
+                return leaf
+            }
+            leaf = leaf.nextSibling
+        }
+        return null
+    }
+    
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val file = element.containingFile ?: return emptyArray()
         val project = element.project
