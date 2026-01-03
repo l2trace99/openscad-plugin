@@ -573,6 +573,72 @@ class ParserRegressionTest {
         )
     }
 
+    // ========== Trailing Commas (Issue #12) ==========
+    
+    @Test
+    fun testTrailingCommaInVector() {
+        assertNoParserErrors(
+            "x = [1, 2, 3,];",
+            "Trailing comma in vector literal"
+        )
+    }
+    
+    @Test
+    fun testTrailingCommaInFunctionArguments() {
+        assertNoParserErrors(
+            "cube(size=10,);",
+            "Trailing comma in function arguments"
+        )
+    }
+    
+    @Test
+    fun testTrailingCommaInFunctionParameters() {
+        assertNoParserErrors(
+            "function f(a, b,) = a + b;",
+            "Trailing comma in function parameters"
+        )
+    }
+    
+    @Test
+    fun testTrailingCommaInModuleParameters() {
+        assertNoParserErrors(
+            "module m(x, y,) { cube(x); }",
+            "Trailing comma in module parameters"
+        )
+    }
+    
+    @Test
+    fun testTrailingCommaInModuleCall() {
+        assertNoParserErrors(
+            "translate([1, 2, 3,]) cube(10);",
+            "Trailing comma in module call arguments"
+        )
+    }
+    
+    @Test
+    fun testTrailingCommaInNestedVector() {
+        assertNoParserErrors(
+            "x = [[1, 2,], [3, 4,],];",
+            "Trailing commas in nested vectors"
+        )
+    }
+    
+    @Test
+    fun testTrailingCommaInForBinding() {
+        assertNoParserErrors(
+            "for(i=[0:5], j=[0:3],) cube([i, j, 1]);",
+            "Trailing comma in for loop bindings"
+        )
+    }
+    
+    @Test
+    fun testTrailingCommaInLetAssignments() {
+        assertNoParserErrors(
+            "x = let(a=1, b=2,) a + b;",
+            "Trailing comma in let assignments"
+        )
+    }
+
     // ========== Parser Validation Helper ==========
     
     private fun assertNoParserErrors(code: String, description: String) {
