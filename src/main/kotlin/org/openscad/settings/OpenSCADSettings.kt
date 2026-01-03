@@ -31,6 +31,9 @@ class OpenSCADSettings : PersistentStateComponent<OpenSCADSettings> {
     // Library paths
     var libraryPaths: MutableList<String> = mutableListOf()
     
+    // Custom temp directory (empty = use system default, with Linux Flatpak-friendly fallback)
+    var customTempDirectory: String = ""
+    
     override fun getState(): OpenSCADSettings = this
     
     override fun loadState(state: OpenSCADSettings) {
