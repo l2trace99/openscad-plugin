@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Automatic Temp Cleanup** - Old preview temp directories are automatically deleted in background when creating new renders
 
 ### Fixed
+- **Trailing Comma Support** (Issue #12) - Parser now accepts trailing commas in:
+  - Vectors/lists: `[1, 2, 3,]`
+  - Function/module arguments: `cube(size=10,);`
+  - Function/module parameters: `function f(a, b,) = ...`
+  - For loop bindings: `for(i=[0:5],) ...`
+  - Let assignments: `let(a=1,) ...`
 - **Windows Compatibility** - OS-independent library paths now properly support Windows:
   - `%USERPROFILE%\Documents\OpenSCAD\libraries`
   - `%PROGRAMFILES%\OpenSCAD\libraries`

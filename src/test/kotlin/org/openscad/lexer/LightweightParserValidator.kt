@@ -240,6 +240,8 @@ object LightweightParserValidator {
             parseForBinding()
             while (currentType() == OpenSCADTypes.COMMA) {
                 advance()
+                // Allow trailing comma - don't parse binding if we hit closing paren
+                if (currentType() == OpenSCADTypes.RPAREN) break
                 parseForBinding()
             }
         }
@@ -271,6 +273,8 @@ object LightweightParserValidator {
             parseAssignment()
             while (currentType() == OpenSCADTypes.COMMA) {
                 advance()
+                // Allow trailing comma - don't parse assignment if we hit closing paren
+                if (currentType() == OpenSCADTypes.RPAREN) break
                 parseAssignment()
             }
         }
@@ -388,6 +392,8 @@ object LightweightParserValidator {
             parseArgument()
             while (currentType() == OpenSCADTypes.COMMA) {
                 advance()
+                // Allow trailing comma - don't parse argument if we hit closing paren
+                if (currentType() == OpenSCADTypes.RPAREN) break
                 parseArgument()
             }
         }

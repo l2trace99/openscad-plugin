@@ -419,13 +419,18 @@ class OpenSCADParserImpl : PsiParser {
         mark.done(OpenSCADTypes.MODULE_CALL)
     }
     
-    // <argument_list> ::= <argument> { "," <argument> }
+    // <argument_list> ::= <argument> { "," <argument> } [ "," ]
+    // Supports trailing commas
     private fun parseArgumentList(b: PsiBuilder) {
         val mark = b.mark()
         
-        do {
+        parseArgument(b)
+        while (b.tokenType == OpenSCADTypes.COMMA) {
+            b.advanceLexer()
+            // Allow trailing comma - don't parse argument if we hit closing paren
+            if (b.tokenType == OpenSCADTypes.RPAREN) break
             parseArgument(b)
-        } while (b.tokenType == OpenSCADTypes.COMMA && b.advanceLexer() != null)
+        }
         
         mark.done(OpenSCADTypes.ARGUMENT_LIST)
     }
@@ -659,7 +664,8 @@ class OpenSCADParserImpl : PsiParser {
         return true
     }
     
-    // <for_binding_list> ::= <for_binding> { "," <for_binding> }
+    // <for_binding_list> ::= <for_binding> { "," <for_binding> } [ "," ]
+    // Supports trailing commas
     private fun parseForBindingList(b: PsiBuilder) {
         val mark = b.mark()
         
@@ -667,6 +673,8 @@ class OpenSCADParserImpl : PsiParser {
         
         while (b.tokenType == OpenSCADTypes.COMMA) {
             b.advanceLexer() // consume comma
+            // Allow trailing comma - don't parse binding if we hit closing paren
+            if (b.tokenType == OpenSCADTypes.RPAREN) break
             parseForBinding(b)
         }
         
@@ -696,19 +704,30 @@ class OpenSCADParserImpl : PsiParser {
         mark.done(OpenSCADTypes.FOR_BINDING)
     }
     
-    // <assignment_list> ::= IDENT "=" <expression> { "," IDENT "=" <expression> }
+    // <assignment_list> ::= IDENT "=" <expression> { "," IDENT "=" <expression> } [ "," ]
+    // Supports trailing commas
     private fun parseAssignmentList(b: PsiBuilder) {
-        do {
-            // Variable name can be: IDENT or NUMBER IDENT (digit-starting like "2D")
-            if (b.tokenType == OpenSCADTypes.NUMBER && b.lookAhead(1) == OpenSCADTypes.IDENT) {
-                b.advanceLexer() // number part
-                b.advanceLexer() // ident part
-            } else {
-                expect(b, OpenSCADTypes.IDENT, "Expected identifier")
-            }
-            expect(b, OpenSCADTypes.EQ, "Expected '='")
-            parseExpression(b)
-        } while (b.tokenType == OpenSCADTypes.COMMA && b.advanceLexer() != null)
+        // Parse first assignment
+        parseAssignmentInList(b)
+        
+        while (b.tokenType == OpenSCADTypes.COMMA) {
+            b.advanceLexer()
+            // Allow trailing comma - don't parse assignment if we hit closing paren
+            if (b.tokenType == OpenSCADTypes.RPAREN) break
+            parseAssignmentInList(b)
+        }
+    }
+    
+    private fun parseAssignmentInList(b: PsiBuilder) {
+        // Variable name can be: IDENT or NUMBER IDENT (digit-starting like "2D")
+        if (b.tokenType == OpenSCADTypes.NUMBER && b.lookAhead(1) == OpenSCADTypes.IDENT) {
+            b.advanceLexer() // number part
+            b.advanceLexer() // ident part
+        } else {
+            expect(b, OpenSCADTypes.IDENT, "Expected identifier")
+        }
+        expect(b, OpenSCADTypes.EQ, "Expected '='")
+        parseExpression(b)
     }
     
     private fun parseBlockOrSingleStatement(b: PsiBuilder) {
