@@ -47,7 +47,7 @@ class OpenSCADPreviewFileEditor(
     private val wireframeButton = JButton("Wireframe")
     private val debugPreviewButton = JButton("Debug Preview")
     private val exportSTLButton = JButton("Export STL")
-    private val autoRenderCheckbox = JCheckBox("Auto-render", false)
+    private val autoRenderCheckbox = JCheckBox("auto-refresh", false)
     
     private var isRendering = false
     
