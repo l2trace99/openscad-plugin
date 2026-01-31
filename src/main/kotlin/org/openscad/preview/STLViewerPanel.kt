@@ -343,8 +343,8 @@ class STLViewerPanel : JPanel() {
         val faces = listOf(
             CubeFace(intArrayOf(4, 5, 6, 7), Color(100, 150, 200), "Front", cos(rotationX) * cos(rotationY)),
             CubeFace(intArrayOf(0, 3, 2, 1), Color(100, 150, 200), "Back", -cos(rotationX) * cos(rotationY)),
-            CubeFace(intArrayOf(0, 4, 7, 3), Color(150, 100, 100), "Left", -cos(rotationX) * sin(rotationY)),
-            CubeFace(intArrayOf(1, 2, 6, 5), Color(150, 100, 100), "Right", cos(rotationX) * sin(rotationY)),
+            CubeFace(intArrayOf(0, 4, 7, 3), Color(150, 100, 100), "Right", -cos(rotationX) * sin(rotationY)),
+            CubeFace(intArrayOf(1, 2, 6, 5), Color(150, 100, 100), "Left", cos(rotationX) * sin(rotationY)),
             CubeFace(intArrayOf(3, 7, 6, 2), Color(100, 180, 100), "Top", sin(rotationX)),
             CubeFace(intArrayOf(0, 1, 5, 4), Color(100, 180, 100), "Bottom", -sin(rotationX))
         ).sortedBy { it.normalZ } // Draw back-to-front
