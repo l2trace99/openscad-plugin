@@ -20,6 +20,8 @@ import org.openscad.preview.OpenSCADRenderer
 import org.openscad.preview.STLParser
 import org.openscad.preview.STLViewer3D
 import org.openscad.preview.STLViewerPanel
+import org.openscad.preview.ThreeMFParser
+import org.openscad.settings.OpenSCADSettings
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.beans.PropertyChangeListener
@@ -34,8 +36,10 @@ class OpenSCADPreviewFileEditor(
 ) : UserDataHolderBase(), FileEditor {
     
     private val logger = Logger.getInstance(OpenSCADPreviewFileEditor::class.java)
+    private val settings = OpenSCADSettings.getInstance(project)
     private val renderer = OpenSCADRenderer(project)
-    private val parser = STLParser()
+    private val stlParser = STLParser()
+    private val threemfParser = ThreeMFParser()
     
     private val component: JComponent
     private val viewer: Any
@@ -44,10 +48,16 @@ class OpenSCADPreviewFileEditor(
     private val statusLabel = JLabel("Ready")
     private val renderButton = JButton("Render")
     private val resetViewButton = JButton("Reset View")
-    private val wireframeButton = JButton("Wireframe")
-    private val debugPreviewButton = JButton("Debug Preview")
-    private val exportSTLButton = JButton("Export STL")
-    private val autoRenderCheckbox = JCheckBox("auto-refresh", false)
+    private val previewModeButton = JButton("Preview: 3D ▼")
+    private var currentPreviewMode = PreviewMode.SOLID_3D
+    
+    private enum class PreviewMode(val displayName: String) {
+        SOLID_3D("3D"),
+        WIREFRAME("Wireframe"),
+        OPENSCAD_DEBUG("OpenSCAD Debug")
+    }
+    private val exportButton = JButton("Export ▼")
+    private val autoRenderCheckbox = JCheckBox("auto-refresh")
     
     private var isRendering = false
     
@@ -65,10 +75,9 @@ class OpenSCADPreviewFileEditor(
             val toolbar = JPanel(FlowLayout(FlowLayout.LEFT, 5, 5))
             toolbar.add(renderButton)
             toolbar.add(resetViewButton)
-            toolbar.add(wireframeButton)
-            toolbar.add(debugPreviewButton)
+            toolbar.add(previewModeButton)
             toolbar.add(JSeparator(SwingConstants.VERTICAL))
-            toolbar.add(exportSTLButton)
+            toolbar.add(exportButton)
             toolbar.add(JSeparator(SwingConstants.VERTICAL))
             toolbar.add(autoRenderCheckbox)
             toolbar.add(Box.createHorizontalStrut(10))
@@ -78,34 +87,49 @@ class OpenSCADPreviewFileEditor(
             add(viewerPanel, BorderLayout.CENTER)
         }
         
+        // Initialize auto-refresh from settings
+        autoRenderCheckbox.isSelected = settings.autoRenderOnSave
+        
         setupListeners()
         checkOpenSCADAvailability()
     }
     
     private fun setupListeners() {
         renderButton.addActionListener {
-            renderFile()
+            renderForCurrentMode()
         }
         
         resetViewButton.addActionListener {
             (viewer as? STLViewerPanel)?.resetView()
         }
         
-        wireframeButton.addActionListener {
-            (viewer as? STLViewerPanel)?.toggleWireframe()
+        previewModeButton.addActionListener {
+            val popup = JPopupMenu()
+            PreviewMode.values().forEach { mode ->
+                popup.add(JMenuItem(mode.displayName).apply {
+                    addActionListener {
+                        setPreviewMode(mode)
+                    }
+                })
+            }
+            popup.show(previewModeButton, 0, previewModeButton.height)
         }
         
-        debugPreviewButton.addActionListener {
-            renderDebugPreview()
-        }
-        
-        exportSTLButton.addActionListener {
-            exportSTL()
+        exportButton.addActionListener { e ->
+            val popup = JPopupMenu()
+            popup.add(JMenuItem("Export STL").apply {
+                addActionListener { exportSTL() }
+            })
+            popup.add(JMenuItem("Export 3MF (with colors)").apply {
+                addActionListener { export3MF() }
+            })
+            popup.show(exportButton, 0, exportButton.height)
         }
         
         autoRenderCheckbox.addActionListener {
+            settings.autoRenderOnSave = autoRenderCheckbox.isSelected
             if (autoRenderCheckbox.isSelected) {
-                renderFile()
+                renderForCurrentMode()
             }
         }
         
@@ -125,13 +149,29 @@ class OpenSCADPreviewFileEditor(
                         if (event.file == file && autoRenderCheckbox.isSelected) {
                             // Render after save completes
                             ApplicationManager.getApplication().invokeLater {
-                                renderFile()
+                                renderForCurrentMode()
                             }
                         }
                     }
                 }
             }
         )
+    }
+    
+    private fun renderForCurrentMode() {
+        when (currentPreviewMode) {
+            PreviewMode.SOLID_3D -> {
+                (viewer as? STLViewerPanel)?.setWireframe(false)
+                renderFile()
+            }
+            PreviewMode.WIREFRAME -> {
+                (viewer as? STLViewerPanel)?.setWireframe(true)
+                renderFile()
+            }
+            PreviewMode.OPENSCAD_DEBUG -> {
+                renderDebugPreview()
+            }
+        }
     }
     
     private fun checkOpenSCADAvailability() {
@@ -160,10 +200,29 @@ class OpenSCADPreviewFileEditor(
         
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
+                // Try 3MF first (preserves colors from color() statements)
+                logger.info("Starting 3MF render for ${file.name}")
+                val threemfPath = renderer.renderTo3MF(file)
+                
+                if (threemfPath != null) {
+                    val coloredModel = threemfParser.parse(threemfPath)
+                    
+                    if (coloredModel != null && coloredModel.triangles.isNotEmpty()) {
+                        logger.info("3MF parsed: ${coloredModel.triangles.size} triangles")
+                        SwingUtilities.invokeLater {
+                            (viewer as? STLViewerPanel)?.setColoredModel(coloredModel)
+                            updateStatus("✓ Rendered with colors (${coloredModel.triangles.size} triangles)")
+                        }
+                        return@executeOnPooledThread
+                    }
+                }
+                
+                // Fall back to STL if 3MF fails
+                logger.info("Falling back to STL render")
                 val stlPath = renderer.renderToSTL(file)
                 
                 if (stlPath != null) {
-                    val model = parser.parse(stlPath)
+                    val model = stlParser.parse(stlPath)
                     
                     SwingUtilities.invokeLater {
                         if (model != null) {
@@ -198,6 +257,26 @@ class OpenSCADPreviewFileEditor(
         }
     }
     
+    private fun setPreviewMode(mode: PreviewMode) {
+        currentPreviewMode = mode
+        previewModeButton.text = "Preview: ${mode.displayName} ▼"
+        
+        when (mode) {
+            PreviewMode.SOLID_3D -> {
+                (viewer as? STLViewerPanel)?.setWireframe(false)
+                // Re-render to show 3D view
+                renderFile()
+            }
+            PreviewMode.WIREFRAME -> {
+                (viewer as? STLViewerPanel)?.setWireframe(true)
+                renderFile()
+            }
+            PreviewMode.OPENSCAD_DEBUG -> {
+                renderDebugPreview()
+            }
+        }
+    }
+    
     private fun renderDebugPreview() {
         if (isRendering) {
             updateStatus("Already rendering...")
@@ -209,17 +288,10 @@ class OpenSCADPreviewFileEditor(
             return
         }
         
-        // Check if already showing debug preview, toggle back to 3D view
         val viewerPanel = viewer as? STLViewerPanel
-        if (viewerPanel?.isShowingImagePreview() == true) {
-            viewerPanel.toggleImagePreview()
-            debugPreviewButton.text = "Debug Preview"
-            updateStatus("✓ Switched to 3D view")
-            return
-        }
         
         isRendering = true
-        debugPreviewButton.isEnabled = false
+        renderButton.isEnabled = false
         updateStatus("Rendering debug preview...")
         
         ApplicationManager.getApplication().executeOnPooledThread {
@@ -238,7 +310,6 @@ class OpenSCADPreviewFileEditor(
                 SwingUtilities.invokeLater {
                     if (pngPath != null) {
                         viewerPanel?.setPreviewImage(pngPath)
-                        debugPreviewButton.text = "3D View"
                         updateStatus("✓ Debug preview (shows # % ! * modifiers)")
                     } else {
                         updateStatus("✗ Debug preview failed")
@@ -252,7 +323,7 @@ class OpenSCADPreviewFileEditor(
             } finally {
                 SwingUtilities.invokeLater {
                     isRendering = false
-                    debugPreviewButton.isEnabled = true
+                    renderButton.isEnabled = true
                 }
             }
         }
@@ -302,6 +373,57 @@ class OpenSCADPreviewFileEditor(
                 }
             } catch (e: Exception) {
                 logger.error("Error exporting STL", e)
+                SwingUtilities.invokeLater {
+                    updateStatus("✗ Export error: ${e.message}")
+                }
+            }
+        }
+    }
+    
+    private fun export3MF() {
+        if (!file.isValid) {
+            updateStatus("✗ File is not valid")
+            return
+        }
+        
+        // Show file save dialog
+        val descriptor = FileSaverDescriptor("Export to 3MF", "Choose output 3MF file (preserves colors)", "3mf")
+        val saveDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project)
+        val fileWrapper = saveDialog.save(file.parent, file.nameWithoutExtension + ".3mf") ?: return
+        
+        val outputFile = fileWrapper.file
+        
+        updateStatus("Exporting to ${outputFile.name}...")
+        
+        ApplicationManager.getApplication().executeOnPooledThread {
+            try {
+                val threemfPath = renderer.renderTo3MF(file, outputFile.toPath())
+                
+                SwingUtilities.invokeLater {
+                    if (threemfPath != null) {
+                        updateStatus("✓ Exported to ${outputFile.name}")
+                        NotificationGroupManager.getInstance()
+                            .getNotificationGroup("OpenSCAD")
+                            .createNotification(
+                                "Export Successful",
+                                "Exported 3MF (with colors) to ${outputFile.absolutePath}",
+                                NotificationType.INFORMATION
+                            )
+                            .notify(project)
+                    } else {
+                        updateStatus("✗ Export failed")
+                        NotificationGroupManager.getInstance()
+                            .getNotificationGroup("OpenSCAD")
+                            .createNotification(
+                                "Export Failed",
+                                "Failed to export 3MF file",
+                                NotificationType.ERROR
+                            )
+                            .notify(project)
+                    }
+                }
+            } catch (e: Exception) {
+                logger.error("Error exporting 3MF", e)
                 SwingUtilities.invokeLater {
                     updateStatus("✗ Export error: ${e.message}")
                 }

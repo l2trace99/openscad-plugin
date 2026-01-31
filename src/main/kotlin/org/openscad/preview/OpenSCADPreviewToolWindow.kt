@@ -36,7 +36,8 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
     
     private val logger = Logger.getInstance(OpenSCADPreviewPanel::class.java)
     private val renderer = OpenSCADRenderer(project)
-    private val parser = STLParser()
+    private val stlParser = STLParser()
+    private val threemfParser = ThreeMFParser()
     private val viewerPanel: JComponent
     private val viewer: Any // Can be STLViewer3D or STLViewerPanel
     
@@ -144,10 +145,39 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
+                // Try 3MF first (preserves colors from color() statements)
+                logger.info("Starting 3MF render for ${file.name}")
+                val threemfPath = renderer.renderTo3MF(file)
+                logger.info("3MF render result: $threemfPath")
+                
+                if (threemfPath != null) {
+                    logger.info("Parsing 3MF file...")
+                    val coloredModel = threemfParser.parse(threemfPath)
+                    logger.info("3MF parse result: ${coloredModel?.triangles?.size ?: "null"} triangles")
+                    
+                    if (coloredModel != null && coloredModel.triangles.isNotEmpty()) {
+                        val uniqueColors = coloredModel.triangles.map { it.color }.distinct()
+                        logger.info("Unique colors in model: ${uniqueColors.size} - $uniqueColors")
+                        SwingUtilities.invokeLater {
+                            when (viewer) {
+                                is STLViewer3D -> viewer.setColoredModel(coloredModel)
+                                is STLViewerPanel -> viewer.setColoredModel(coloredModel)
+                            }
+                            updateStatus("✓ Rendered with colors (${coloredModel.triangles.size} triangles)")
+                        }
+                        return@executeOnPooledThread
+                    } else {
+                        logger.warn("3MF parsed but no triangles found, falling back to STL")
+                    }
+                } else {
+                    logger.warn("3MF render returned null, falling back to STL")
+                }
+                
+                // Fall back to STL if 3MF fails
                 val stlPath = renderer.renderToSTL(file)
                 
                 if (stlPath != null) {
-                    val model = parser.parse(stlPath)
+                    val model = stlParser.parse(stlPath)
                     
                     SwingUtilities.invokeLater {
                         if (model != null) {

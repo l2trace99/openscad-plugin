@@ -248,6 +248,82 @@ class OpenSCADRenderer(private val project: Project) {
     }
     
     /**
+     * Renders an OpenSCAD file to 3MF format (preserves colors from color() statements)
+     * @param scadFile The OpenSCAD source file
+     * @param outputPath Optional output path for the 3MF file. If null, uses temp directory
+     * @return Path to the generated 3MF file, or null if rendering failed
+     */
+    fun renderTo3MF(scadFile: VirtualFile, outputPath: Path? = null): Path? {
+        val openscadPath = findOpenSCADExecutable() ?: run {
+            logger.warn("OpenSCAD executable not found")
+            return null
+        }
+        
+        val settings = org.openscad.settings.OpenSCADSettings.getInstance(project)
+        val threemfPath = outputPath ?: run {
+            val tempDir = org.openscad.util.OpenSCADPathUtils.createTempDirectory("openscad-preview", settings.customTempDirectory)
+            if (!Files.exists(tempDir) || !Files.isDirectory(tempDir)) {
+                logger.error("Failed to create temp directory: $tempDir")
+                return null
+            }
+            tempDir.resolve("${scadFile.nameWithoutExtension}.3mf")
+        }
+        
+        try {
+            val params = mutableListOf<String>()
+            
+            // Rendering mode - need full render for 3MF export
+            params.add("--render")
+            
+            // View options
+            if (settings.autoCenter) {
+                params.add("--autocenter")
+            }
+            if (settings.viewAll) {
+                params.add("--viewall")
+            }
+            
+            // Use project root as working directory
+            val workDir = project.basePath ?: scadFile.parent.path
+            
+            // Output file (absolute path)
+            params.add("-o")
+            params.add(threemfPath.toAbsolutePath().toString())
+            
+            // Input file
+            val inputPath = if (project.basePath != null && scadFile.path.startsWith(project.basePath!!)) {
+                File(project.basePath!!).toPath().relativize(File(scadFile.path).toPath()).toString()
+            } else {
+                scadFile.path
+            }
+            params.add(inputPath)
+            
+            val openscadPathEnv = buildOpenSCADPath(settings)
+            
+            val commandLine = GeneralCommandLine()
+                .withExePath(openscadPath)
+                .withParameters(params)
+                .withWorkDirectory(workDir)
+                .withEnvironment("OPENSCADPATH", openscadPathEnv)
+            
+            logger.info("Executing 3MF render: ${commandLine.commandLineString}")
+            
+            val output: ProcessOutput = ExecUtil.execAndGetOutput(commandLine, settings.renderTimeout * 1000)
+            
+            if (output.exitCode == 0 && threemfPath.exists()) {
+                logger.info("Successfully rendered ${scadFile.name} to 3MF")
+                return threemfPath
+            } else {
+                logger.error("3MF rendering failed: ${output.stderr}")
+                return null
+            }
+        } catch (e: Exception) {
+            logger.error("Error rendering to 3MF", e)
+            return null
+        }
+    }
+    
+    /**
      * Renders an OpenSCAD file to PNG format (shows debug modifiers # % ! *)
      * @param scadFile The OpenSCAD source file
      * @param width Image width
@@ -283,12 +359,24 @@ class OpenSCADRenderer(private val project: Project) {
             // Use preview mode (not --render) to show debug modifiers
             // Debug modifiers (#, %) are only visible in preview mode
             
-            // View options
-            if (settings.autoCenter) {
+            // Camera parameters for preserving orientation
+            if (cameraParams != null) {
+                // OpenSCAD camera format: --camera=translate_x,translate_y,translate_z,rot_x,rot_y,rot_z,distance
+                val cameraString = "0,0,0,${cameraParams.rotX},${cameraParams.rotY},${cameraParams.rotZ},${cameraParams.distance}"
+                logger.info("Debug preview camera: --camera=$cameraString")
+                params.add("--camera")
+                params.add(cameraString)
+                // Use autocenter and viewall to ensure model is centered and visible
                 params.add("--autocenter")
-            }
-            if (settings.viewAll) {
                 params.add("--viewall")
+            } else {
+                // Use settings when not using custom camera
+                if (settings.autoCenter) {
+                    params.add("--autocenter")
+                }
+                if (settings.viewAll) {
+                    params.add("--viewall")
+                }
             }
             
             // Image size
@@ -298,13 +386,6 @@ class OpenSCADRenderer(private val project: Project) {
             // Use OpenSCAD's default colorscheme which shows debug colors
             params.add("--colorscheme")
             params.add("Cornfield")
-            
-            // Camera parameters for preserving orientation
-            if (cameraParams != null) {
-                // OpenSCAD camera format: --camera=translate_x,translate_y,translate_z,rot_x,rot_y,rot_z,distance
-                params.add("--camera")
-                params.add("0,0,0,${cameraParams.rotX},${cameraParams.rotY},${cameraParams.rotZ},${cameraParams.distance}")
-            }
             
             // Output file (absolute path)
             params.add("-o")

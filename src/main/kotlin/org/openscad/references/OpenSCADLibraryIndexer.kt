@@ -28,8 +28,8 @@ class OpenSCADLibraryIndexer(private val project: Project) {
     private val logger = Logger.getInstance(OpenSCADLibraryIndexer::class.java)
     private val symbolCache = ConcurrentHashMap<String, LibrarySymbol>()
     private val fileIndex = ConcurrentHashMap<String, MutableList<LibrarySymbol>>()
-    private var lastIndexTime = 0L
-    private val indexCacheDuration = 60000L // Re-index every 60 seconds max
+    private var lastLibraryFingerprint: String = ""
+    private val fileModificationTimes = ConcurrentHashMap<String, Long>()
     
     /**
      * Get all indexed library symbols
@@ -51,29 +51,44 @@ class OpenSCADLibraryIndexer(private val project: Project) {
      * Force re-indexing of library files
      */
     fun reindex() {
-        lastIndexTime = 0
+        lastLibraryFingerprint = ""
         ensureIndexed()
+    }
+    
+    /**
+     * Check if a file path is within any of the configured library paths
+     */
+    fun isInLibraryPath(filePath: String): Boolean {
+        val normalizedPath = File(filePath).absolutePath
+        return getLibraryPaths().any { libPath ->
+            normalizedPath.startsWith(libPath)
+        }
     }
     
     /**
      * Ensure the index is up-to-date
      */
     private fun ensureIndexed() {
-        val now = System.currentTimeMillis()
-        if (now - lastIndexTime < indexCacheDuration && symbolCache.isNotEmpty()) {
+        val libraryPaths = getLibraryPaths()
+        val currentFingerprint = computeLibraryFingerprint(libraryPaths)
+        
+        if (currentFingerprint == lastLibraryFingerprint && symbolCache.isNotEmpty()) {
+            logger.debug("Library fingerprint unchanged, skipping reindex")
             return
         }
         
         synchronized(this) {
-            if (now - lastIndexTime < indexCacheDuration && symbolCache.isNotEmpty()) {
+            // Double-check after acquiring lock
+            val recheckFingerprint = computeLibraryFingerprint(libraryPaths)
+            if (recheckFingerprint == lastLibraryFingerprint && symbolCache.isNotEmpty()) {
                 return
             }
             
             symbolCache.clear()
             fileIndex.clear()
+            fileModificationTimes.clear()
             
-            val libraryPaths = getLibraryPaths()
-            logger.info("Indexing OpenSCAD libraries from ${libraryPaths.size} paths")
+            logger.info("Indexing OpenSCAD libraries from ${libraryPaths.size} paths (fingerprint changed)")
             
             // Collect all files to index first
             val filesToIndex = mutableListOf<Pair<File, String>>()
@@ -98,17 +113,53 @@ class OpenSCADLibraryIndexer(private val project: Project) {
                     indicator.text2 = file.name
                     indicator.fraction = index.toDouble() / filesToIndex.size
                     indexFile(file, libPath)
+                    fileModificationTimes[file.absolutePath] = file.lastModified()
                 }
             } else {
                 // No progress indicator available, just index
                 filesToIndex.forEach { (file, libPath) ->
                     indexFile(file, libPath)
+                    fileModificationTimes[file.absolutePath] = file.lastModified()
                 }
             }
             
-            lastIndexTime = System.currentTimeMillis()
+            lastLibraryFingerprint = recheckFingerprint
             logger.info("Indexed ${symbolCache.size} symbols from library files")
         }
+    }
+    
+    /**
+     * Compute a fingerprint of the library directories based on file paths and modification times.
+     * This fingerprint changes when files are added, removed, or modified.
+     */
+    private fun computeLibraryFingerprint(libraryPaths: List<String>): String {
+        val sb = StringBuilder()
+        sb.append(libraryPaths.sorted().joinToString(";"))
+        sb.append("|")
+        
+        var fileCount = 0
+        var latestModTime = 0L
+        
+        for (libPath in libraryPaths) {
+            val dir = File(libPath)
+            if (dir.exists() && dir.isDirectory) {
+                dir.walkTopDown()
+                    .filter { it.isFile && it.extension == "scad" }
+                    .forEach { file ->
+                        fileCount++
+                        val modTime = file.lastModified()
+                        if (modTime > latestModTime) {
+                            latestModTime = modTime
+                        }
+                    }
+            }
+        }
+        
+        sb.append(fileCount)
+        sb.append("|")
+        sb.append(latestModTime)
+        
+        return sb.toString()
     }
     
     /**

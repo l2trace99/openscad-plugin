@@ -17,6 +17,7 @@ import kotlin.math.sin
 class STLViewerPanel : JPanel() {
     
     private var model: STLParser.STLModel? = null
+    private var coloredModel: ThreeMFParser.ColoredModel? = null
     private var previewImage: BufferedImage? = null
     private var showImagePreview = false // When true, shows PNG instead of 3D model
     private var rotationX = 0.3
@@ -91,10 +92,22 @@ class STLViewerPanel : JPanel() {
     }
     
     fun setModel(model: STLParser.STLModel?, preserveView: Boolean = true) {
-        val isFirstModel = this.model == null
+        val isFirstModel = this.model == null && this.coloredModel == null
         this.model = model
+        this.coloredModel = null
         showImagePreview = false // Switch back to 3D view
         // Only reset view for first model load, preserve orientation for re-renders
+        if (!preserveView || isFirstModel) {
+            resetView()
+        }
+        repaint()
+    }
+    
+    fun setColoredModel(model: ThreeMFParser.ColoredModel?, preserveView: Boolean = true) {
+        val isFirstModel = this.model == null && this.coloredModel == null
+        this.coloredModel = model
+        this.model = null
+        showImagePreview = false // Switch back to 3D view
         if (!preserveView || isFirstModel) {
             resetView()
         }
@@ -137,15 +150,45 @@ class STLViewerPanel : JPanel() {
     fun isShowingImagePreview(): Boolean = showImagePreview
     
     /**
-     * Get current view parameters for camera synchronization
-     * Returns rotation (x, y, z in degrees) and distance factor
+     * Get current view parameters for camera synchronization with OpenSCAD
+     * OpenSCAD camera format: --camera=tx,ty,tz,rot_x,rot_y,rot_z,distance
+     * 
+     * Our viewer coordinate system:
+     * - Front view (rotationX=0, rotationY=0): looking at model from +Z axis, Y points up
+     * - rotationX: pitch (tilt up/down around X axis)
+     * - rotationY: yaw (rotate left/right around Y axis)
+     * 
+     * OpenSCAD camera coordinate system:
+     * - rot_x=0, rot_z=0: looking from above (top-down view)
+     * - rot_x=90: front view (looking from +Y toward origin)
+     * - rot_z: azimuth rotation (around Z axis)
+     * 
+     * Mapping:
+     * - To get our "front" view in OpenSCAD: need rot_x=90, rot_z=180 (OpenSCAD's Y is our -Y)
+     * - Our rotationX adds to the pitch
+     * - Our rotationY maps to OpenSCAD's azimuth (rot_z)
      */
     fun getViewParameters(): ViewParameters {
+        // OpenSCAD Euler angles: rot_x, rot_y, rot_z applied in order
+        // Our viewer: Y-up with rotationX (pitch) and rotationY (yaw)
+        // 
+        // After testing, -rotationX maps to rot_x (correct top/bottom)
+        // rotationY maps to rot_z (correct left/right with this combination)
+        // rot_y is used to compensate for the roll/tilt difference
+        val rotXDeg = Math.toDegrees(rotationX)
+        val rotYDeg = Math.toDegrees(rotationY)
+        
+        // The roll compensation depends on the viewing angles
+        // When looking from an angle, there's an induced roll due to coordinate system difference
+        val openscadRotX = -rotXDeg
+        val openscadRotY = rotYDeg  // Use rot_y to compensate for tilt
+        val openscadRotZ = 0.0
+        
         return ViewParameters(
-            rotX = Math.toDegrees(rotationX),
-            rotY = Math.toDegrees(rotationY),
-            rotZ = Math.toDegrees(rotationZ),
-            distance = 500.0 / zoom, // Base distance adjusted by zoom
+            rotX = openscadRotX,
+            rotY = openscadRotY,
+            rotZ = openscadRotZ,
+            distance = 140.0 / zoom,
             translateX = panX,
             translateY = panY
         )
@@ -161,8 +204,9 @@ class STLViewerPanel : JPanel() {
     )
     
     fun resetView() {
-        rotationX = 0.3
-        rotationY = 0.3
+        // Match OpenSCAD's default view: rot_x=55, rot_z=25
+        rotationX = Math.toRadians(55.0)
+        rotationY = Math.toRadians(25.0)
         rotationZ = 0.0
         zoom = 1.0
         panX = 0.0
@@ -170,13 +214,14 @@ class STLViewerPanel : JPanel() {
         repaint()
     }
     
-    // Preset view orientations
-    fun setViewFront() { rotationX = 0.0; rotationY = 0.0; rotationZ = 0.0; repaint() }
-    fun setViewBack() { rotationX = 0.0; rotationY = Math.PI; rotationZ = 0.0; repaint() }
-    fun setViewLeft() { rotationX = 0.0; rotationY = -Math.PI / 2; rotationZ = 0.0; repaint() }
-    fun setViewRight() { rotationX = 0.0; rotationY = Math.PI / 2; rotationZ = 0.0; repaint() }
-    fun setViewTop() { rotationX = -Math.PI / 2; rotationY = 0.0; rotationZ = 0.0; repaint() }
-    fun setViewBottom() { rotationX = Math.PI / 2; rotationY = 0.0; rotationZ = 0.0; repaint() }
+    // Preset view orientations matching OpenSCAD's View menu
+    // OpenSCAD: rot_x is elevation (0=top, 90=front), rot_z is azimuth
+    fun setViewFront() { rotationX = Math.toRadians(90.0); rotationY = 0.0; rotationZ = 0.0; repaint() }
+    fun setViewBack() { rotationX = Math.toRadians(90.0); rotationY = Math.toRadians(180.0); rotationZ = 0.0; repaint() }
+    fun setViewLeft() { rotationX = Math.toRadians(90.0); rotationY = Math.toRadians(90.0); rotationZ = 0.0; repaint() }
+    fun setViewRight() { rotationX = Math.toRadians(90.0); rotationY = Math.toRadians(-90.0); rotationZ = 0.0; repaint() }
+    fun setViewTop() { rotationX = 0.0; rotationY = 0.0; rotationZ = 0.0; repaint() }
+    fun setViewBottom() { rotationX = Math.toRadians(180.0); rotationY = 0.0; rotationZ = 0.0; repaint() }
     
     /**
      * Handle click on orientation cube, returns true if click was on cube
@@ -218,6 +263,11 @@ class STLViewerPanel : JPanel() {
         repaint()
     }
     
+    fun setWireframe(enabled: Boolean) {
+        showWireframe = enabled
+        repaint()
+    }
+    
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
         
@@ -230,13 +280,17 @@ class STLViewerPanel : JPanel() {
             return
         }
         
+        val currentColoredModel = coloredModel
         val currentModel = model
-        if (currentModel == null) {
+        
+        if (currentColoredModel != null) {
+            drawColoredModel(g2d, currentColoredModel)
+        } else if (currentModel != null) {
+            drawModel(g2d, currentModel)
+        } else {
             drawNoModelMessage(g2d)
             return
         }
-        
-        drawModel(g2d, currentModel)
         
         // Draw orientation cube overlay
         drawOrientationCube(g2d)
@@ -294,8 +348,8 @@ class STLViewerPanel : JPanel() {
         val faces = listOf(
             CubeFace(intArrayOf(4, 5, 6, 7), Color(100, 150, 200), "Front", cos(rotationX) * cos(rotationY)),
             CubeFace(intArrayOf(0, 3, 2, 1), Color(100, 150, 200), "Back", -cos(rotationX) * cos(rotationY)),
-            CubeFace(intArrayOf(0, 4, 7, 3), Color(150, 100, 100), "Left", -cos(rotationX) * sin(rotationY)),
-            CubeFace(intArrayOf(1, 2, 6, 5), Color(150, 100, 100), "Right", cos(rotationX) * sin(rotationY)),
+            CubeFace(intArrayOf(0, 4, 7, 3), Color(150, 100, 100), "Right", -cos(rotationX) * sin(rotationY)),
+            CubeFace(intArrayOf(1, 2, 6, 5), Color(150, 100, 100), "Left", cos(rotationX) * sin(rotationY)),
             CubeFace(intArrayOf(3, 7, 6, 2), Color(100, 180, 100), "Top", sin(rotationX)),
             CubeFace(intArrayOf(0, 1, 5, 4), Color(100, 180, 100), "Bottom", -sin(rotationX))
         ).sortedBy { it.normalZ } // Draw back-to-front
@@ -361,7 +415,7 @@ class STLViewerPanel : JPanel() {
         g2d.color = Color.LIGHT_GRAY
         g2d.font = Font("SansSerif", Font.PLAIN, 11)
         g2d.drawString("Debug Preview (PNG) - Shows # % ! * modifiers", 10, 15)
-        g2d.drawString("Click '3D View' to return to interactive 3D model", 10, 30)
+        g2d.drawString("Select 'Preview: 3D' to return to interactive 3D model", 10, 30)
     }
     
     private fun drawNoModelMessage(g2d: Graphics2D) {
@@ -372,6 +426,171 @@ class STLViewerPanel : JPanel() {
         val x = (width - fm.stringWidth(message)) / 2
         val y = height / 2
         g2d.drawString(message, x, y)
+    }
+    
+    private fun drawColoredModel(g2d: Graphics2D, model: ThreeMFParser.ColoredModel) {
+        val centerX = width / 2.0 + panX
+        val centerY = height / 2.0 + panY
+        
+        // Calculate scale to fit model in view
+        val modelSize = maxOf(model.bounds.size.x, model.bounds.size.y, model.bounds.size.z)
+        val viewSize = minOf(width, height) * 0.8
+        val scale = if (modelSize > 0) (viewSize / modelSize) * zoom else zoom
+        
+        // Draw axes
+        drawAxesColored(g2d, centerX, centerY, scale, model.bounds.center)
+        
+        // Project and sort triangles by depth (painter's algorithm)
+        data class ProjectedColoredTriangle(
+            val p1: Pair<Int, Int>,
+            val p2: Pair<Int, Int>,
+            val p3: Pair<Int, Int>,
+            val depth: Double,
+            val normal: ThreeMFParser.Vector3,
+            val color: Color
+        )
+        
+        val projectedTriangles = model.triangles.map { triangle ->
+            val p1 = projectColored(triangle.v1, model.bounds.center, centerX, centerY, scale)
+            val p2 = projectColored(triangle.v2, model.bounds.center, centerX, centerY, scale)
+            val p3 = projectColored(triangle.v3, model.bounds.center, centerX, centerY, scale)
+            
+            // Calculate average depth for sorting
+            val depth = (
+                getDepthColored(triangle.v1, model.bounds.center) +
+                getDepthColored(triangle.v2, model.bounds.center) +
+                getDepthColored(triangle.v3, model.bounds.center)
+            ) / 3.0
+            
+            ProjectedColoredTriangle(p1, p2, p3, depth, triangle.normal, triangle.color)
+        }.sortedBy { it.depth } // Draw far to near
+        
+        // Calculate view direction
+        val cosX = cos(rotationX)
+        val sinX = sin(rotationX)
+        val cosY = cos(rotationY)
+        val sinY = sin(rotationY)
+        
+        // Draw triangles with per-triangle colors
+        projectedTriangles.forEach { tri ->
+            // Transform normal by view rotation
+            var nx = tri.normal.x.toDouble()
+            var ny = tri.normal.y.toDouble()
+            var nz = tri.normal.z.toDouble()
+            
+            val ny1 = ny * cosX - nz * sinX
+            val nz1 = ny * sinX + nz * cosX
+            ny = ny1
+            nz = nz1
+            
+            val nx1 = nx * cosY + nz * sinY
+            val nz2 = -nx * sinY + nz * cosY
+            nz = nz2
+            
+            // Backface culling
+            if (nz <= 0) {
+                return@forEach
+            }
+            
+            // Brightness based on facing direction
+            val brightness = (0.6f + 0.4f * nz.toFloat()).coerceIn(0.6f, 1.0f)
+            
+            // Apply brightness to triangle's color
+            val r = (tri.color.red * brightness).toInt().coerceIn(0, 255)
+            val g = (tri.color.green * brightness).toInt().coerceIn(0, 255)
+            val b = (tri.color.blue * brightness).toInt().coerceIn(0, 255)
+            val faceColor = Color(r, g, b)
+            
+            if (showWireframe) {
+                g2d.color = faceColor
+                g2d.drawLine(tri.p1.first, tri.p1.second, tri.p2.first, tri.p2.second)
+                g2d.drawLine(tri.p2.first, tri.p2.second, tri.p3.first, tri.p3.second)
+                g2d.drawLine(tri.p3.first, tri.p3.second, tri.p1.first, tri.p1.second)
+            } else {
+                g2d.color = faceColor
+                val xPoints = intArrayOf(tri.p1.first, tri.p2.first, tri.p3.first)
+                val yPoints = intArrayOf(tri.p1.second, tri.p2.second, tri.p3.second)
+                g2d.fillPolygon(xPoints, yPoints, 3)
+            }
+        }
+        
+        // Draw info
+        drawColoredInfo(g2d, model)
+        
+        // Draw orientation cube
+        drawOrientationCube(g2d)
+    }
+    
+    private fun projectColored(point: ThreeMFParser.Vector3, modelCenter: ThreeMFParser.Vector3, 
+                               centerX: Double, centerY: Double, scale: Double): Pair<Int, Int> {
+        var x = (point.x - modelCenter.x).toDouble()
+        var y = (point.y - modelCenter.y).toDouble()
+        var z = (point.z - modelCenter.z).toDouble()
+        
+        // Rotate around X
+        val cosX = cos(rotationX)
+        val sinX = sin(rotationX)
+        val y1 = y * cosX - z * sinX
+        val z1 = y * sinX + z * cosX
+        y = y1
+        z = z1
+        
+        // Rotate around Y
+        val cosY = cos(rotationY)
+        val sinY = sin(rotationY)
+        val x1 = x * cosY + z * sinY
+        x = x1
+        
+        return Pair((centerX + x * scale).toInt(), (centerY - y * scale).toInt())
+    }
+    
+    private fun getDepthColored(point: ThreeMFParser.Vector3, modelCenter: ThreeMFParser.Vector3): Double {
+        var x = (point.x - modelCenter.x).toDouble()
+        var y = (point.y - modelCenter.y).toDouble()
+        var z = (point.z - modelCenter.z).toDouble()
+        
+        val cosX = cos(rotationX)
+        val sinX = sin(rotationX)
+        val y1 = y * cosX - z * sinX
+        val z1 = y * sinX + z * cosX
+        y = y1
+        z = z1
+        
+        val cosY = cos(rotationY)
+        val sinY = sin(rotationY)
+        val z2 = -x * sinY + z * cosY
+        
+        return z2
+    }
+    
+    private fun drawAxesColored(g2d: Graphics2D, centerX: Double, centerY: Double, scale: Double, 
+                                modelCenter: ThreeMFParser.Vector3) {
+        val axisLength = 50.0
+        val origin = ThreeMFParser.Vector3(modelCenter.x, modelCenter.y, modelCenter.z)
+        
+        // X axis (red)
+        g2d.color = Color.RED
+        val xEnd = projectColored(ThreeMFParser.Vector3(modelCenter.x + axisLength.toFloat(), modelCenter.y, modelCenter.z), 
+                                  origin, centerX, centerY, scale)
+        g2d.drawLine(centerX.toInt(), centerY.toInt(), xEnd.first, xEnd.second)
+        
+        // Y axis (green)
+        g2d.color = Color.GREEN
+        val yEnd = projectColored(ThreeMFParser.Vector3(modelCenter.x, modelCenter.y + axisLength.toFloat(), modelCenter.z), 
+                                  origin, centerX, centerY, scale)
+        g2d.drawLine(centerX.toInt(), centerY.toInt(), yEnd.first, yEnd.second)
+        
+        // Z axis (blue)
+        g2d.color = Color.BLUE
+        val zEnd = projectColored(ThreeMFParser.Vector3(modelCenter.x, modelCenter.y, modelCenter.z + axisLength.toFloat()), 
+                                  origin, centerX, centerY, scale)
+        g2d.drawLine(centerX.toInt(), centerY.toInt(), zEnd.first, zEnd.second)
+    }
+    
+    private fun drawColoredInfo(g2d: Graphics2D, model: ThreeMFParser.ColoredModel) {
+        g2d.color = Color.WHITE
+        g2d.font = Font("SansSerif", Font.PLAIN, 11)
+        g2d.drawString("Triangles: ${model.triangles.size} (with colors)", 10, height - 10)
     }
     
     private fun drawModel(g2d: Graphics2D, model: STLParser.STLModel) {
