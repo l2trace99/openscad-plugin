@@ -18,6 +18,7 @@ import kotlin.math.sin
 class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEventListener {
     
     private var model: STLParser.STLModel? = null
+    private var coloredModel: ThreeMFParser.ColoredModel? = null
     private val canvas: GLCanvas
     private val animator: FPSAnimator
     
@@ -94,7 +95,16 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
     
     fun setModel(model: STLParser.STLModel?) {
         this.model = model
+        this.coloredModel = null
         resetView()
+        repaint()
+    }
+    
+    fun setColoredModel(model: ThreeMFParser.ColoredModel?) {
+        this.coloredModel = model
+        this.model = null
+        resetView()
+        repaint()
     }
     
     fun resetView() {
@@ -103,6 +113,7 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         zoom = 1.0f
         panX = 0.0f
         panY = 0.0f
+        repaint()
     }
     
     override fun init(drawable: GLAutoDrawable) {
@@ -152,8 +163,12 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
             drawGrid(gl, settings.gridSize, settings.gridSpacing)
         }
         
+        val currentColoredModel = coloredModel
         val currentModel = model
-        if (currentModel != null) {
+        
+        if (currentColoredModel != null) {
+            drawColoredModel(gl, currentColoredModel)
+        } else if (currentModel != null) {
             drawModel(gl, currentModel)
         }
     }
@@ -240,6 +255,56 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         
         gl.glEnable(GL.GL_DEPTH_TEST)
         gl.glEnable(GL2.GL_LIGHTING)
+    }
+    
+    private fun drawColoredModel(gl: GL2, model: ThreeMFParser.ColoredModel) {
+        // Center and scale model
+        val center = model.bounds.center
+        val size = model.bounds.size
+        val maxSize = maxOf(size.x, size.y, size.z)
+        val scale = if (maxSize > 0) 2.0f / maxSize else 1.0f
+        
+        gl.glPushMatrix()
+        gl.glScalef(scale, scale, scale)
+        gl.glTranslatef(-center.x, -center.y, -center.z)
+        
+        // Enable color material so vertex colors affect lighting
+        gl.glEnable(GL2.GL_COLOR_MATERIAL)
+        gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE)
+        
+        // Set specular properties (shared for all triangles)
+        val matSpecular = floatArrayOf(0.5f, 0.5f, 0.5f, 1.0f)
+        val matShininess = floatArrayOf(32.0f)
+        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SPECULAR, matSpecular, 0)
+        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SHININESS, matShininess, 0)
+        
+        // Draw triangles with per-triangle colors
+        gl.glBegin(GL2.GL_TRIANGLES)
+        model.triangles.forEach { triangle ->
+            // Set color for this triangle
+            gl.glColor3f(
+                triangle.color.red / 255.0f,
+                triangle.color.green / 255.0f,
+                triangle.color.blue / 255.0f
+            )
+            
+            // Set normal for lighting
+            gl.glNormal3f(triangle.normal.x, triangle.normal.y, triangle.normal.z)
+            
+            // Draw vertices
+            gl.glVertex3f(triangle.v1.x, triangle.v1.y, triangle.v1.z)
+            gl.glVertex3f(triangle.v2.x, triangle.v2.y, triangle.v2.z)
+            gl.glVertex3f(triangle.v3.x, triangle.v3.y, triangle.v3.z)
+        }
+        gl.glEnd()
+        
+        // Disable color material to restore state
+        gl.glDisable(GL2.GL_COLOR_MATERIAL)
+        
+        gl.glPopMatrix()
+        
+        // Draw axes
+        drawAxes(gl)
     }
     
     private fun drawAxes(gl: GL2) {
