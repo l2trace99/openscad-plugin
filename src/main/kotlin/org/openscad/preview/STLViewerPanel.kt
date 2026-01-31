@@ -263,6 +263,11 @@ class STLViewerPanel : JPanel() {
         repaint()
     }
     
+    fun setWireframe(enabled: Boolean) {
+        showWireframe = enabled
+        repaint()
+    }
+    
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
         
@@ -410,7 +415,7 @@ class STLViewerPanel : JPanel() {
         g2d.color = Color.LIGHT_GRAY
         g2d.font = Font("SansSerif", Font.PLAIN, 11)
         g2d.drawString("Debug Preview (PNG) - Shows # % ! * modifiers", 10, 15)
-        g2d.drawString("Click '3D View' to return to interactive 3D model", 10, 30)
+        g2d.drawString("Select 'Preview: 3D' to return to interactive 3D model", 10, 30)
     }
     
     private fun drawNoModelMessage(g2d: Graphics2D) {
