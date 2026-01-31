@@ -359,12 +359,24 @@ class OpenSCADRenderer(private val project: Project) {
             // Use preview mode (not --render) to show debug modifiers
             // Debug modifiers (#, %) are only visible in preview mode
             
-            // View options
-            if (settings.autoCenter) {
+            // Camera parameters for preserving orientation
+            if (cameraParams != null) {
+                // OpenSCAD camera format: --camera=translate_x,translate_y,translate_z,rot_x,rot_y,rot_z,distance
+                val cameraString = "0,0,0,${cameraParams.rotX},${cameraParams.rotY},${cameraParams.rotZ},${cameraParams.distance}"
+                logger.info("Debug preview camera: --camera=$cameraString")
+                params.add("--camera")
+                params.add(cameraString)
+                // Use autocenter and viewall to ensure model is centered and visible
                 params.add("--autocenter")
-            }
-            if (settings.viewAll) {
                 params.add("--viewall")
+            } else {
+                // Use settings when not using custom camera
+                if (settings.autoCenter) {
+                    params.add("--autocenter")
+                }
+                if (settings.viewAll) {
+                    params.add("--viewall")
+                }
             }
             
             // Image size
@@ -374,13 +386,6 @@ class OpenSCADRenderer(private val project: Project) {
             // Use OpenSCAD's default colorscheme which shows debug colors
             params.add("--colorscheme")
             params.add("Cornfield")
-            
-            // Camera parameters for preserving orientation
-            if (cameraParams != null) {
-                // OpenSCAD camera format: --camera=translate_x,translate_y,translate_z,rot_x,rot_y,rot_z,distance
-                params.add("--camera")
-                params.add("0,0,0,${cameraParams.rotX},${cameraParams.rotY},${cameraParams.rotZ},${cameraParams.distance}")
-            }
             
             // Output file (absolute path)
             params.add("-o")

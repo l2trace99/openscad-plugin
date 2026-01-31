@@ -150,15 +150,45 @@ class STLViewerPanel : JPanel() {
     fun isShowingImagePreview(): Boolean = showImagePreview
     
     /**
-     * Get current view parameters for camera synchronization
-     * Returns rotation (x, y, z in degrees) and distance factor
+     * Get current view parameters for camera synchronization with OpenSCAD
+     * OpenSCAD camera format: --camera=tx,ty,tz,rot_x,rot_y,rot_z,distance
+     * 
+     * Our viewer coordinate system:
+     * - Front view (rotationX=0, rotationY=0): looking at model from +Z axis, Y points up
+     * - rotationX: pitch (tilt up/down around X axis)
+     * - rotationY: yaw (rotate left/right around Y axis)
+     * 
+     * OpenSCAD camera coordinate system:
+     * - rot_x=0, rot_z=0: looking from above (top-down view)
+     * - rot_x=90: front view (looking from +Y toward origin)
+     * - rot_z: azimuth rotation (around Z axis)
+     * 
+     * Mapping:
+     * - To get our "front" view in OpenSCAD: need rot_x=90, rot_z=180 (OpenSCAD's Y is our -Y)
+     * - Our rotationX adds to the pitch
+     * - Our rotationY maps to OpenSCAD's azimuth (rot_z)
      */
     fun getViewParameters(): ViewParameters {
+        // OpenSCAD Euler angles: rot_x, rot_y, rot_z applied in order
+        // Our viewer: Y-up with rotationX (pitch) and rotationY (yaw)
+        // 
+        // After testing, -rotationX maps to rot_x (correct top/bottom)
+        // rotationY maps to rot_z (correct left/right with this combination)
+        // rot_y is used to compensate for the roll/tilt difference
+        val rotXDeg = Math.toDegrees(rotationX)
+        val rotYDeg = Math.toDegrees(rotationY)
+        
+        // The roll compensation depends on the viewing angles
+        // When looking from an angle, there's an induced roll due to coordinate system difference
+        val openscadRotX = -rotXDeg
+        val openscadRotY = rotYDeg  // Use rot_y to compensate for tilt
+        val openscadRotZ = 0.0
+        
         return ViewParameters(
-            rotX = Math.toDegrees(rotationX),
-            rotY = Math.toDegrees(rotationY),
-            rotZ = Math.toDegrees(rotationZ),
-            distance = 500.0 / zoom, // Base distance adjusted by zoom
+            rotX = openscadRotX,
+            rotY = openscadRotY,
+            rotZ = openscadRotZ,
+            distance = 140.0 / zoom,
             translateX = panX,
             translateY = panY
         )
@@ -174,8 +204,9 @@ class STLViewerPanel : JPanel() {
     )
     
     fun resetView() {
-        rotationX = 0.3
-        rotationY = 0.3
+        // Match OpenSCAD's default view: rot_x=55, rot_z=25
+        rotationX = Math.toRadians(55.0)
+        rotationY = Math.toRadians(25.0)
         rotationZ = 0.0
         zoom = 1.0
         panX = 0.0
@@ -183,13 +214,14 @@ class STLViewerPanel : JPanel() {
         repaint()
     }
     
-    // Preset view orientations
-    fun setViewFront() { rotationX = 0.0; rotationY = 0.0; rotationZ = 0.0; repaint() }
-    fun setViewBack() { rotationX = 0.0; rotationY = Math.PI; rotationZ = 0.0; repaint() }
-    fun setViewLeft() { rotationX = 0.0; rotationY = -Math.PI / 2; rotationZ = 0.0; repaint() }
-    fun setViewRight() { rotationX = 0.0; rotationY = Math.PI / 2; rotationZ = 0.0; repaint() }
-    fun setViewTop() { rotationX = -Math.PI / 2; rotationY = 0.0; rotationZ = 0.0; repaint() }
-    fun setViewBottom() { rotationX = Math.PI / 2; rotationY = 0.0; rotationZ = 0.0; repaint() }
+    // Preset view orientations matching OpenSCAD's View menu
+    // OpenSCAD: rot_x is elevation (0=top, 90=front), rot_z is azimuth
+    fun setViewFront() { rotationX = Math.toRadians(90.0); rotationY = 0.0; rotationZ = 0.0; repaint() }
+    fun setViewBack() { rotationX = Math.toRadians(90.0); rotationY = Math.toRadians(180.0); rotationZ = 0.0; repaint() }
+    fun setViewLeft() { rotationX = Math.toRadians(90.0); rotationY = Math.toRadians(90.0); rotationZ = 0.0; repaint() }
+    fun setViewRight() { rotationX = Math.toRadians(90.0); rotationY = Math.toRadians(-90.0); rotationZ = 0.0; repaint() }
+    fun setViewTop() { rotationX = 0.0; rotationY = 0.0; rotationZ = 0.0; repaint() }
+    fun setViewBottom() { rotationX = Math.toRadians(180.0); rotationY = 0.0; rotationZ = 0.0; repaint() }
     
     /**
      * Handle click on orientation cube, returns true if click was on cube
