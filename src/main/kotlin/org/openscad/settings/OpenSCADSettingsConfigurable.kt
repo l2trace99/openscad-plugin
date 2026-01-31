@@ -24,7 +24,7 @@ import javax.swing.JPanel
 class OpenSCADSettingsConfigurable(private val project: Project) : Configurable {
     
     private val openscadPathField = TextFieldWithBrowseButton()
-    private val autoRenderCheckbox = JBCheckBox("Auto-render on file save")
+    private val autoRenderCheckbox = JBCheckBox("auto-refresh on file save")
     private val timeoutField = JBTextField()
     private val detectedPathLabel = JBLabel()
     

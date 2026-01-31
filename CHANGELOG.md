@@ -142,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code Intelligence** - Autocomplete, go-to-definition, find usages
 - **3D Preview** - Real-time STL preview with wireframe/solid rendering
 - **Split Editor** - Code and preview side-by-side
-- **Auto-render** - Automatic preview updates on save
+- **auto-refresh** - Automatic preview updates on save
 - **Run Configurations** - Custom OpenSCAD CLI configurations
 - **Animation Support** - Export animation frames using $t variable
 - **Batch Export** - Export multiple files at once (STL, PNG, etc.)

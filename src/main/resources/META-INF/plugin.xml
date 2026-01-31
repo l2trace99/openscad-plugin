@@ -22,7 +22,7 @@
             <li><b>Orientation Cube</b> - Interactive 3D cube for quick view switching (Front/Back/Left/Right/Top/Bottom)</li>
             <li><b>Export STL</b> - Direct export from preview pane toolbar</li>
             <li><b>Split Editor</b> - Code and preview side-by-side</li>
-            <li><b>Auto-render</b> - Automatic preview updates on save</li>
+            <li><b>auto-refresh</b> - Automatic preview updates on save</li>
             <li><b>Run Configurations</b> - Custom OpenSCAD CLI configurations with animation support</li>
             <li><b>Batch Export</b> - Export multiple files at once (STL, PNG, 3MF, AMF, etc.)</li>
             <li><b>Library Path Support</b> - Configure external library paths (OPENSCADPATH)</li>
@@ -78,7 +78,7 @@
             <li><b>Use Full Render</b>: Enable for high-quality preview (slower, uses <code>--render</code> flag)</li>
             <li><b>Auto Center</b>: Automatically center model in viewport (<code>--autocenter</code>)</li>
             <li><b>View All</b>: Fit entire model in view (<code>--viewall</code>)</li>
-            <li><b>Auto-render on Save</b>: Automatically update preview when file is saved</li>
+            <li><b>auto-refresh on Save</b>: Automatically update preview when file is saved</li>
         </ul>
         
         <h3>Custom Temp Directory (Flatpak/Sandbox Support)</h3>
@@ -113,7 +113,7 @@
         <h3>3D Preview</h3>
         <ul>
             <li><b>Open</b>: Any <code>.scad</code> file automatically shows split editor with preview</li>
-            <li><b>Render</b>: Click "Render" button or save file (if auto-render enabled)</li>
+            <li><b>Render</b>: Click "Render" button or save file (if auto-refresh enabled)</li>
             <li><b>Reset View</b>: Reset camera to default position</li>
             <li><b>Wireframe/Solid</b>: Toggle between wireframe and solid rendering modes</li>
             <li><b>Mouse Controls</b>:

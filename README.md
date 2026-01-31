@@ -18,7 +18,7 @@ Support this project by buying me a coffee!
 - ✅ **Rename Refactoring** - Rename modules and functions with automatic reference updates (Shift+F6)
 - ✅ **3D Preview** - Real-time STL preview with wireframe/solid rendering
 - ✅ **Split Editor** - Code and preview side-by-side
-- ✅ **Auto-render** - Automatic preview updates on save
+- ✅ **auto-refresh** - Automatic preview updates on save
 - ✅ **Run Configurations** - Custom OpenSCAD CLI configurations
 - ✅ **Animation Support** - Export animation frames using `$t`
 - ✅ **Batch Export** - Export multiple files at once
@@ -42,7 +42,7 @@ Support this project by buying me a coffee!
 - Set custom OpenSCAD executable path
 - Configure library paths (one per line)
 - Configure custom temp directory (see below)
-- Enable auto-render on save
+- Enable auto-refresh on save
 - Set rendering options
 
 ### Custom Temp Directory (Flatpak/Sandbox Support)
@@ -88,7 +88,7 @@ Open any `.scad` file to see the split editor with live 3D preview.
 - **Wireframe** - Toggle wireframe/solid view
 - **Debug Preview** - Show OpenSCAD debug modifiers (see below)
 - **Export STL** - Export directly to STL file
-- **Auto-render** - Enable automatic rendering on save
+- **auto-refresh** - Enable automatic rendering on save
 
 **3D Navigation:**
 - **Left-click + drag** - Rotate model
