@@ -7,7 +7,8 @@ import com.intellij.openapi.project.ProjectManager
 import org.openscad.file.OpenSCADFileType
 
 /**
- * Listener that triggers library re-indexing when OpenSCAD files are saved
+ * Listener that triggers library re-indexing when OpenSCAD library files are saved.
+ * Only triggers reindex if the saved file is within a configured library path.
  */
 class OpenSCADFileSaveListener : FileDocumentManagerListener {
     
@@ -17,10 +18,15 @@ class OpenSCADFileSaveListener : FileDocumentManagerListener {
         // Only trigger for OpenSCAD files
         if (virtualFile.extension != "scad") return
         
-        // Re-index for all open projects
+        val filePath = virtualFile.path
+        
+        // Re-index only for projects where this file is in a library path
         ProjectManager.getInstance().openProjects.forEach { project ->
             if (!project.isDisposed) {
-                OpenSCADLibraryIndexer.getInstance(project).reindex()
+                val indexer = OpenSCADLibraryIndexer.getInstance(project)
+                if (indexer.isInLibraryPath(filePath)) {
+                    indexer.reindex()
+                }
             }
         }
     }
