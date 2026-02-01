@@ -5,6 +5,32 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-02-01
+
+### Added
+- **3MF File Support** - Full support for importing and rendering 3MF files with preserved color information from OpenSCAD's `color()` statements
+- **Enhanced Rename Refactoring** - Improved validation for module and function renaming:
+  - Custom name validator prevents invalid identifiers (must start with letter/underscore/$)
+  - OpenSCAD keyword detection prevents renaming to reserved words
+  - Detailed error messages for invalid rename attempts
+- **Color Support in Preview** - Preview pane now properly displays colored models from 3MF exports
+
+### Changed
+- **Auto-refresh Text** - Changed "auto-render" terminology to "auto-refresh" throughout the UI for clarity
+- **Improved Preview UI** - Enhanced user interface for better preview pane experience
+- **Orientation Cube Fix** - Fixed orientation cube controls for proper view switching
+
+### Fixed
+- **Smart Library Indexing** - Library indexing now only triggers when files in library directories actually change, reducing unnecessary re-indexing
+- **Preview Performance** - Optimized preview rendering by avoiding redundant library scans on file save
+- **Debug View Synchronization** - Improved synchronization between debug preview and 3D view camera angles
+
+### Technical
+- Added `ThreeMFParser` class for parsing 3MF files with color information
+- Implemented `OpenSCADNamesValidator` and `OpenSCADRenameInputValidator` for better refactoring support
+- Enhanced `OpenSCADLibraryIndexer` with change detection logic
+- Improved preview panel UI components and color rendering
+
 ## [1.2.1] - 2026-01-02
 
 ### Added
