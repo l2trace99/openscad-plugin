@@ -22,12 +22,12 @@ import javax.swing.JPanel
  * Settings UI for OpenSCAD plugin
  */
 class OpenSCADSettingsConfigurable(private val project: Project) : Configurable {
-
+    
     private val openscadPathField = TextFieldWithBrowseButton()
     private val autoRenderCheckbox = JBCheckBox("auto-refresh on file save")
     private val timeoutField = JBTextField()
     private val detectedPathLabel = JBLabel()
-
+    
     // Rendering options
     private val useFullRenderCheckbox = JBCheckBox("Use full render (slower, more accurate)")
     private val autoCenterCheckbox = JBCheckBox("Auto-center model")
@@ -40,16 +40,16 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
     private val showGridCheckbox = JBCheckBox("Show grid in preview")
     private val gridSizeField = JBTextField()
     private val gridSpacingField = JBTextField()
-
+    
     // Library paths
     private val libraryPathsField = JBTextArea()
     private val libraryPathsScrollPane = JBScrollPane(libraryPathsField)
-
+    
     // Temp directory
     private val tempDirectoryField = TextFieldWithBrowseButton()
-
+    
     private var modified = false
-
+    
     init {
         // Setup file chooser for OpenSCAD path
         val descriptor = FileChooserDescriptor(true, false, false, false, false, false)
@@ -61,12 +61,12 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
                 openscadPathField.text = file.path
             }
         }
-
+        
         // Setup library paths text area
         libraryPathsField.rows = 5
         libraryPathsField.lineWrap = false
         libraryPathsScrollPane.preferredSize = java.awt.Dimension(400, 100)
-
+        
         // Setup file chooser for temp directory
         val tempDirDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor()
             .withTitle("Select Temp Directory")
@@ -77,24 +77,24 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
                 tempDirectoryField.text = file.path
             }
         }
-
+        
         openscadPathField.textField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
             override fun insertUpdate(e: javax.swing.event.DocumentEvent?) { modified = true }
             override fun removeUpdate(e: javax.swing.event.DocumentEvent?) { modified = true }
             override fun changedUpdate(e: javax.swing.event.DocumentEvent?) { modified = true }
         })
-
+        
         autoRenderCheckbox.addActionListener { modified = true }
         timeoutField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
             override fun insertUpdate(e: javax.swing.event.DocumentEvent?) { modified = true }
             override fun removeUpdate(e: javax.swing.event.DocumentEvent?) { modified = true }
             override fun changedUpdate(e: javax.swing.event.DocumentEvent?) { modified = true }
         })
-
+        
         // Detect OpenSCAD installation
         detectOpenSCAD()
     }
-
+    
     private fun detectOpenSCAD() {
         val renderer = OpenSCADRenderer(project)
         val detectedPath = renderer.findOpenSCADExecutable()
@@ -104,9 +104,9 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             detectedPathLabel.text = "⚠ OpenSCAD not found automatically"
         }
     }
-
+    
     override fun getDisplayName(): String = "OpenSCAD"
-
+    
     override fun createComponent(): JComponent {
         val panel = FormBuilder.createFormBuilder()
             .addLabeledComponent(JBLabel("OpenSCAD executable path:"), openscadPathField, 1, false)
@@ -141,13 +141,13 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             .addTooltip("Custom directory for temporary render files. Leave empty to use system default (Linux uses ~/.cache for Flatpak compatibility)")
             .addComponentFillVertically(JPanel(), 0)
             .panel
-
+        
         val wrapper = JPanel(BorderLayout())
         wrapper.add(panel, BorderLayout.NORTH)
-
+        
         return wrapper
     }
-
+    
     override fun isModified(): Boolean {
         val settings = OpenSCADSettings.getInstance(project)
         val currentLibPaths = libraryPathsField.text.lines().filter { it.isNotBlank() }
@@ -164,11 +164,11 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
                 currentLibPaths != settings.libraryPaths ||
                 tempDirectoryField.text != settings.customTempDirectory
     }
-
+    
     override fun apply() {
         val settings = OpenSCADSettings.getInstance(project)
         val oldLibraryPaths = settings.libraryPaths.toList()
-
+        
         settings.openscadPath = openscadPathField.text
         settings.autoRenderOnSave = autoRenderCheckbox.isSelected
         settings.renderTimeout = timeoutField.text.toIntOrNull() ?: 30
@@ -184,15 +184,15 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             .map { it.trim() }
             .toMutableList()
         settings.customTempDirectory = tempDirectoryField.text.trim()
-
+        
         // Re-index libraries if paths changed
         if (oldLibraryPaths != settings.libraryPaths) {
             OpenSCADLibraryIndexer.getInstance(project).reindex()
         }
-
+        
         modified = false
     }
-
+    
     override fun reset() {
         val settings = OpenSCADSettings.getInstance(project)
         openscadPathField.text = settings.openscadPath

@@ -5,6 +5,17 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-02-16
+
+### Added
+- **Hardware-Accelerated 3D Viewer** - Optional JOGL/OpenGL viewer for smoother 3D preview (Settings → Tools → OpenSCAD → "Use hardware-accelerated 3D viewer")
+- Falls back gracefully to software renderer if OpenGL initialization fails
+- Preview mode menu adapts to viewer capabilities (Wireframe and Debug modes only available with software renderer)
+
+### Fixed
+- **JOGL Viewer Lighting** - Fixed blown-out lighting in hardware-accelerated viewer caused by non-normalized normals after model scaling (`GL_NORMALIZE`)
+- **JOGL Viewer Rendering** - Enabled back-face culling and corrected material properties to eliminate visual artifacts
+
 ## [1.3.1] - 2026-02-01
 
 ### Added
