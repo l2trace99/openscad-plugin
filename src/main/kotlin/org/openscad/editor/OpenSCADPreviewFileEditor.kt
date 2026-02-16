@@ -12,6 +12,7 @@ import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.notification.NotificationGroupManager
@@ -197,7 +198,13 @@ class OpenSCADPreviewFileEditor(
         isRendering = true
         renderButton.isEnabled = false
         updateStatus("Rendering ${file.name}...")
-        
+
+        // Flush in-memory VFS changes to disk for this file before rendering,
+        // otherwise OpenSCAD reads stale file content
+        FileDocumentManager.getInstance().getDocument(file)?.let {
+            FileDocumentManager.getInstance().saveDocument(it)
+        }
+
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 // Try 3MF first (preserves colors from color() statements)
@@ -293,7 +300,12 @@ class OpenSCADPreviewFileEditor(
         isRendering = true
         renderButton.isEnabled = false
         updateStatus("Rendering debug preview...")
-        
+
+        // Flush in-memory VFS changes to disk for this file before rendering
+        FileDocumentManager.getInstance().getDocument(file)?.let {
+            FileDocumentManager.getInstance().saveDocument(it)
+        }
+
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 // Get current view parameters for camera synchronization
