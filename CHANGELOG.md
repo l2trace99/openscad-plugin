@@ -5,6 +5,17 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-02-16
+
+### Added
+- **Manifold Backend Support** - Geometry backend selector (Manifold/CGAL/Auto) in Settings and Run Configurations
+- **`--backend` CLI Flag** - Backend selection is passed to OpenSCAD CLI when a specific backend is chosen
+- **Per-Run Configuration Backend** - Override the project-level backend setting in individual Run Configurations
+
+### Note
+- Manifold and CGAL backend options require OpenSCAD 2024.09+; older versions should use "Auto (OpenSCAD default)"
+- Default backend is "Auto" to ensure compatibility with all OpenSCAD versions
+
 ## [1.3.1] - 2026-02-01
 
 ### Added
