@@ -10,8 +10,9 @@ import java.nio.file.Path
 object OpenSCADPathUtils {
 
     // Track active temp directories to prevent premature deletion during concurrent renders
-    private val activeTempDirectories = mutableSetOf<Path>()
-    
+    // Uses a map to track both the path and when it was last accessed
+    private val activeTempDirectories = mutableMapOf<Path, Long>()
+
     /**
      * Returns a list of common OpenSCAD library paths appropriate for the current OS.
      * Paths are not filtered for existence - caller should filter if needed.
@@ -96,8 +97,15 @@ object OpenSCADPathUtils {
         val newDir = Files.createTempDirectory(parentDir.toPath(), prefix)
 
         // Register as active to prevent deletion by concurrent renders
+        val now = System.currentTimeMillis()
         synchronized(activeTempDirectories) {
-            activeTempDirectories.add(newDir)
+            activeTempDirectories[newDir] = now
+
+            // Clean up stale entries older than 5 minutes (directory must have been deleted externally or process crashed)
+            val staleThreshold = now - 300_000 // 5 minutes
+            activeTempDirectories.entries.removeIf { (path, timestamp) ->
+                timestamp < staleThreshold || !Files.exists(path)
+            }
         }
 
         // Collect existing preview directories for cleanup
@@ -113,7 +121,7 @@ object OpenSCADPathUtils {
                     val dirPath = dir.toPath()
                     // Skip directories that are currently active
                     val isActive = synchronized(activeTempDirectories) {
-                        activeTempDirectories.contains(dirPath)
+                        activeTempDirectories.containsKey(dirPath)
                     }
                     if (!isActive) {
                         try {
