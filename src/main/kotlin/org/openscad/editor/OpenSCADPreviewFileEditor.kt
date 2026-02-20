@@ -159,11 +159,26 @@ class OpenSCADPreviewFileEditor(
             }
         }
 
-        // Listen for file save events
+        // Listen for file save and selection events
         val connection = project.messageBus.connect()
         connection.subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, object : FileEditorManagerListener {
             override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
                 // Cleanup when file is closed
+            }
+
+            override fun selectionChanged(event: com.intellij.openapi.fileEditor.FileEditorManagerEvent) {
+                // Pause/resume animator based on whether this editor's file is selected
+                val isThisFileSelected = event.newFile == file
+
+                when (viewer) {
+                    is STLViewer3D -> {
+                        if (isThisFileSelected) {
+                            viewer.resumeAnimator()
+                        } else {
+                            viewer.pauseAnimator()
+                        }
+                    }
+                }
             }
         })
 
@@ -493,7 +508,19 @@ class OpenSCADPreviewFileEditor(
     override fun getCurrentLocation(): FileEditorLocation? = null
 
     override fun dispose() {
-        // Cleanup if needed
+        // Stop animator and cleanup JOGL resources to prevent resource leaks
+        // and conflicts when multiple preview editors are open
+        when (viewer) {
+            is STLViewer3D -> {
+                try {
+                    // The STLViewer3D's animator must be stopped to prevent
+                    // thread leaks and OpenGL context conflicts
+                    viewer.cleanup()
+                } catch (e: Exception) {
+                    logger.warn("Error disposing JOGL viewer", e)
+                }
+            }
+        }
     }
 
     override fun getFile(): VirtualFile = file
