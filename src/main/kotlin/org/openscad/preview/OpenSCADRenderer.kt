@@ -39,7 +39,12 @@ class OpenSCADRenderer(private val project: Project) {
             
             // Build parameter list
             val params = mutableListOf<String>()
-            
+
+            // Backend selection (Manifold or CGAL)
+            if (settings.renderBackend.isNotEmpty()) {
+                params.add("--backend=${settings.renderBackend}")
+            }
+
             // Rendering mode
             if (settings.useFullRender) {
                 params.add("--render")
@@ -271,7 +276,12 @@ class OpenSCADRenderer(private val project: Project) {
         
         try {
             val params = mutableListOf<String>()
-            
+
+            // Backend selection (Manifold or CGAL)
+            if (settings.renderBackend.isNotEmpty()) {
+                params.add("--backend=${settings.renderBackend}")
+            }
+
             // Rendering mode - need full render for 3MF export
             params.add("--render")
             
@@ -355,7 +365,12 @@ class OpenSCADRenderer(private val project: Project) {
         try {
             
             val params = mutableListOf<String>()
-            
+
+            // Backend selection (Manifold or CGAL)
+            if (settings.renderBackend.isNotEmpty()) {
+                params.add("--backend=${settings.renderBackend}")
+            }
+
             // Use preview mode (not --render) to show debug modifiers
             // Debug modifiers (#, %) are only visible in preview mode
             

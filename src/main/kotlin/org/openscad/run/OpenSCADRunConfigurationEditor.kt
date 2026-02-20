@@ -9,6 +9,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
+import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -20,6 +21,7 @@ class OpenSCADRunConfigurationEditor : SettingsEditor<OpenSCADRunConfiguration>(
     private val scriptPathField = TextFieldWithBrowseButton()
     private val outputPathField = TextFieldWithBrowseButton()
     private val openscadPathField = TextFieldWithBrowseButton()
+    private val backendComboBox = JComboBox(arrayOf("Use project setting", "Manifold", "CGAL", "Auto (OpenSCAD default)"))
     private val useRenderCheckbox = JBCheckBox("Use full render (--render)")
     private val autoCenterCheckbox = JBCheckBox("Auto-center (--autocenter)")
     private val viewAllCheckbox = JBCheckBox("View all (--viewall)")
@@ -69,6 +71,8 @@ class OpenSCADRunConfigurationEditor : SettingsEditor<OpenSCADRunConfiguration>(
             .addLabeledComponent(JBLabel("OpenSCAD executable:"), openscadPathField, 1, false)
             .addTooltip("Leave empty to use system default")
             .addSeparator()
+            .addLabeledComponent(JBLabel("Geometry backend:"), backendComboBox, 1, false)
+            .addTooltip("Override project backend setting for this run configuration")
             .addComponent(useRenderCheckbox)
             .addComponent(autoCenterCheckbox)
             .addComponent(viewAllCheckbox)
@@ -92,6 +96,7 @@ class OpenSCADRunConfigurationEditor : SettingsEditor<OpenSCADRunConfiguration>(
         scriptPathField.text = options.scriptPath
         outputPathField.text = options.outputPath
         openscadPathField.text = options.openscadPath
+        backendComboBox.selectedIndex = backendSettingToIndex(options.backend)
         useRenderCheckbox.isSelected = options.useRender
         autoCenterCheckbox.isSelected = options.autoCenter
         viewAllCheckbox.isSelected = options.viewAll
@@ -107,6 +112,7 @@ class OpenSCADRunConfigurationEditor : SettingsEditor<OpenSCADRunConfiguration>(
         options.scriptPath = scriptPathField.text
         options.outputPath = outputPathField.text
         options.openscadPath = openscadPathField.text
+        options.backend = backendIndexToSetting(backendComboBox.selectedIndex)
         options.useRender = useRenderCheckbox.isSelected
         options.autoCenter = autoCenterCheckbox.isSelected
         options.viewAll = viewAllCheckbox.isSelected
@@ -115,5 +121,19 @@ class OpenSCADRunConfigurationEditor : SettingsEditor<OpenSCADRunConfiguration>(
         options.cameraSettings = cameraSettingsField.text
         options.imageSize = imageSizeField.text
         options.customParameters = customParametersField.text
+    }
+
+    private fun backendSettingToIndex(value: String): Int = when (value) {
+        "manifold" -> 1
+        "cgal" -> 2
+        "auto" -> 3
+        else -> 0 // empty = use project setting
+    }
+
+    private fun backendIndexToSetting(index: Int): String = when (index) {
+        1 -> "manifold"
+        2 -> "cgal"
+        3 -> "auto"
+        else -> "" // 0 = use project setting
     }
 }

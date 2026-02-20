@@ -2,6 +2,7 @@ package org.openscad.preview
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
@@ -157,7 +158,12 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         isRendering = true
         renderButton.isEnabled = false
         updateStatus("Rendering ${file.name}...")
-        
+
+        // Flush in-memory VFS changes to disk for this file before rendering
+        FileDocumentManager.getInstance().getDocument(file)?.let {
+            FileDocumentManager.getInstance().saveDocument(it)
+        }
+
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 // Try 3MF first (preserves colors from color() statements)
@@ -259,7 +265,12 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         isRendering = true
         debugPreviewButton.isEnabled = false
         updateStatus("Rendering debug preview...")
-        
+
+        // Flush in-memory VFS changes to disk for this file before rendering
+        FileDocumentManager.getInstance().getDocument(file)?.let {
+            FileDocumentManager.getInstance().saveDocument(it)
+        }
+
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 // Get current view parameters for camera synchronization
