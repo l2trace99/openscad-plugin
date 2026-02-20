@@ -363,4 +363,40 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
     override fun dispose(drawable: GLAutoDrawable) {
         animator.stop()
     }
+
+    /**
+     * Pause the animator to save resources when the editor is not visible.
+     */
+    fun pauseAnimator() {
+        if (animator.isAnimating && !animator.isPaused) {
+            animator.pause()
+        }
+    }
+
+    /**
+     * Resume the animator when the editor becomes visible again.
+     */
+    fun resumeAnimator() {
+        if (animator.isPaused) {
+            animator.resume()
+        } else if (!animator.isAnimating) {
+            animator.start()
+        }
+    }
+
+    /**
+     * Cleanup method called when the editor is closed.
+     * Stops the animator to prevent thread leaks and OpenGL context conflicts.
+     */
+    fun cleanup() {
+        // Resume if paused, then stop (stop() doesn't work on paused animators)
+        if (animator.isPaused) {
+            animator.resume()
+        }
+        if (animator.isAnimating) {
+            animator.stop()
+        }
+        // Dispose of the GL canvas
+        canvas.destroy()
+    }
 }
