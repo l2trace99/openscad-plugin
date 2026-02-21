@@ -96,14 +96,12 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
     fun setModel(model: STLParser.STLModel?) {
         this.model = model
         this.coloredModel = null
-        resetView()
         repaint()
     }
-    
+
     fun setColoredModel(model: ThreeMFParser.ColoredModel?) {
         this.coloredModel = model
         this.model = null
-        resetView()
         repaint()
     }
     
