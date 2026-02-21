@@ -24,6 +24,7 @@ import org.openscad.preview.STLViewerPanel
 import org.openscad.preview.ThreeMFParser
 import org.openscad.settings.OpenSCADSettings
 import java.awt.BorderLayout
+import java.awt.Dimension
 import java.awt.FlowLayout
 import java.beans.PropertyChangeListener
 import javax.swing.*
@@ -35,23 +36,23 @@ class OpenSCADPreviewFileEditor(
     private val project: Project,
     private val file: VirtualFile
 ) : UserDataHolderBase(), FileEditor {
-    
+
     private val logger = Logger.getInstance(OpenSCADPreviewFileEditor::class.java)
     private val settings = OpenSCADSettings.getInstance(project)
     private val renderer = OpenSCADRenderer(project)
     private val stlParser = STLParser()
     private val threemfParser = ThreeMFParser()
-    
+
     private val component: JComponent
     private val viewer: Any
     private val viewerPanel: JComponent
-    
+
     private val statusLabel = JLabel("Ready")
     private val renderButton = JButton("Render")
     private val resetViewButton = JButton("Reset View")
     private val previewModeButton = JButton("Preview: 3D ▼")
     private var currentPreviewMode = PreviewMode.SOLID_3D
-    
+
     private enum class PreviewMode(val displayName: String) {
         SOLID_3D("3D"),
         WIREFRAME("Wireframe"),
@@ -59,19 +60,34 @@ class OpenSCADPreviewFileEditor(
     }
     private val exportButton = JButton("Export ▼")
     private val autoRenderCheckbox = JCheckBox("auto-refresh")
-    
+
     private var isRendering = false
-    
+
     init {
-        // Initialize viewer - always use simple wireframe viewer for now
-        // JOGL has issues with ARM64 Mac (Apple Silicon) native libraries
-        val v = STLViewerPanel()
-        viewerPanel = v
-        viewer = v
-        logger.info("Initialized simple wireframe viewer")
-        
+        // Initialize viewer based on hardware acceleration setting
+        val (panel, viewerInstance) = if (settings.useHardwareAcceleration) {
+            try {
+                val v = STLViewer3D(project)
+                logger.info("Initialized hardware-accelerated JOGL viewer")
+                Pair(v as JComponent, v as Any)
+            } catch (e: Exception) {
+                logger.warn("Failed to initialize JOGL viewer, falling back to software renderer", e)
+                val v = STLViewerPanel()
+                Pair(v as JComponent, v as Any)
+            }
+        } else {
+            val v = STLViewerPanel()
+            logger.info("Initialized software renderer")
+            Pair(v as JComponent, v as Any)
+        }
+        viewerPanel = panel
+        viewer = viewerInstance
+
         // Create main component
         component = JPanel(BorderLayout()).apply {
+            minimumSize = Dimension(50, 50)
+            preferredSize = Dimension(400, 400)
+
             // Toolbar
             val toolbar = JPanel(FlowLayout(FlowLayout.LEFT, 5, 5))
             toolbar.add(renderButton)
@@ -83,30 +99,39 @@ class OpenSCADPreviewFileEditor(
             toolbar.add(autoRenderCheckbox)
             toolbar.add(Box.createHorizontalStrut(10))
             toolbar.add(statusLabel)
-            
+
             add(toolbar, BorderLayout.NORTH)
             add(viewerPanel, BorderLayout.CENTER)
         }
-        
+
         // Initialize auto-refresh from settings
         autoRenderCheckbox.isSelected = settings.autoRenderOnSave
-        
+
         setupListeners()
         checkOpenSCADAvailability()
     }
-    
+
     private fun setupListeners() {
         renderButton.addActionListener {
             renderForCurrentMode()
         }
-        
+
         resetViewButton.addActionListener {
-            (viewer as? STLViewerPanel)?.resetView()
+            when (viewer) {
+                is STLViewer3D -> viewer.resetView()
+                is STLViewerPanel -> viewer.resetView()
+            }
         }
-        
+
         previewModeButton.addActionListener {
             val popup = JPopupMenu()
-            PreviewMode.values().forEach { mode ->
+            val availableModes = if (viewer is STLViewerPanel) {
+                PreviewMode.values().toList()
+            } else {
+                // JOGL viewer only supports solid 3D mode
+                listOf(PreviewMode.SOLID_3D)
+            }
+            availableModes.forEach { mode ->
                 popup.add(JMenuItem(mode.displayName).apply {
                     addActionListener {
                         setPreviewMode(mode)
@@ -115,7 +140,7 @@ class OpenSCADPreviewFileEditor(
             }
             popup.show(previewModeButton, 0, previewModeButton.height)
         }
-        
+
         exportButton.addActionListener { e ->
             val popup = JPopupMenu()
             popup.add(JMenuItem("Export STL").apply {
@@ -126,22 +151,37 @@ class OpenSCADPreviewFileEditor(
             })
             popup.show(exportButton, 0, exportButton.height)
         }
-        
+
         autoRenderCheckbox.addActionListener {
             settings.autoRenderOnSave = autoRenderCheckbox.isSelected
             if (autoRenderCheckbox.isSelected) {
                 renderForCurrentMode()
             }
         }
-        
-        // Listen for file save events
+
+        // Listen for file save and selection events
         val connection = project.messageBus.connect()
         connection.subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, object : FileEditorManagerListener {
             override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
                 // Cleanup when file is closed
             }
+
+            override fun selectionChanged(event: com.intellij.openapi.fileEditor.FileEditorManagerEvent) {
+                // Pause/resume animator based on whether this editor's file is selected
+                val isThisFileSelected = event.newFile == file
+
+                when (viewer) {
+                    is STLViewer3D -> {
+                        if (isThisFileSelected) {
+                            viewer.resumeAnimator()
+                        } else {
+                            viewer.pauseAnimator()
+                        }
+                    }
+                }
+            }
         })
-        
+
         // Listen for file save events using bulk file listener
         connection.subscribe(com.intellij.openapi.vfs.VirtualFileManager.VFS_CHANGES,
             object : BulkFileListener {
@@ -158,7 +198,7 @@ class OpenSCADPreviewFileEditor(
             }
         )
     }
-    
+
     private fun renderForCurrentMode() {
         when (currentPreviewMode) {
             PreviewMode.SOLID_3D -> {
@@ -166,15 +206,29 @@ class OpenSCADPreviewFileEditor(
                 renderFile()
             }
             PreviewMode.WIREFRAME -> {
-                (viewer as? STLViewerPanel)?.setWireframe(true)
-                renderFile()
+                if (viewer is STLViewerPanel) {
+                    viewer.setWireframe(true)
+                    renderFile()
+                } else {
+                    // JOGL viewer doesn't support wireframe, fall back to solid 3D
+                    currentPreviewMode = PreviewMode.SOLID_3D
+                    previewModeButton.text = "Preview: ${PreviewMode.SOLID_3D.displayName} ▼"
+                    renderFile()
+                }
             }
             PreviewMode.OPENSCAD_DEBUG -> {
-                renderDebugPreview()
+                if (viewer is STLViewerPanel) {
+                    renderDebugPreview()
+                } else {
+                    // JOGL viewer doesn't support debug preview, fall back to solid 3D
+                    currentPreviewMode = PreviewMode.SOLID_3D
+                    previewModeButton.text = "Preview: ${PreviewMode.SOLID_3D.displayName} ▼"
+                    renderFile()
+                }
             }
         }
     }
-    
+
     private fun checkOpenSCADAvailability() {
         if (!renderer.isOpenSCADAvailable()) {
             updateStatus("⚠️ OpenSCAD not found. Configure in Settings → Tools → OpenSCAD")
@@ -183,18 +237,18 @@ class OpenSCADPreviewFileEditor(
             updateStatus("✓ Ready to render")
         }
     }
-    
+
     private fun renderFile() {
         if (isRendering) {
             updateStatus("Already rendering...")
             return
         }
-        
+
         if (!file.isValid) {
             updateStatus("✗ File is not valid")
             return
         }
-        
+
         isRendering = true
         renderButton.isEnabled = false
         updateStatus("Rendering ${file.name}...")
@@ -210,30 +264,36 @@ class OpenSCADPreviewFileEditor(
                 // Try 3MF first (preserves colors from color() statements)
                 logger.info("Starting 3MF render for ${file.name}")
                 val threemfPath = renderer.renderTo3MF(file)
-                
+
                 if (threemfPath != null) {
                     val coloredModel = threemfParser.parse(threemfPath)
-                    
+
                     if (coloredModel != null && coloredModel.triangles.isNotEmpty()) {
                         logger.info("3MF parsed: ${coloredModel.triangles.size} triangles")
                         SwingUtilities.invokeLater {
-                            (viewer as? STLViewerPanel)?.setColoredModel(coloredModel)
+                            when (viewer) {
+                                is STLViewer3D -> viewer.setColoredModel(coloredModel)
+                                is STLViewerPanel -> viewer.setColoredModel(coloredModel)
+                            }
                             updateStatus("✓ Rendered with colors (${coloredModel.triangles.size} triangles)")
                         }
                         return@executeOnPooledThread
                     }
                 }
-                
+
                 // Fall back to STL if 3MF fails
                 logger.info("Falling back to STL render")
-                val stlPath = renderer.renderToSTL(file)
-                
+                val stlPath = renderer.renderToSTL(file, usePreviewMode = true)
+
                 if (stlPath != null) {
                     val model = stlParser.parse(stlPath)
-                    
+
                     SwingUtilities.invokeLater {
                         if (model != null) {
-                            (viewer as? STLViewerPanel)?.setModel(model)
+                            when (viewer) {
+                                is STLViewer3D -> viewer.setModel(model)
+                                is STLViewerPanel -> viewer.setModel(model)
+                            }
                             updateStatus("✓ Rendered (${model.triangles.size} triangles)")
                         } else {
                             updateStatus("✗ Failed to parse STL")
@@ -257,46 +317,32 @@ class OpenSCADPreviewFileEditor(
             }
         }
     }
-    
+
     private fun updateStatus(message: String) {
         SwingUtilities.invokeLater {
             statusLabel.text = message
         }
     }
-    
+
     private fun setPreviewMode(mode: PreviewMode) {
         currentPreviewMode = mode
         previewModeButton.text = "Preview: ${mode.displayName} ▼"
-        
-        when (mode) {
-            PreviewMode.SOLID_3D -> {
-                (viewer as? STLViewerPanel)?.setWireframe(false)
-                // Re-render to show 3D view
-                renderFile()
-            }
-            PreviewMode.WIREFRAME -> {
-                (viewer as? STLViewerPanel)?.setWireframe(true)
-                renderFile()
-            }
-            PreviewMode.OPENSCAD_DEBUG -> {
-                renderDebugPreview()
-            }
-        }
+        renderForCurrentMode()
     }
-    
+
     private fun renderDebugPreview() {
         if (isRendering) {
             updateStatus("Already rendering...")
             return
         }
-        
+
         if (!file.isValid) {
             updateStatus("✗ File is not valid")
             return
         }
-        
+
         val viewerPanel = viewer as? STLViewerPanel
-        
+
         isRendering = true
         renderButton.isEnabled = false
         updateStatus("Rendering debug preview...")
@@ -318,7 +364,7 @@ class OpenSCADPreviewFileEditor(
                     )
                 }
                 val pngPath = renderer.renderToPNG(file, 1024, 768, cameraParams)
-                
+
                 SwingUtilities.invokeLater {
                     if (pngPath != null) {
                         viewerPanel?.setPreviewImage(pngPath)
@@ -340,26 +386,26 @@ class OpenSCADPreviewFileEditor(
             }
         }
     }
-    
+
     private fun exportSTL() {
         if (!file.isValid) {
             updateStatus("✗ File is not valid")
             return
         }
-        
+
         // Show file save dialog
         val descriptor = FileSaverDescriptor("Export to STL", "Choose output STL file", "stl")
         val saveDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project)
         val fileWrapper = saveDialog.save(file.parent, file.nameWithoutExtension + ".stl") ?: return
-        
+
         val outputFile = fileWrapper.file
-        
+
         updateStatus("Exporting to ${outputFile.name}...")
-        
+
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 val stlPath = renderer.renderToSTL(file, outputFile.toPath())
-                
+
                 SwingUtilities.invokeLater {
                     if (stlPath != null) {
                         updateStatus("✓ Exported to ${outputFile.name}")
@@ -391,26 +437,26 @@ class OpenSCADPreviewFileEditor(
             }
         }
     }
-    
+
     private fun export3MF() {
         if (!file.isValid) {
             updateStatus("✗ File is not valid")
             return
         }
-        
+
         // Show file save dialog
         val descriptor = FileSaverDescriptor("Export to 3MF", "Choose output 3MF file (preserves colors)", "3mf")
         val saveDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project)
         val fileWrapper = saveDialog.save(file.parent, file.nameWithoutExtension + ".3mf") ?: return
-        
+
         val outputFile = fileWrapper.file
-        
+
         updateStatus("Exporting to ${outputFile.name}...")
-        
+
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 val threemfPath = renderer.renderTo3MF(file, outputFile.toPath())
-                
+
                 SwingUtilities.invokeLater {
                     if (threemfPath != null) {
                         updateStatus("✓ Exported to ${outputFile.name}")
@@ -442,28 +488,40 @@ class OpenSCADPreviewFileEditor(
             }
         }
     }
-    
+
     override fun getComponent(): JComponent = component
-    
+
     override fun getPreferredFocusedComponent(): JComponent? = viewerPanel
-    
+
     override fun getName(): String = "Preview"
-    
+
     override fun setState(state: FileEditorState) {}
-    
+
     override fun isModified(): Boolean = false
-    
+
     override fun isValid(): Boolean = file.isValid
-    
+
     override fun addPropertyChangeListener(listener: PropertyChangeListener) {}
-    
+
     override fun removePropertyChangeListener(listener: PropertyChangeListener) {}
-    
+
     override fun getCurrentLocation(): FileEditorLocation? = null
-    
+
     override fun dispose() {
-        // Cleanup if needed
+        // Stop animator and cleanup JOGL resources to prevent resource leaks
+        // and conflicts when multiple preview editors are open
+        when (viewer) {
+            is STLViewer3D -> {
+                try {
+                    // The STLViewer3D's animator must be stopped to prevent
+                    // thread leaks and OpenGL context conflicts
+                    viewer.cleanup()
+                } catch (e: Exception) {
+                    logger.warn("Error disposing JOGL viewer", e)
+                }
+            }
+        }
     }
-    
+
     override fun getFile(): VirtualFile = file
 }

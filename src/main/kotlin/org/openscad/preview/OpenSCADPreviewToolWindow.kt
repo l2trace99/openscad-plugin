@@ -15,6 +15,7 @@ import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import org.openscad.settings.OpenSCADSettings
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.*
@@ -52,14 +53,22 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
     private var isRendering = false
     
     init {
-        // Try to initialize JOGL viewer, fallback to simple viewer
-        val (panel, viewerInstance) = try {
-            val v = STLViewer3D(project)
-            Pair(v as JComponent, v)
-        } catch (e: Exception) {
-            logger.warn("Failed to initialize JOGL viewer, falling back to simple viewer", e)
+        // Initialize viewer based on hardware acceleration setting
+        val settings = OpenSCADSettings.getInstance(project)
+        val (panel, viewerInstance) = if (settings.useHardwareAcceleration) {
+            try {
+                val v = STLViewer3D(project)
+                logger.info("Initialized hardware-accelerated JOGL viewer")
+                Pair(v as JComponent, v as Any)
+            } catch (e: Exception) {
+                logger.warn("Failed to initialize JOGL viewer, falling back to software renderer", e)
+                val v = STLViewerPanel()
+                Pair(v as JComponent, v as Any)
+            }
+        } else {
             val v = STLViewerPanel()
-            Pair(v as JComponent, v)
+            logger.info("Initialized software renderer")
+            Pair(v as JComponent, v as Any)
         }
         viewerPanel = panel
         viewer = viewerInstance
@@ -101,8 +110,14 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         debugPreviewButton.addActionListener {
             currentFile?.let { renderDebugPreview(it) }
         }
+
+        // Debug preview requires STLViewerPanel features (camera sync, image preview)
+        if (viewer !is STLViewerPanel) {
+            debugPreviewButton.isEnabled = false
+            debugPreviewButton.toolTipText = "Debug preview requires software renderer"
+        }
     }
-    
+
     private fun setupListeners() {
         // Listen for file editor changes
         project.messageBus.connect().subscribe(
@@ -180,7 +195,7 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
                 }
                 
                 // Fall back to STL if 3MF fails
-                val stlPath = renderer.renderToSTL(file)
+                val stlPath = renderer.renderToSTL(file, usePreviewMode = true)
                 
                 if (stlPath != null) {
                     val model = stlParser.parse(stlPath)

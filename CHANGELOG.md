@@ -5,6 +5,32 @@ All notable changes to the OpenSCAD IntelliJ Plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-02-20
+
+### Fixed
+- **Temporary Directory Cleanup Race Condition** - Fixed "Can't open file" and "is not a directory" errors when switching between multiple rendered files by preventing cleanup threads from deleting active temp directories
+- **JOGL Viewer Resource Leak** - Fixed freeze when switching between multiple open `.scad` files by properly stopping FPSAnimator and disposing of OpenGL resources in `dispose()`
+- **JOGL Viewer Freeze on Tab Switch** - Fixed frozen preview when switching between file tabs by adding pause/resume logic tied to component visibility events
+- **Concurrent Render Stability** - Added timestamp-based tracking of active temp directories with automatic stale entry cleanup after 5 minutes
+
+### Technical
+- Implemented thread-safe `activeTempDirectories` map to track temp directories currently in use
+- Added `cleanup()` method to `STLViewer3D` to properly stop animator and dispose of GL canvas
+- Updated `OpenSCADPreviewFileEditor.dispose()` to call viewer cleanup when editor is closed
+- Added file selection listener to pause animator when tab becomes inactive and resume when tab becomes active
+- Added comprehensive tests for concurrent temp directory creation and cleanup scenarios
+
+## [1.4.1] - 2026-02-16
+
+### Added
+- **Hardware-Accelerated 3D Viewer** - Optional JOGL/OpenGL viewer for smoother 3D preview (Settings → Tools → OpenSCAD → "Use hardware-accelerated 3D viewer")
+- Falls back gracefully to software renderer if OpenGL initialization fails
+- Preview mode menu adapts to viewer capabilities (Wireframe and Debug modes only available with software renderer)
+
+### Fixed
+- **JOGL Viewer Lighting** - Fixed blown-out lighting in hardware-accelerated viewer caused by non-normalized normals after model scaling (`GL_NORMALIZE`)
+- **JOGL Viewer Rendering** - Enabled back-face culling and corrected material properties to eliminate visual artifacts
+
 ## [1.4.0] - 2026-02-16
 
 ### Added

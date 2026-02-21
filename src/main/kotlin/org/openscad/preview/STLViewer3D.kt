@@ -96,14 +96,12 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
     fun setModel(model: STLParser.STLModel?) {
         this.model = model
         this.coloredModel = null
-        resetView()
         repaint()
     }
-    
+
     fun setColoredModel(model: ThreeMFParser.ColoredModel?) {
         this.coloredModel = model
         this.model = null
-        resetView()
         repaint()
     }
     
@@ -122,23 +120,33 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         // Enable depth testing
         gl.glEnable(GL.GL_DEPTH_TEST)
         gl.glDepthFunc(GL.GL_LEQUAL)
-        
+
+        // Enable back-face culling (STL models are closed solids)
+        gl.glEnable(GL.GL_CULL_FACE)
+        gl.glCullFace(GL.GL_BACK)
+
         // Enable lighting
         gl.glEnable(GL2.GL_LIGHTING)
         gl.glEnable(GL2.GL_LIGHT0)
-        gl.glEnable(GL2.GL_COLOR_MATERIAL)
-        
+
         // Setup light
         val lightPos = floatArrayOf(1.0f, 1.0f, 1.0f, 0.0f)
-        val lightAmbient = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
-        val lightDiffuse = floatArrayOf(0.8f, 0.8f, 0.8f, 1.0f)
-        val lightSpecular = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
-        
+        val lightAmbient = floatArrayOf(0.2f, 0.2f, 0.2f, 1.0f)
+        val lightDiffuse = floatArrayOf(0.7f, 0.7f, 0.7f, 1.0f)
+        val lightSpecular = floatArrayOf(0.4f, 0.4f, 0.4f, 1.0f)
+
+        // Disable global ambient (defaults to 0.2, stacks on top of per-light ambient)
+        gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f), 0)
+
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPos, 0)
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, lightAmbient, 0)
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, lightDiffuse, 0)
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, lightSpecular, 0)
-        
+
+        // Renormalize normals after model scaling (glScalef stretches normals,
+        // causing blown-out lighting without this)
+        gl.glEnable(GL2.GL_NORMALIZE)
+
         // Enable smooth shading
         gl.glShadeModel(GL2.GL_SMOOTH)
         
@@ -187,13 +195,13 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         // Set material properties - OpenSCAD default (coral/orange)
         val matAmbient = floatArrayOf(0.95f, 0.55f, 0.35f, 1.0f)
         val matDiffuse = floatArrayOf(0.95f, 0.55f, 0.35f, 1.0f)
-        val matSpecular = floatArrayOf(0.8f, 0.8f, 0.8f, 1.0f)
-        val matShininess = floatArrayOf(32.0f)
+        val matSpecular = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
+        val matShininess = floatArrayOf(64.0f)
         
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_AMBIENT, matAmbient, 0)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_DIFFUSE, matDiffuse, 0)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SPECULAR, matSpecular, 0)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SHININESS, matShininess, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT, matAmbient, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_DIFFUSE, matDiffuse, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, matSpecular, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, matShininess, 0)
         
         // Draw triangles
         gl.glBegin(GL2.GL_TRIANGLES)
@@ -273,10 +281,10 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE)
         
         // Set specular properties (shared for all triangles)
-        val matSpecular = floatArrayOf(0.5f, 0.5f, 0.5f, 1.0f)
-        val matShininess = floatArrayOf(32.0f)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SPECULAR, matSpecular, 0)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SHININESS, matShininess, 0)
+        val matSpecular = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
+        val matShininess = floatArrayOf(64.0f)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, matSpecular, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, matShininess, 0)
         
         // Draw triangles with per-triangle colors
         gl.glBegin(GL2.GL_TRIANGLES)
@@ -352,5 +360,41 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
     
     override fun dispose(drawable: GLAutoDrawable) {
         animator.stop()
+    }
+
+    /**
+     * Pause the animator to save resources when the editor is not visible.
+     */
+    fun pauseAnimator() {
+        if (animator.isAnimating && !animator.isPaused) {
+            animator.pause()
+        }
+    }
+
+    /**
+     * Resume the animator when the editor becomes visible again.
+     */
+    fun resumeAnimator() {
+        if (animator.isPaused) {
+            animator.resume()
+        } else if (!animator.isAnimating) {
+            animator.start()
+        }
+    }
+
+    /**
+     * Cleanup method called when the editor is closed.
+     * Stops the animator to prevent thread leaks and OpenGL context conflicts.
+     */
+    fun cleanup() {
+        // Resume if paused, then stop (stop() doesn't work on paused animators)
+        if (animator.isPaused) {
+            animator.resume()
+        }
+        if (animator.isAnimating) {
+            animator.stop()
+        }
+        // Dispose of the GL canvas
+        canvas.destroy()
     }
 }

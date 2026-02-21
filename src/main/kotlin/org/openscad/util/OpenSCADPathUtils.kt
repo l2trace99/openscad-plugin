@@ -8,7 +8,11 @@ import java.nio.file.Path
  * Utility functions for OS-independent path handling in OpenSCAD plugin
  */
 object OpenSCADPathUtils {
-    
+
+    // Track active temp directories to prevent premature deletion during concurrent renders
+    // Uses a map to track both the path and when it was last accessed
+    private val activeTempDirectories = mutableMapOf<Path, Long>()
+
     /**
      * Returns a list of common OpenSCAD library paths appropriate for the current OS.
      * Paths are not filtered for existence - caller should filter if needed.
@@ -88,26 +92,48 @@ object OpenSCADPathUtils {
                 File(System.getProperty("java.io.tmpdir"))
             }
         }
-        
-        // Collect existing preview directories before creating new one
-        val existingDirs = getExistingTempDirectories(parentDir, prefix)
-        
-        // Create the new temp directory first
+
+        // Create the new temp directory
         val newDir = Files.createTempDirectory(parentDir.toPath(), prefix)
-        
-        // Delete old directories in background thread
+
+        // Register as active to prevent deletion by concurrent renders
+        val now = System.currentTimeMillis()
+        synchronized(activeTempDirectories) {
+            activeTempDirectories[newDir] = now
+
+            // Clean up stale entries older than 5 minutes (directory must have been deleted externally or process crashed)
+            val staleThreshold = now - 300_000 // 5 minutes
+            activeTempDirectories.entries.removeIf { (path, timestamp) ->
+                timestamp < staleThreshold || !Files.exists(path)
+            }
+        }
+
+        // Collect existing preview directories for cleanup
+        val existingDirs = getExistingTempDirectories(parentDir, prefix)
+
+        // Delete old directories in background thread, excluding active ones
         if (existingDirs.isNotEmpty()) {
             Thread {
+                // Small delay to allow concurrent renders to register their directories
+                Thread.sleep(100)
+
                 existingDirs.forEach { dir ->
-                    try {
-                        dir.deleteRecursively()
-                    } catch (e: Exception) {
-                        // Ignore errors during cleanup
+                    val dirPath = dir.toPath()
+                    // Skip directories that are currently active
+                    val isActive = synchronized(activeTempDirectories) {
+                        activeTempDirectories.containsKey(dirPath)
+                    }
+                    if (!isActive) {
+                        try {
+                            dir.deleteRecursively()
+                        } catch (e: Exception) {
+                            // Ignore errors during cleanup
+                        }
                     }
                 }
             }.start()
         }
-        
+
         return newDir
     }
     

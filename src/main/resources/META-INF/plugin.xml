@@ -1,16 +1,16 @@
 <idea-plugin>
     <id>org.openscad.plugin</id>
     <name>OpenSCAD</name>
-    <version>1.4.0</version>
+    <version>1.4.2</version>
     <vendor email="support@openscad.org" url="https://openscad.org">OpenSCAD Community</vendor>
 
     <description>
         <![CDATA[
         <h1>OpenSCAD Language Support</h1>
         <p>Full-featured IntelliJ IDEA plugin for OpenSCAD with syntax highlighting, code intelligence, and real-time 3D preview.</p>
-        
+
         <p><b>Support this project:</b> <a href="https://www.buymeacoffee.com/l2trace99">Buy Me a Coffee ☕</a></p>
-        
+
         <h2>Features</h2>
         <ul>
             <li><b>Syntax Highlighting</b> - Full OpenSCAD language support with trailing comma support</li>
@@ -30,17 +30,17 @@
             <li><b>File Templates</b> - Quick start with Empty, 3D Model, or 2D Shape templates</li>
             <li><b>Cross-Platform</b> - Windows, macOS, and Linux support (including Flatpak)</li>
         </ul>
-        
+
         <h2>Getting Started</h2>
         <p><b>New to OpenSCAD? Follow these steps to get started quickly:</b></p>
-        
+
         <h3>Step 1: Install OpenSCAD</h3>
         <ol>
             <li>Download OpenSCAD from <a href="https://openscad.org/downloads.html">openscad.org/downloads</a></li>
             <li>Install it using your platform's installer (Windows .exe, macOS .dmg, Linux package)</li>
             <li>Verify installation: Open terminal/command prompt and run <code>openscad --version</code></li>
         </ol>
-        
+
         <h3>Step 2: Install the Plugin</h3>
         <ol>
             <li>Open IntelliJ IDEA (or any JetBrains IDE)</li>
@@ -48,7 +48,7 @@
             <li>Search for "OpenSCAD" in the Marketplace</li>
             <li>Click <b>Install</b> and restart the IDE</li>
         </ol>
-        
+
         <h3>Step 3: Configure the Plugin</h3>
         <ol>
             <li>Go to <b>Settings → Tools → OpenSCAD</b></li>
@@ -69,7 +69,7 @@
             <li><b>Rendering Options</b>: Enable <b>auto-refresh on Save</b> for automatic preview updates</li>
             <li>Click <b>Apply</b> and <b>OK</b></li>
         </ol>
-        
+
         <h3>Step 4: Create Your First OpenSCAD File</h3>
         <ol>
             <li>Go to <b>File → New → OpenSCAD File</b></li>
@@ -82,23 +82,23 @@
             </li>
             <li>Give it a name (e.g., <code>my_first_model.scad</code>) and click <b>OK</b></li>
         </ol>
-        
+
         <h3>Step 5: Your First 3D Model</h3>
         <p>Try this simple example to see the plugin in action:</p>
         <pre><code>// My first OpenSCAD model
 cube([20, 20, 10]);
-translate([30, 0, 0]) 
+translate([30, 0, 0])
     cylinder(h=10, r=10);
 translate([15, 15, 5])
     sphere(r=5);</code></pre>
-        
+
         <p><b>What happens:</b></p>
         <ul>
             <li>The editor shows syntax highlighting as you type</li>
             <li>The preview pane displays your 3D model in real-time</li>
             <li>Save the file (Ctrl+S/Cmd+S) to update the preview (if auto-refresh is enabled)</li>
         </ul>
-        
+
         <h3>Step 6: Explore the Features</h3>
         <ul>
             <li><b>Autocomplete</b>: Press Ctrl+Space to see available functions and modules</li>
@@ -114,34 +114,34 @@ translate([15, 15, 5])
             </li>
             <li><b>Export</b>: Right-click your file → <b>Export to STL</b> to save for 3D printing</li>
         </ul>
-        
+
         <h3>Step 7: Learn OpenSCAD Basics</h3>
         <p>Here are the essential OpenSCAD concepts to get you started:</p>
-        
+
         <h4>Basic 3D Shapes</h4>
         <pre><code>cube([width, height, depth]);           // Box
 sphere(radius);                        // Sphere
 cylinder(h=height, r=radius);          // Cylinder</code></pre>
-        
+
         <h4>Transformations</h4>
         <pre><code>translate([x, y, z])                    // Move
-rotate([x, y, z])                      // Rotate  
+rotate([x, y, z])                      // Rotate
 scale([x, y, z])                       // Scale</code></pre>
-        
+
         <h4>Boolean Operations</h4>
         <pre><code>union() { ... }                        // Combine shapes
 difference() { ... }                    // Subtract shapes
 intersection() { ... }                  // Keep overlap</code></pre>
-        
+
         <h4>Modules (Reusable Components)</h4>
         <pre><code>module my_block(size) {
     cube(size);
-    translate([size/2, size/2, size]) 
+    translate([size/2, size/2, size])
         sphere(r=size/4);
 }
 
 my_block([20, 20, 10]);  // Use the module</code></pre>
-        
+
         <h3>Next Steps</h3>
         <ul>
             <li><b>OpenSCAD Documentation</b>: <a href="https://openscad.org/documentation.html">openscad.org/documentation</a></li>
@@ -149,7 +149,7 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             <li><b>Popular Libraries</b>: MCAD, BOSL2, NopSCADlib (add them in Settings → Library Paths)</li>
             <li><b>Community</b>: Join the OpenSCAD community for help and inspiration</li>
         </ul>
-        
+
         <p><b>💡 Tip:</b> Start with simple shapes, then gradually learn transformations and modules. OpenSCAD is different from traditional CAD - it's more like programming with 3D shapes!</p>
 
         <h2>System Requirements</h2>
@@ -160,17 +160,17 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             <li><b>IntelliJ Platform</b>: 2023.2 or later (IntelliJ IDEA, PyCharm, WebStorm, etc.)</li>
             <li><b>Java</b>: JDK 17 or later (bundled with IDE)</li>
         </ul>
-        
+
         <h2>Installation & Setup</h2>
         <ol>
             <li><b>Install OpenSCAD</b> from <a href="https://openscad.org/downloads.html">openscad.org</a></li>
             <li><b>Install Plugin</b> from JetBrains Marketplace or manually from ZIP</li>
             <li><b>Configure Settings</b> (see below)</li>
         </ol>
-        
+
         <h2>Settings Configuration</h2>
         <p>Go to <b>Settings → Tools → OpenSCAD</b> to configure:</p>
-        
+
         <h3>OpenSCAD Executable Path</h3>
         <ul>
             <li><b>Auto-detection</b>: Plugin automatically detects OpenSCAD in standard locations</li>
@@ -179,7 +179,7 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             <li><b>Windows</b>: <code>C:\Program Files\OpenSCAD\openscad.exe</code></li>
             <li><b>Linux</b>: <code>/usr/bin/openscad</code></li>
         </ul>
-        
+
         <h3>Library Paths (OPENSCADPATH)</h3>
         <ul>
             <li><b>Purpose</b>: Resolve external libraries and enable library autocomplete</li>
@@ -193,7 +193,7 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             <li><b>Common libraries</b>: MCAD, BOSL2, NopSCADlib, etc.</li>
             <li><b>Indexing</b>: Libraries are indexed on project startup and re-indexed on file save</li>
         </ul>
-        
+
         <h3>Rendering Options</h3>
         <ul>
             <li><b>Use Full Render</b>: Enable for high-quality preview (slower, uses <code>--render</code> flag)</li>
@@ -201,16 +201,16 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             <li><b>View All</b>: Fit entire model in view (<code>--viewall</code>)</li>
             <li><b>auto-refresh on Save</b>: Automatically update preview when file is saved</li>
         </ul>
-        
+
         <h3>Custom Temp Directory (Flatpak/Sandbox Support)</h3>
         <ul>
             <li><b>Purpose</b>: Required for sandboxed OpenSCAD installations (Flatpak) that cannot access <code>/tmp</code></li>
             <li><b>Recommended</b>: <code>~/.cache/openscad-plugin/</code> for Linux</li>
             <li><b>Note</b>: On Linux, the plugin automatically uses <code>~/.cache/openscad-plugin/</code> as the default</li>
         </ul>
-        
+
         <h2>Usage Guide</h2>
-        
+
         <h3>Rename Refactoring</h3>
         <ol>
             <li>Place cursor on a module or function name</li>
@@ -218,7 +218,7 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             <li>Enter the new name - all usages are automatically updated</li>
         </ol>
         <p><b>Name validation:</b> Names must start with a letter or underscore, contain only letters/digits/underscores, and cannot be OpenSCAD keywords.</p>
-        
+
         <h3>Creating New Files</h3>
         <ol>
             <li>Go to <b>File → New → OpenSCAD File</b></li>
@@ -230,7 +230,7 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
                 </ul>
             </li>
         </ol>
-        
+
         <h3>3D Preview</h3>
         <ul>
             <li><b>Open</b>: Any <code>.scad</code> file automatically shows split editor with preview</li>
@@ -245,14 +245,14 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
                 </ul>
             </li>
         </ul>
-        
+
         <h3>Export Options</h3>
         <ul>
             <li><b>Single File Export</b>: Right-click <code>.scad</code> file → <b>Export to STL</b></li>
             <li><b>Multi-Format Export</b>: Right-click → <b>Export to Multiple Formats</b> (STL + PNG)</li>
             <li><b>Batch Export</b>: <b>Tools → Batch Export to STL</b> (exports all project files)</li>
         </ul>
-        
+
         <h3>Run Configurations</h3>
         <ol>
             <li>Go to <b>Run → Edit Configurations</b></li>
@@ -270,7 +270,7 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             </li>
             <li>Click <b>Run</b> to execute</li>
         </ol>
-        
+
         <h3>Animation Export</h3>
         <ul>
             <li>Use <code>$t</code> variable in your OpenSCAD code (ranges from 0 to 1)</li>
@@ -278,29 +278,29 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             <li>In Run Configuration, enable animation and set frame count</li>
             <li>Generates multiple files: <code>output_0001.png</code>, <code>output_0002.png</code>, etc.</li>
         </ul>
-        
+
         <h2>Troubleshooting</h2>
-        
+
         <h3>Preview Not Working</h3>
         <ul>
             <li>Check OpenSCAD is installed: Run <code>openscad --version</code> in terminal</li>
             <li>Verify executable path in Settings → Tools → OpenSCAD</li>
             <li>Check IDE notifications for error messages</li>
         </ul>
-        
+
         <h3>"Can't open library" Warnings</h3>
         <ul>
             <li>Add library paths in Settings → Tools → OpenSCAD → Library Paths</li>
             <li>Ensure paths point to directories containing <code>.scad</code> library files</li>
         </ul>
-        
+
         <h3>Rendering Errors</h3>
         <ul>
             <li>Check OpenSCAD syntax - errors shown in IDE notifications</li>
             <li>Try rendering in the OpenSCAD application directly to verify code</li>
             <li>Enable full render in settings for better error reporting</li>
         </ul>
-        
+
         <h2>Support & Resources</h2>
         <ul>
             <li><b>GitHub</b>: <a href="https://github.com/l2trace99/openscad-plugin">github.com/l2trace99/openscad-plugin</a></li>
@@ -314,28 +314,28 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
     <change-notes>
         <![CDATA[
         <h2>Version 1.3.1 (2026-02-01)</h2>
-        
+
         <h3>🆕 Added</h3>
         <ul>
             <li><b>3MF File Support</b> - Full support for importing and rendering 3MF files with preserved color information from OpenSCAD's <code>color()</code> statements</li>
             <li><b>Enhanced Rename Refactoring</b> - Improved validation for module and function renaming with custom name validator and OpenSCAD keyword detection</li>
             <li><b>Color Support in Preview</b> - Preview pane now properly displays colored models from 3MF exports</li>
         </ul>
-        
+
         <h3>🔄 Changed</h3>
         <ul>
             <li><b>Auto-refresh Text</b> - Changed "auto-render" terminology to "auto-refresh" throughout the UI for clarity</li>
             <li><b>Improved Preview UI</b> - Enhanced user interface for better preview pane experience</li>
             <li><b>Orientation Cube Fix</b> - Fixed orientation cube controls for proper view switching</li>
         </ul>
-        
+
         <h3>🐛 Fixed</h3>
         <ul>
             <li><b>Smart Library Indexing</b> - Library indexing now only triggers when files in library directories actually change, reducing unnecessary re-indexing</li>
             <li><b>Preview Performance</b> - Optimized preview rendering by avoiding redundant library scans on file save</li>
             <li><b>Debug View Synchronization</b> - Improved synchronization between debug preview and 3D view camera angles</li>
         </ul>
-        
+
         <h3>🔧 Technical</h3>
         <ul>
             <li>Added <code>ThreeMFParser</code> class for parsing 3MF files with color information</li>
@@ -350,12 +350,12 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- File type -->
-        <fileType name="OpenSCAD" 
-                  implementationClass="org.openscad.file.OpenSCADFileType" 
-                  fieldName="INSTANCE" 
-                  language="OpenSCAD" 
+        <fileType name="OpenSCAD"
+                  implementationClass="org.openscad.file.OpenSCADFileType"
+                  fieldName="INSTANCE"
+                  language="OpenSCAD"
                   extensions="scad"/>
-        
+
         <!-- Language support -->
         <lang.parserDefinition language="OpenSCAD" implementationClass="org.openscad.parser.OpenSCADParserDefinition"/>
         <!-- Syntax highlighting -->
@@ -365,7 +365,7 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
         <annotator language="OpenSCAD" implementationClass="org.openscad.highlighting.OpenSCADWarningAnnotator"/>
         <colorSettingsPage implementation="org.openscad.highlighting.OpenSCADColorSettingsPage"/>
         <lang.commenter language="OpenSCAD" implementationClass="org.openscad.commenter.OpenSCADCommenter"/>
-        
+
         <!-- Code intelligence -->
         <completion.contributor language="OpenSCAD" implementationClass="org.openscad.completion.OpenSCADCompletionContributor"/>
         <lang.psiStructureViewFactory language="OpenSCAD" implementationClass="org.openscad.structure.OpenSCADStructureViewFactory"/>
@@ -373,43 +373,43 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
         <gotoDeclarationHandler implementation="org.openscad.references.OpenSCADGotoDeclarationHandler"/>
         <lang.findUsagesProvider language="OpenSCAD" implementationClass="org.openscad.findusages.OpenSCADFindUsagesProvider"/>
         <lang.documentationProvider language="OpenSCAD" implementationClass="org.openscad.documentation.OpenSCADDocumentationProvider"/>
-        
+
         <!-- Rename refactoring support -->
         <lang.namesValidator language="OpenSCAD" implementationClass="org.openscad.refactoring.OpenSCADNamesValidator"/>
         <renameInputValidator implementation="org.openscad.refactoring.OpenSCADRenameInputValidator"/>
         <referencesSearch implementation="org.openscad.references.OpenSCADReferencesSearcher"/>
-        
+
         <!-- Editor features -->
         <lang.braceMatcher language="OpenSCAD" implementationClass="org.openscad.editor.OpenSCADBraceMatcher"/>
         <lang.foldingBuilder language="OpenSCAD" implementationClass="org.openscad.editor.OpenSCADFoldingBuilder"/>
         <fileEditorProvider implementation="org.openscad.editor.OpenSCADSplitEditorProvider"/>
-        
+
         <!-- Preview tool window -->
-        <toolWindow id="OpenSCAD Preview" 
-                    anchor="right" 
+        <toolWindow id="OpenSCAD Preview"
+                    anchor="right"
                     icon="/icons/openscad.svg"
                     factoryClass="org.openscad.preview.OpenSCADPreviewToolWindowFactory"/>
-        
+
         <!-- Settings -->
-        <projectConfigurable parentId="tools" 
+        <projectConfigurable parentId="tools"
                            instance="org.openscad.settings.OpenSCADSettingsConfigurable"
                            id="org.openscad.settings.OpenSCADSettingsConfigurable"
                            displayName="OpenSCAD"/>
         <projectService serviceImplementation="org.openscad.settings.OpenSCADSettings"/>
         <projectService serviceImplementation="org.openscad.references.OpenSCADLibraryIndexer"/>
-        
+
         <!-- Library roots provider for PSI parsing of library files -->
         <additionalLibraryRootsProvider implementation="org.openscad.references.OpenSCADLibraryRootsProvider"/>
-        
+
         <!-- Startup activity for library indexing -->
         <postStartupActivity implementation="org.openscad.references.OpenSCADLibraryIndexerStartup"/>
-        
+
         <!-- File save listener for re-indexing -->
         <fileDocumentManagerListener implementation="org.openscad.references.OpenSCADFileSaveListener"/>
-        
+
         <!-- Notifications -->
         <notificationGroup id="OpenSCAD" displayType="BALLOON" isLogByDefault="true"/>
-        
+
         <!-- Run Configuration -->
         <configurationType implementation="org.openscad.run.OpenSCADConfigurationType"/>
     </extensions>
@@ -422,16 +422,16 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
                 description="Create new OpenSCAD file">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
         </action>
-        
+
         <!-- Context menu action for showing documentation -->
-        <action id="OpenSCAD.ShowDocumentation" 
-                class="org.openscad.actions.ShowDocumentationAction" 
-                text="Show OpenSCAD Documentation" 
+        <action id="OpenSCAD.ShowDocumentation"
+                class="org.openscad.actions.ShowDocumentationAction"
+                text="Show OpenSCAD Documentation"
                 description="Show documentation for the OpenSCAD symbol at caret">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
         </action>
-        
+
         <!-- Export actions -->
         <action id="OpenSCAD.ExportSTL"
                 class="org.openscad.actions.ExportSTLAction"
@@ -440,14 +440,14 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
-        
+
         <action id="OpenSCAD.BatchExport"
                 class="org.openscad.actions.BatchExportAction"
                 text="Batch Export to STL..."
                 description="Export all OpenSCAD files in project to STL">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
-        
+
         <action id="OpenSCAD.ExportMultiFormat"
                 class="org.openscad.actions.ExportMultiFormatAction"
                 text="Export to Multiple Formats..."

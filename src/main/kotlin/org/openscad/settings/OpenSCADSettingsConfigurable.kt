@@ -34,7 +34,10 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
     private val useFullRenderCheckbox = JBCheckBox("Use full render (slower, more accurate)")
     private val autoCenterCheckbox = JBCheckBox("Auto-center model")
     private val viewAllCheckbox = JBCheckBox("Auto-fit model to view")
-    
+
+    // Viewer settings
+    private val hardwareAccelerationCheckbox = JBCheckBox("Use hardware-accelerated 3D viewer (experimental)")
+
     // Grid settings
     private val showGridCheckbox = JBCheckBox("Show grid in preview")
     private val gridSizeField = JBTextField()
@@ -125,7 +128,9 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             .addComponent(viewAllCheckbox)
             .addTooltip("Automatically adjust camera to fit the entire model")
             .addSeparator()
-            .addLabeledComponent(JBLabel("Grid Settings:"), JPanel(), 1, false)
+            .addLabeledComponent(JBLabel("Viewer Settings:"), JPanel(), 1, false)
+            .addComponent(hardwareAccelerationCheckbox)
+            .addTooltip("Uses OpenGL for hardware-accelerated rendering. May not work on all systems (requires working OpenGL drivers). Requires reopening .scad files to take effect.")
             .addComponent(showGridCheckbox)
             .addTooltip("Show a horizontal grid centered on the origin")
             .addLabeledComponent(JBLabel("Grid size (mm):"), gridSizeField, 1, false)
@@ -157,6 +162,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
                 useFullRenderCheckbox.isSelected != settings.useFullRender ||
                 autoCenterCheckbox.isSelected != settings.autoCenter ||
                 viewAllCheckbox.isSelected != settings.viewAll ||
+                hardwareAccelerationCheckbox.isSelected != settings.useHardwareAcceleration ||
                 showGridCheckbox.isSelected != settings.showGrid ||
                 gridSizeField.text != settings.gridSize.toString() ||
                 gridSpacingField.text != settings.gridSpacing.toString() ||
@@ -175,6 +181,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         settings.useFullRender = useFullRenderCheckbox.isSelected
         settings.autoCenter = autoCenterCheckbox.isSelected
         settings.viewAll = viewAllCheckbox.isSelected
+        settings.useHardwareAcceleration = hardwareAccelerationCheckbox.isSelected
         settings.showGrid = showGridCheckbox.isSelected
         settings.gridSize = gridSizeField.text.toFloatOrNull() ?: 250.0f
         settings.gridSpacing = gridSpacingField.text.toFloatOrNull() ?: 10.0f
@@ -201,6 +208,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         useFullRenderCheckbox.isSelected = settings.useFullRender
         autoCenterCheckbox.isSelected = settings.autoCenter
         viewAllCheckbox.isSelected = settings.viewAll
+        hardwareAccelerationCheckbox.isSelected = settings.useHardwareAcceleration
         showGridCheckbox.isSelected = settings.showGrid
         gridSizeField.text = settings.gridSize.toString()
         gridSpacingField.text = settings.gridSpacing.toString()
