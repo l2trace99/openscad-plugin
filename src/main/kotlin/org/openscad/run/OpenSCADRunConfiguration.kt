@@ -52,6 +52,19 @@ class OpenSCADRunConfiguration(
                     commandLine.withEnvironment("OPENSCADPATH", openscadPath)
                 }
                 
+                // Backend selection - use run config override, or fall back to project setting
+                // "auto" means explicitly no backend flag; empty means use project setting
+                val backend = if (options.backend.isEmpty()) {
+                    OpenSCADSettings.getInstance(project).renderBackend
+                } else if (options.backend == "auto") {
+                    ""
+                } else {
+                    options.backend
+                }
+                if (backend.isNotEmpty()) {
+                    commandLine.addParameter("--backend=$backend")
+                }
+
                 // Add parameters based on configuration
                 if (options.outputPath.isNotEmpty()) {
                     commandLine.addParameter("-o")
@@ -147,7 +160,8 @@ class OpenSCADRunConfigurationOptions : RunConfigurationOptions() {
     private val cameraSettingsOption = string("").provideDelegate(this, "cameraSettings")
     private val imageSizeOption = string("").provideDelegate(this, "imageSize")
     private val customParametersOption = string("").provideDelegate(this, "customParameters")
-    
+    private val backendOption = string("").provideDelegate(this, "backend")
+
     var scriptPath: String
         get() = scriptPathOption.getValue(this) ?: ""
         set(value) { scriptPathOption.setValue(this, value) }
@@ -191,4 +205,8 @@ class OpenSCADRunConfigurationOptions : RunConfigurationOptions() {
     var customParameters: String
         get() = customParametersOption.getValue(this) ?: ""
         set(value) { customParametersOption.setValue(this, value) }
+
+    var backend: String
+        get() = backendOption.getValue(this) ?: ""
+        set(value) { backendOption.setValue(this, value) }
 }

@@ -15,6 +15,7 @@ import com.intellij.util.ui.FormBuilder
 import org.openscad.preview.OpenSCADRenderer
 import org.openscad.references.OpenSCADLibraryIndexer
 import java.awt.BorderLayout
+import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -29,6 +30,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
     private val detectedPathLabel = JBLabel()
     
     // Rendering options
+    private val backendComboBox = JComboBox(arrayOf("Manifold (recommended)", "CGAL", "Auto (OpenSCAD default)"))
     private val useFullRenderCheckbox = JBCheckBox("Use full render (slower, more accurate)")
     private val autoCenterCheckbox = JBCheckBox("Auto-center model")
     private val viewAllCheckbox = JBCheckBox("Auto-fit model to view")
@@ -114,8 +116,10 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
             .addLabeledComponent(JBLabel("Render timeout (seconds):"), timeoutField, 1, false)
             .addSeparator()
             .addLabeledComponent(JBLabel("Rendering Options:"), JPanel(), 1, false)
+            .addLabeledComponent(JBLabel("Geometry backend:"), backendComboBox, 1, false)
+            .addTooltip("Manifold is 20-100x faster than CGAL. Select Manifold if you have OpenSCAD 2024.09+; use Auto for older versions.")
             .addComponent(useFullRenderCheckbox)
-            .addTooltip("Use CGAL rendering instead of OpenCSG preview (slower but more accurate)")
+            .addTooltip("Use full geometry render instead of OpenCSG preview (slower but more accurate)")
             .addComponent(autoCenterCheckbox)
             .addTooltip("Automatically center the model in the view")
             .addComponent(viewAllCheckbox)
@@ -149,6 +153,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         return openscadPathField.text != settings.openscadPath ||
                 autoRenderCheckbox.isSelected != settings.autoRenderOnSave ||
                 timeoutField.text != settings.renderTimeout.toString() ||
+                backendToSettingValue(backendComboBox.selectedIndex) != settings.renderBackend ||
                 useFullRenderCheckbox.isSelected != settings.useFullRender ||
                 autoCenterCheckbox.isSelected != settings.autoCenter ||
                 viewAllCheckbox.isSelected != settings.viewAll ||
@@ -166,6 +171,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         settings.openscadPath = openscadPathField.text
         settings.autoRenderOnSave = autoRenderCheckbox.isSelected
         settings.renderTimeout = timeoutField.text.toIntOrNull() ?: 30
+        settings.renderBackend = backendToSettingValue(backendComboBox.selectedIndex)
         settings.useFullRender = useFullRenderCheckbox.isSelected
         settings.autoCenter = autoCenterCheckbox.isSelected
         settings.viewAll = viewAllCheckbox.isSelected
@@ -191,6 +197,7 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         openscadPathField.text = settings.openscadPath
         autoRenderCheckbox.isSelected = settings.autoRenderOnSave
         timeoutField.text = settings.renderTimeout.toString()
+        backendComboBox.selectedIndex = settingValueToBackendIndex(settings.renderBackend)
         useFullRenderCheckbox.isSelected = settings.useFullRender
         autoCenterCheckbox.isSelected = settings.autoCenter
         viewAllCheckbox.isSelected = settings.viewAll
@@ -200,5 +207,17 @@ class OpenSCADSettingsConfigurable(private val project: Project) : Configurable 
         libraryPathsField.text = settings.libraryPaths.joinToString("\n")
         tempDirectoryField.text = settings.customTempDirectory
         modified = false
+    }
+
+    private fun backendToSettingValue(index: Int): String = when (index) {
+        0 -> "manifold"
+        1 -> "cgal"
+        else -> ""
+    }
+
+    private fun settingValueToBackendIndex(value: String): Int = when (value) {
+        "manifold" -> 0
+        "cgal" -> 1
+        else -> 2
     }
 }
