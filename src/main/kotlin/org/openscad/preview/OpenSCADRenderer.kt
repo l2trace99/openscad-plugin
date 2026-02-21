@@ -24,9 +24,10 @@ class OpenSCADRenderer(private val project: Project) {
      * Renders an OpenSCAD file to STL format
      * @param scadFile The OpenSCAD source file
      * @param outputPath Optional output path for the STL file. If null, uses temp directory
+     * @param usePreviewMode If true, uses preview mode (shows %, #, ! modifiers); if false, uses settings
      * @return Path to the generated STL file, or null if rendering failed
      */
-    fun renderToSTL(scadFile: VirtualFile, outputPath: Path? = null): Path? {
+    fun renderToSTL(scadFile: VirtualFile, outputPath: Path? = null, usePreviewMode: Boolean = false): Path? {
         val openscadPath = findOpenSCADExecutable() ?: run {
             logger.warn("OpenSCAD executable not found")
             return null
@@ -46,7 +47,9 @@ class OpenSCADRenderer(private val project: Project) {
             }
 
             // Rendering mode
-            if (settings.useFullRender) {
+            // Use preview mode if requested (to show debug modifiers like %, #, !, *)
+            // Otherwise respect settings
+            if (!usePreviewMode && settings.useFullRender) {
                 params.add("--render")
             }
             

@@ -283,7 +283,7 @@ class OpenSCADPreviewFileEditor(
 
                 // Fall back to STL if 3MF fails
                 logger.info("Falling back to STL render")
-                val stlPath = renderer.renderToSTL(file)
+                val stlPath = renderer.renderToSTL(file, usePreviewMode = true)
 
                 if (stlPath != null) {
                     val model = stlParser.parse(stlPath)

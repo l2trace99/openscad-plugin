@@ -195,7 +195,7 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
                 }
                 
                 // Fall back to STL if 3MF fails
-                val stlPath = renderer.renderToSTL(file)
+                val stlPath = renderer.renderToSTL(file, usePreviewMode = true)
                 
                 if (stlPath != null) {
                     val model = stlParser.parse(stlPath)
