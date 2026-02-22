@@ -19,9 +19,10 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import org.openscad.preview.OpenSCADRenderer
 import org.openscad.preview.STLParser
-import org.openscad.preview.STLViewer3D
+import org.openscad.preview.STLViewer
 import org.openscad.preview.STLViewerPanel
 import org.openscad.preview.ThreeMFParser
+import org.openscad.preview.ViewerFactory
 import org.openscad.settings.OpenSCADSettings
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -44,8 +45,9 @@ class OpenSCADPreviewFileEditor(
     private val threemfParser = ThreeMFParser()
 
     private val component: JComponent
-    private val viewer: Any
+    private val viewer: STLViewer
     private val viewerPanel: JComponent
+    private val isHardwareAccelerated: Boolean
 
     private val statusLabel = JLabel("Ready")
     private val renderButton = JButton("Render")
@@ -64,24 +66,11 @@ class OpenSCADPreviewFileEditor(
     private var isRendering = false
 
     init {
-        // Initialize viewer based on hardware acceleration setting
-        val (panel, viewerInstance) = if (settings.useHardwareAcceleration) {
-            try {
-                val v = STLViewer3D(project)
-                logger.info("Initialized hardware-accelerated JOGL viewer")
-                Pair(v as JComponent, v as Any)
-            } catch (e: Exception) {
-                logger.warn("Failed to initialize JOGL viewer, falling back to software renderer", e)
-                val v = STLViewerPanel()
-                Pair(v as JComponent, v as Any)
-            }
-        } else {
-            val v = STLViewerPanel()
-            logger.info("Initialized software renderer")
-            Pair(v as JComponent, v as Any)
-        }
-        viewerPanel = panel
-        viewer = viewerInstance
+        // Initialize viewer using factory
+        val viewerResult = ViewerFactory.create(project)
+        viewerPanel = viewerResult.panel
+        viewer = viewerResult.viewer
+        isHardwareAccelerated = viewerResult.isHardwareAccelerated
 
         // Create main component
         component = JPanel(BorderLayout()).apply {
@@ -117,15 +106,12 @@ class OpenSCADPreviewFileEditor(
         }
 
         resetViewButton.addActionListener {
-            when (viewer) {
-                is STLViewer3D -> viewer.resetView()
-                is STLViewerPanel -> viewer.resetView()
-            }
+            viewer.resetView()
         }
 
         previewModeButton.addActionListener {
             val popup = JPopupMenu()
-            val availableModes = if (viewer is STLViewerPanel) {
+            val availableModes = if (!isHardwareAccelerated) {
                 PreviewMode.values().toList()
             } else {
                 // JOGL viewer only supports solid 3D mode
@@ -191,8 +177,9 @@ class OpenSCADPreviewFileEditor(
                 renderFile()
             }
             PreviewMode.WIREFRAME -> {
-                if (viewer is STLViewerPanel) {
-                    viewer.setWireframe(true)
+                val softwareViewer = viewer as? STLViewerPanel
+                if (softwareViewer != null) {
+                    softwareViewer.setWireframe(true)
                     renderFile()
                 } else {
                     // JOGL viewer doesn't support wireframe, fall back to solid 3D
@@ -202,7 +189,7 @@ class OpenSCADPreviewFileEditor(
                 }
             }
             PreviewMode.OPENSCAD_DEBUG -> {
-                if (viewer is STLViewerPanel) {
+                if (!isHardwareAccelerated) {
                     renderDebugPreview()
                 } else {
                     // JOGL viewer doesn't support debug preview, fall back to solid 3D
@@ -256,10 +243,7 @@ class OpenSCADPreviewFileEditor(
                     if (coloredModel != null && coloredModel.triangles.isNotEmpty()) {
                         logger.info("3MF parsed: ${coloredModel.triangles.size} triangles")
                         SwingUtilities.invokeLater {
-                            when (viewer) {
-                                is STLViewer3D -> viewer.setColoredModel(coloredModel)
-                                is STLViewerPanel -> viewer.setColoredModel(coloredModel)
-                            }
+                            viewer.setColoredModel(coloredModel)
                             updateStatus("✓ Rendered with colors (${coloredModel.triangles.size} triangles)")
                         }
                         return@executeOnPooledThread
@@ -275,10 +259,7 @@ class OpenSCADPreviewFileEditor(
 
                     SwingUtilities.invokeLater {
                         if (model != null) {
-                            when (viewer) {
-                                is STLViewer3D -> viewer.setModel(model)
-                                is STLViewerPanel -> viewer.setModel(model)
-                            }
+                            viewer.setModel(model)
                             updateStatus("✓ Rendered (${model.triangles.size} triangles)")
                         } else {
                             updateStatus("✗ Failed to parse STL")

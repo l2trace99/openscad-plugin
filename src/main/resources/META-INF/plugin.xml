@@ -8,9 +8,7 @@
         <![CDATA[
         <h1>OpenSCAD Language Support</h1>
         <p>Full-featured IntelliJ IDEA plugin for OpenSCAD with syntax highlighting, code intelligence, and real-time 3D preview.</p>
-        
-        <p><b>Support this project:</b> <a href="https://www.buymeacoffee.com/l2trace99">Buy Me a Coffee ☕</a></p>
-        
+
         <h2>Features</h2>
         <ul>
             <li><b>Syntax Highlighting</b> - Full OpenSCAD language support with trailing comma support</li>
@@ -313,35 +311,45 @@ my_block([20, 20, 10]);  // Use the module</code></pre>
 
     <change-notes>
         <![CDATA[
-        <h2>Version 1.3.1 (2026-02-01)</h2>
+        <h2>Version 1.4.1 (2026-02-16)</h2>
         
         <h3>🆕 Added</h3>
         <ul>
-            <li><b>3MF File Support</b> - Full support for importing and rendering 3MF files with preserved color information from OpenSCAD's <code>color()</code> statements</li>
-            <li><b>Enhanced Rename Refactoring</b> - Improved validation for module and function renaming with custom name validator and OpenSCAD keyword detection</li>
-            <li><b>Color Support in Preview</b> - Preview pane now properly displays colored models from 3MF exports</li>
-        </ul>
-        
-        <h3>🔄 Changed</h3>
-        <ul>
-            <li><b>Auto-refresh Text</b> - Changed "auto-render" terminology to "auto-refresh" throughout the UI for clarity</li>
-            <li><b>Improved Preview UI</b> - Enhanced user interface for better preview pane experience</li>
-            <li><b>Orientation Cube Fix</b> - Fixed orientation cube controls for proper view switching</li>
+            <li><b>Hardware-Accelerated 3D Viewer</b> - Optional JOGL/OpenGL viewer for smoother 3D preview (Settings → Tools → OpenSCAD) <i>(contributed by szrudi)</i></li>
+            <li>Falls back gracefully to software renderer if OpenGL initialization fails <i>(contributed by szrudi)</i></li>
+            <li>Preview mode menu adapts to viewer capabilities (Wireframe and Debug modes only available with software renderer) <i>(contributed by szrudi)</i></li>
+            <li><b>Preview Panel Sizing</b> - Set minimum and preferred sizes for the preview editor component <i>(contributed by szrudi)</i></li>
         </ul>
         
         <h3>🐛 Fixed</h3>
         <ul>
-            <li><b>Smart Library Indexing</b> - Library indexing now only triggers when files in library directories actually change, reducing unnecessary re-indexing</li>
-            <li><b>Preview Performance</b> - Optimized preview rendering by avoiding redundant library scans on file save</li>
-            <li><b>Debug View Synchronization</b> - Improved synchronization between debug preview and 3D view camera angles</li>
+            <li><b>JOGL Viewer Lighting</b> - Fixed blown-out lighting in hardware-accelerated viewer caused by non-normalized normals after model scaling <i>(contributed by szrudi)</i></li>
+            <li><b>JOGL Viewer Rendering</b> - Enabled back-face culling and corrected material properties to eliminate visual artifacts <i>(contributed by szrudi)</i></li>
+        </ul>
+        
+        <h2>Version 1.4.0 (2026-02-16)</h2>
+        
+        <h3>🆕 Added</h3>
+        <ul>
+            <li><b>Manifold Backend Support</b> - Geometry backend selector (Manifold/CGAL/Auto) in Settings and Run Configurations <i>(contributed by szrudi)</i></li>
+            <li><b>--backend CLI Flag</b> - Backend selection is passed to OpenSCAD CLI when a specific backend is chosen <i>(contributed by szrudi)</i></li>
+            <li><b>Per-Run Configuration Backend</b> - Override the project-level backend setting in individual Run Configurations <i>(contributed by szrudi)</i></li>
+        </ul>
+        
+        <h3>🐛 Fixed</h3>
+        <ul>
+            <li><b>Render Stale Content</b> - Ensure in-memory changes are saved to disk before rendering to prevent stale file content <i>(contributed by szrudi)</i></li>
         </ul>
         
         <h3>🔧 Technical</h3>
         <ul>
-            <li>Added <code>ThreeMFParser</code> class for parsing 3MF files with color information</li>
-            <li>Implemented enhanced rename refactoring validation</li>
-            <li>Enhanced library indexer with change detection logic</li>
-            <li>Improved preview panel UI components and color rendering</li>
+            <li>Added integration tests for geometry backend settings and mappings <i>(contributed by szrudi)</i></li>
+        </ul>
+        
+        <h3>📝 Note</h3>
+        <ul>
+            <li>Manifold and CGAL backend options require OpenSCAD 2024.09+; older versions should use "Auto (OpenSCAD default)"</li>
+            <li>Default backend is "Auto" to ensure compatibility with all OpenSCAD versions</li>
         </ul>
         ]]>
     </change-notes>

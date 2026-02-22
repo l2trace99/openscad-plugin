@@ -15,7 +15,6 @@ import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import org.openscad.settings.OpenSCADSettings
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.*
@@ -41,7 +40,8 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
     private val stlParser = STLParser()
     private val threemfParser = ThreeMFParser()
     private val viewerPanel: JComponent
-    private val viewer: Any // Can be STLViewer3D or STLViewerPanel
+    private val viewer: STLViewer
+    private val isHardwareAccelerated: Boolean
     
     private val statusLabel = JLabel("Ready")
     private val renderButton = JButton("Render")
@@ -53,25 +53,11 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
     private var isRendering = false
     
     init {
-        // Initialize viewer based on hardware acceleration setting
-        val settings = OpenSCADSettings.getInstance(project)
-        val (panel, viewerInstance) = if (settings.useHardwareAcceleration) {
-            try {
-                val v = STLViewer3D(project)
-                logger.info("Initialized hardware-accelerated JOGL viewer")
-                Pair(v as JComponent, v as Any)
-            } catch (e: Exception) {
-                logger.warn("Failed to initialize JOGL viewer, falling back to software renderer", e)
-                val v = STLViewerPanel()
-                Pair(v as JComponent, v as Any)
-            }
-        } else {
-            val v = STLViewerPanel()
-            logger.info("Initialized software renderer")
-            Pair(v as JComponent, v as Any)
-        }
-        viewerPanel = panel
-        viewer = viewerInstance
+        // Initialize viewer using factory
+        val viewerResult = ViewerFactory.create(project)
+        viewerPanel = viewerResult.panel
+        viewer = viewerResult.viewer
+        isHardwareAccelerated = viewerResult.isHardwareAccelerated
         
         setupUI()
         setupListeners()
@@ -97,10 +83,7 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         }
         
         resetViewButton.addActionListener {
-            when (viewer) {
-                is STLViewer3D -> viewer.resetView()
-                is STLViewerPanel -> viewer.resetView()
-            }
+            viewer.resetView()
         }
         
         exportSTLButton.addActionListener {
@@ -112,7 +95,7 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
         }
 
         // Debug preview requires STLViewerPanel features (camera sync, image preview)
-        if (viewer !is STLViewerPanel) {
+        if (isHardwareAccelerated) {
             debugPreviewButton.isEnabled = false
             debugPreviewButton.toolTipText = "Debug preview requires software renderer"
         }
@@ -180,10 +163,7 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
                         val uniqueColors = coloredModel.triangles.map { it.color }.distinct()
                         logger.info("Unique colors in model: ${uniqueColors.size} - $uniqueColors")
                         SwingUtilities.invokeLater {
-                            when (viewer) {
-                                is STLViewer3D -> viewer.setColoredModel(coloredModel)
-                                is STLViewerPanel -> viewer.setColoredModel(coloredModel)
-                            }
+                            viewer.setColoredModel(coloredModel)
                             updateStatus("✓ Rendered with colors (${coloredModel.triangles.size} triangles)")
                         }
                         return@executeOnPooledThread
@@ -202,10 +182,7 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
                     
                     SwingUtilities.invokeLater {
                         if (model != null) {
-                            when (viewer) {
-                                is STLViewer3D -> viewer.setModel(model)
-                                is STLViewerPanel -> viewer.setModel(model)
-                            }
+                            viewer.setModel(model)
                             updateStatus("✓ Rendered successfully (${model.triangles.size} triangles)")
                         } else {
                             clearModel()
@@ -241,10 +218,7 @@ class OpenSCADPreviewPanel(private val project: Project) : JPanel(BorderLayout()
     }
     
     private fun clearModel() {
-        when (viewer) {
-            is STLViewer3D -> viewer.setModel(null)
-            is STLViewerPanel -> viewer.setModel(null)
-        }
+        viewer.setModel(null)
     }
     
     private fun renderDebugPreview(file: VirtualFile) {

@@ -27,11 +27,20 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build -x buildSearchableOptions
       
-    - name: Run tests
-      run: ./gradlew test
+    - name: Run tests with coverage
+      run: ./gradlew test koverXmlReport koverHtmlReport
       
     - name: Verify plugin
       run: ./gradlew verifyPlugin
+
+    - name: Upload coverage report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          build/reports/kover/
+        retention-days: 7
       
     - name: Upload build artifacts
       if: always()

@@ -14,7 +14,7 @@ import kotlin.math.sin
  * Supports mouse rotation, zoom, and pan
  * Also supports displaying PNG preview images (for debug modifier visualization)
  */
-class STLViewerPanel : JPanel() {
+class STLViewerPanel : JPanel(), STLViewer {
     
     private var model: STLParser.STLModel? = null
     private var coloredModel: ThreeMFParser.ColoredModel? = null
@@ -91,7 +91,11 @@ class STLViewerPanel : JPanel() {
         }
     }
     
-    fun setModel(model: STLParser.STLModel?, preserveView: Boolean = true) {
+    override fun setModel(model: STLParser.STLModel?) {
+        setModel(model, preserveView = true)
+    }
+    
+    fun setModel(model: STLParser.STLModel?, preserveView: Boolean) {
         val isFirstModel = this.model == null && this.coloredModel == null
         this.model = model
         this.coloredModel = null
@@ -103,7 +107,11 @@ class STLViewerPanel : JPanel() {
         repaint()
     }
     
-    fun setColoredModel(model: ThreeMFParser.ColoredModel?, preserveView: Boolean = true) {
+    override fun setColoredModel(model: ThreeMFParser.ColoredModel?) {
+        setColoredModel(model, preserveView = true)
+    }
+    
+    fun setColoredModel(model: ThreeMFParser.ColoredModel?, preserveView: Boolean) {
         val isFirstModel = this.model == null && this.coloredModel == null
         this.coloredModel = model
         this.model = null
@@ -203,7 +211,7 @@ class STLViewerPanel : JPanel() {
         val translateY: Double
     )
     
-    fun resetView() {
+    override fun resetView() {
         // Match OpenSCAD's default view: rot_x=55, rot_z=25
         rotationX = Math.toRadians(55.0)
         rotationY = Math.toRadians(25.0)

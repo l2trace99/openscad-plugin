@@ -15,7 +15,7 @@ import kotlin.math.sin
  * Advanced 3D STL viewer using JOGL (Java OpenGL)
  * Provides hardware-accelerated rendering with lighting and smooth shading
  */
-class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEventListener {
+class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEventListener, STLViewer {
     
     private var model: STLParser.STLModel? = null
     private var coloredModel: ThreeMFParser.ColoredModel? = null
@@ -93,21 +93,21 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         }
     }
     
-    fun setModel(model: STLParser.STLModel?) {
+    override fun setModel(model: STLParser.STLModel?) {
         this.model = model
         this.coloredModel = null
         resetView()
         repaint()
     }
     
-    fun setColoredModel(model: ThreeMFParser.ColoredModel?) {
+    override fun setColoredModel(model: ThreeMFParser.ColoredModel?) {
         this.coloredModel = model
         this.model = null
         resetView()
         repaint()
     }
     
-    fun resetView() {
+    override fun resetView() {
         rotationX = 30.0f
         rotationY = 45.0f
         zoom = 1.0f

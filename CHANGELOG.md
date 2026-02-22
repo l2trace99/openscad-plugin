@@ -8,20 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.1] - 2026-02-16
 
 ### Added
-- **Hardware-Accelerated 3D Viewer** - Optional JOGL/OpenGL viewer for smoother 3D preview (Settings → Tools → OpenSCAD → "Use hardware-accelerated 3D viewer")
-- Falls back gracefully to software renderer if OpenGL initialization fails
-- Preview mode menu adapts to viewer capabilities (Wireframe and Debug modes only available with software renderer)
+- **Hardware-Accelerated 3D Viewer** - Optional JOGL/OpenGL viewer for smoother 3D preview (Settings → Tools → OpenSCAD → "Use hardware-accelerated 3D viewer") *(contributed by szrudi)*
+- Falls back gracefully to software renderer if OpenGL initialization fails *(contributed by szrudi)*
+- Preview mode menu adapts to viewer capabilities (Wireframe and Debug modes only available with software renderer) *(contributed by szrudi)*
+- **Preview Panel Sizing** - Set minimum and preferred sizes for the preview editor component *(contributed by szrudi)*
 
 ### Fixed
-- **JOGL Viewer Lighting** - Fixed blown-out lighting in hardware-accelerated viewer caused by non-normalized normals after model scaling (`GL_NORMALIZE`)
-- **JOGL Viewer Rendering** - Enabled back-face culling and corrected material properties to eliminate visual artifacts
+- **JOGL Viewer Lighting** - Fixed blown-out lighting in hardware-accelerated viewer caused by non-normalized normals after model scaling (`GL_NORMALIZE`) *(contributed by szrudi)*
+- **JOGL Viewer Rendering** - Enabled back-face culling and corrected material properties to eliminate visual artifacts *(contributed by szrudi)*
 
 ## [1.4.0] - 2026-02-16
 
 ### Added
-- **Manifold Backend Support** - Geometry backend selector (Manifold/CGAL/Auto) in Settings and Run Configurations
-- **`--backend` CLI Flag** - Backend selection is passed to OpenSCAD CLI when a specific backend is chosen
-- **Per-Run Configuration Backend** - Override the project-level backend setting in individual Run Configurations
+- **Manifold Backend Support** - Geometry backend selector (Manifold/CGAL/Auto) in Settings and Run Configurations *(contributed by szrudi)*
+- **`--backend` CLI Flag** - Backend selection is passed to OpenSCAD CLI when a specific backend is chosen *(contributed by szrudi)*
+- **Per-Run Configuration Backend** - Override the project-level backend setting in individual Run Configurations *(contributed by szrudi)*
+
+### Fixed
+- **Render Stale Content** - Ensure in-memory changes are saved to disk before rendering to prevent stale file content *(contributed by szrudi)*
+
+### Technical
+- Added integration tests for geometry backend settings and mappings *(contributed by szrudi)*
 
 ### Note
 - Manifold and CGAL backend options require OpenSCAD 2024.09+; older versions should use "Auto (OpenSCAD default)"

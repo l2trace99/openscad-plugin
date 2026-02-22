@@ -7,10 +7,6 @@
 A full-featured IntelliJ IDEA plugin for OpenSCAD with syntax highlighting, code intelligence, 3D preview, and more.
 
 
-Support this project by buying me a coffee!
-
-[![Buy Me a Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/l2trace99)
-
 ## Features
 
 - ✅ **Syntax Highlighting** - Full OpenSCAD language support with trailing comma support
