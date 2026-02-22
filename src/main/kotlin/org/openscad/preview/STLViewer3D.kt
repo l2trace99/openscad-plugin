@@ -122,23 +122,33 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         // Enable depth testing
         gl.glEnable(GL.GL_DEPTH_TEST)
         gl.glDepthFunc(GL.GL_LEQUAL)
-        
+
+        // Enable back-face culling (STL models are closed solids)
+        gl.glEnable(GL.GL_CULL_FACE)
+        gl.glCullFace(GL.GL_BACK)
+
         // Enable lighting
         gl.glEnable(GL2.GL_LIGHTING)
         gl.glEnable(GL2.GL_LIGHT0)
-        gl.glEnable(GL2.GL_COLOR_MATERIAL)
-        
+
         // Setup light
         val lightPos = floatArrayOf(1.0f, 1.0f, 1.0f, 0.0f)
-        val lightAmbient = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
-        val lightDiffuse = floatArrayOf(0.8f, 0.8f, 0.8f, 1.0f)
-        val lightSpecular = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
-        
+        val lightAmbient = floatArrayOf(0.2f, 0.2f, 0.2f, 1.0f)
+        val lightDiffuse = floatArrayOf(0.7f, 0.7f, 0.7f, 1.0f)
+        val lightSpecular = floatArrayOf(0.4f, 0.4f, 0.4f, 1.0f)
+
+        // Disable global ambient (defaults to 0.2, stacks on top of per-light ambient)
+        gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f), 0)
+
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPos, 0)
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, lightAmbient, 0)
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, lightDiffuse, 0)
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, lightSpecular, 0)
-        
+
+        // Renormalize normals after model scaling (glScalef stretches normals,
+        // causing blown-out lighting without this)
+        gl.glEnable(GL2.GL_NORMALIZE)
+
         // Enable smooth shading
         gl.glShadeModel(GL2.GL_SMOOTH)
         
@@ -187,13 +197,13 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         // Set material properties - OpenSCAD default (coral/orange)
         val matAmbient = floatArrayOf(0.95f, 0.55f, 0.35f, 1.0f)
         val matDiffuse = floatArrayOf(0.95f, 0.55f, 0.35f, 1.0f)
-        val matSpecular = floatArrayOf(0.8f, 0.8f, 0.8f, 1.0f)
-        val matShininess = floatArrayOf(32.0f)
+        val matSpecular = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
+        val matShininess = floatArrayOf(64.0f)
         
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_AMBIENT, matAmbient, 0)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_DIFFUSE, matDiffuse, 0)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SPECULAR, matSpecular, 0)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SHININESS, matShininess, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT, matAmbient, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_DIFFUSE, matDiffuse, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, matSpecular, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, matShininess, 0)
         
         // Draw triangles
         gl.glBegin(GL2.GL_TRIANGLES)
@@ -273,10 +283,10 @@ class STLViewer3D(private val project: Project) : JPanel(BorderLayout()), GLEven
         gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE)
         
         // Set specular properties (shared for all triangles)
-        val matSpecular = floatArrayOf(0.5f, 0.5f, 0.5f, 1.0f)
-        val matShininess = floatArrayOf(32.0f)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SPECULAR, matSpecular, 0)
-        gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SHININESS, matShininess, 0)
+        val matSpecular = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
+        val matShininess = floatArrayOf(64.0f)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, matSpecular, 0)
+        gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, matShininess, 0)
         
         // Draw triangles with per-triangle colors
         gl.glBegin(GL2.GL_TRIANGLES)
