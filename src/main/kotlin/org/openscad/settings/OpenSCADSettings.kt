@@ -22,6 +22,9 @@ class OpenSCADSettings : PersistentStateComponent<OpenSCADSettings> {
     var useFullRender: Boolean = false // Use --render instead of preview
     var autoCenter: Boolean = true // Use --autocenter
     var viewAll: Boolean = true // Use --viewall
+
+    // Viewer settings
+    var useHardwareAcceleration: Boolean = false // Use JOGL hardware-accelerated viewer (experimental)
     var renderBackend: String = "" // "manifold", "cgal", or "" (auto/default)
     
     // Preview grid settings
