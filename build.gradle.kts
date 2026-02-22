@@ -16,7 +16,9 @@ kotlin {
 }
 
 group = "org.openscad"
-version = "0.1.0"
+// Read version from plugin.xml (single source of truth)
+version = file("src/main/resources/META-INF/plugin.xml").readText()
+    .let { Regex("""<version>(.+?)</version>""").find(it)!!.groupValues[1] }
 
 repositories {
     mavenCentral()

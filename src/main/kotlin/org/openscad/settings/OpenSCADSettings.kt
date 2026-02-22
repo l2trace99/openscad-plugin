@@ -25,7 +25,8 @@ class OpenSCADSettings : PersistentStateComponent<OpenSCADSettings> {
 
     // Viewer settings
     var useHardwareAcceleration: Boolean = false // Use JOGL hardware-accelerated viewer (experimental)
-
+    var renderBackend: String = "" // "manifold", "cgal", or "" (auto/default)
+    
     // Preview grid settings
     var showGrid: Boolean = true // Show grid in 3D preview
     var gridSize: Float = 250.0f // Grid size in mm (250mm x 250mm default)
